@@ -343,6 +343,8 @@ NATIVE (strptime)
 NATIVE (timegm)
 NATIVE (timelocal)
 DCE_EXPLICIT (clock_gettime, int, clockid_t, struct timespec *)
+//DCE_EXPLICIT (clock_settime, int, clockid_t, const struct timespec *)
+DCE (clock_settime)
 DCE_EXPLICIT (clock_getres, int, clockid_t, struct timespec *)
 
 DCE (timer_create)

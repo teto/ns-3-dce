@@ -70,6 +70,22 @@ int dce_clock_gettime (clockid_t c, struct timespec *tp)
   *tp = UtilsTimeToTimespec (UtilsSimulationTimeToTime (Now ()));
   return 0;
 }
+
+int dce_clock_settime (clockid_t c, const struct timespec *tp)
+{
+  NS_LOG_FUNCTION (Current () << UtilsGetNodeId ());
+  NS_ASSERT (Current () != 0);
+
+  NS_LOG_UNCOND("dce_clock_settime MATT");
+//  if (0 == tp)
+//    {
+//      Current ()->err = EFAULT;
+//      return -1;
+//    }
+//  *tp = UtilsTimeToTimespec (UtilsSimulationTimeToTime (Now ()));
+  return 0;
+}
+
 void dce_tzset ()
 {
 
