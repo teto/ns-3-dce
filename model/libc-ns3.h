@@ -613,6 +613,10 @@ NATIVE (lrintl)
 NATIVE (llrintl)
 NATIVE (ceil)
 NATIVE (floor)
+NATIVE (ldexp)
+NATIVE (log)
+NATIVE (exp)
+NATIVE (lround)
 
 #undef DCE
 #undef DCET
