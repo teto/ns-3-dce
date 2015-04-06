@@ -28,8 +28,13 @@
 #include "process.h"
 #include "dce-unistd.h"
 #include "errno.h"
+#include "ns3/log.h"
+
+NS_LOG_COMPONENT_DEFINE ("DceExecUtils");
 
 namespace ns3 {
+
+
 
 struct ExeCriteria
 {
@@ -189,6 +194,8 @@ bool CanonizePath (std::string path, bool ChRootProtected, std::ostringstream &r
 SearchPath::SearchPath (std::string basepath, std::string paths, bool virt) : m_basePath (basepath),
                                                                               m_virtual (virt)
 {
+  NS_LOG_DEBUG("m_basePath=" << m_basePath << " and paths=" << paths);
+
   bool prot = (m_basePath.length () > 0);
   std::list<std::string> p = Split (paths, ":");
   for (std::list<std::string>::const_iterator i = p.begin (); i != p.end (); i++)
@@ -199,6 +206,7 @@ SearchPath::SearchPath (std::string basepath, std::string paths, bool virt) : m_
           std::string e = cano.str ();
           if (e.length () > 0)
             {
+              NS_LOG_DEBUG("Pushing path=" << e);
               m_paths.push_back (e);
             }
         }
@@ -207,6 +215,7 @@ SearchPath::SearchPath (std::string basepath, std::string paths, bool virt) : m_
 std::string
 SearchPath::SeekFile (std::string file, std::string cwd, void *userData, bool (*checker)(std::string, void*))
 {
+  NS_LOG_FUNCTION(file << " with cwd=" << cwd);
   for (std::vector <std::string>::const_iterator i = m_paths.begin (); i != m_paths.end (); ++i)
     {
       std::string p = *i;
@@ -266,6 +275,7 @@ std::string
 SearchAbsoluteFile (std::string file, std::string vroot, std::string altRoots, void *userData,
                     bool (*checker)(std::string, void*))
 {
+  NS_LOG_FUNCTION("Searching for file [" << file << "]");
   SearchPath p1 (vroot, ".", true);
   std::string res = p1.SeekFile (file, "", userData, checker);
   if (res.length () > 0)
@@ -278,10 +288,13 @@ SearchAbsoluteFile (std::string file, std::string vroot, std::string altRoots, v
       return p2.SeekFile (file, "", userData, checker);
     }
 }
+
 std::string
 SearchRelativeFile (std::string file, std::string vroot, std::string cwd,
                     void *userData, bool (*checker)(std::string, void*))
 {
+
+  NS_LOG_FUNCTION("Searching for " << file);
   SearchPath p1 (vroot, cwd, true);
   return p1.SeekFile (file, "", userData, checker);
 }
@@ -316,6 +329,13 @@ SearchFile (std::string file,
             void *userData,
             bool (*checker)(std::string, void*))
 {
+  NS_LOG_DEBUG(file << " vroot=" << vroot
+                    << " vpath=" << vpath
+                    << " dcepath=" << dcepath
+                    << " cwd=" << cwd
+                    << " altRoots=" << altRoots
+              );
+
   if (*file.c_str () == '/')
     {
       return SearchAbsoluteFile (file, vroot, altRoots, userData, checker);
@@ -347,8 +367,11 @@ CheckFileExe (std::string file, void *params)
   struct stat st;
   struct ExeCriteria *criteria = (struct ExeCriteria *) params;
 
+  NS_LOG_DEBUG("Checking exe " << file);
+
   if (0 != ::stat (file.c_str (), &st))
     {
+      NS_LOG_DEBUG("Stat failed");
       return false;
     }
   if (criteria)
@@ -363,6 +386,7 @@ CheckFileExe (std::string file, void *params)
         {
           *criteria->errNo = ENOEXEC;
         }
+      NS_LOG_DEBUG("Criteria failed");
       return false;
     }
   return true;
@@ -378,6 +402,7 @@ SearchExecFile (std::string file, std::string vpath, uid_t uid, gid_t gid, int *
   std::string altRoots = "";
   char *c = getenv ("DCE_PATH");
   struct ExeCriteria userData;
+
   if (errNo)
     {
       *errNo = ENOENT;
@@ -404,6 +429,7 @@ SearchExecFile (std::string file, std::string vpath, uid_t uid, gid_t gid, int *
   if (c)
     {
       altRoots = c;
+      NS_LOG_DEBUG("DCE_ROOT set ! DCE_ROOT=" << altRoots);
     }
   userData.uid = uid;
   userData.gid = gid;
