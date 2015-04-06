@@ -111,8 +111,9 @@ def get_proc_env(os_env=None):
                                                 os.path.join(bld.env.NS3_DIR, 'bin_dce'), \
                                                 proc_env[pathvar]])
 
-    proc_env['DCE_ROOT'] = os.pathsep.join([os.path.join(bld.out_dir), \
-                                                os.path.join(bld.env.PREFIX)])
+    # print("Overriding DCE_ROOT with = %s:%s" % (bld.out_dir, bld.env.PREFIX))
+    # proc_env['DCE_ROOT'] = os.pathsep.join([os.path.join(bld.out_dir), \
+    #                                             os.path.join(bld.env.PREFIX)])
 
     pymoddir = bld.path.find_dir('bindings/python')
     if pymoddir is not None:
