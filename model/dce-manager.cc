@@ -721,6 +721,7 @@ void
 DceManager::SigabrtHandler (int signal)
 {
   NS_ASSERT (signal == SIGABRT);
+  NS_LOG_WARN("Received Abort Signal");
   dce_exit (-2);
 }
 void
