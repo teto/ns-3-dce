@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="dce" />
+		<Option makefile_is_custom="1" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<MakeCommands>
+			<Build command="./waf build" />
+			<CompileFile command="" />
+			<Clean command="" />
+			<DistClean command="$make -f $makefile distclean$target" />
+			<AskRebuildNeeded command="" />
+			<SilentBuild command="./waf build &gt; $(CMD_NULL)" />
+		</MakeCommands>
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/dce" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+				<MakeCommands>
+					<Build command="" />
+					<CompileFile command="" />
+					<Clean command="" />
+					<DistClean command="$make -f $makefile distclean$target" />
+					<AskRebuildNeeded command="" />
+					<SilentBuild command=" &gt; $(CMD_NULL)" />
+				</MakeCommands>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/dce" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+				<MakeCommands>
+					<Build command="" />
+					<CompileFile command="" />
+					<Clean command="" />
+					<DistClean command="$make -f $makefile distclean$target" />
+					<AskRebuildNeeded command="" />
+					<SilentBuild command=" &gt; $(CMD_NULL)" />
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="example/bash/dce-bash-simple.cc" />
+		<Unit filename="example/ccnx/dce-ccn-cache.cc" />
+		<Unit filename="example/ccnx/dce-ccnd-linear-multiple.cc" />
+		<Unit filename="example/ccnx/dce-ccnd-short-stuff.cc" />
+		<Unit filename="example/ccnx/dce-ccnd-simple.cc" />
+		<Unit filename="example/ccnx/dce-ccnd-udp-2-nodes.cc" />
+		<Unit filename="example/ccnx/dce-tap-ccnd.cc" />
+		<Unit filename="example/ccnx/dce-tap-udp-echo.cc" />
+		<Unit filename="example/ccnx/dce-tap-vlc.cc" />
+		<Unit filename="example/ccnx/dce-wifi-ccnx.cc" />
+		<Unit filename="example/ccnx/misc-tools.cc" />
+		<Unit filename="example/ccnx/misc-tools.h" />
+		<Unit filename="example/dccp-client.cc" />
+		<Unit filename="example/dccp-server.cc" />
+		<Unit filename="example/dce-cradle-mptcp.cc" />
+		<Unit filename="example/dce-cradle-simple.cc" />
+		<Unit filename="example/dce-dccp.cc" />
+		<Unit filename="example/dce-debug-aspect.cc" />
+		<Unit filename="example/dce-freebsd.cc" />
+		<Unit filename="example/dce-httpd.cc" />
+		<Unit filename="example/dce-iperf-emulation.cc" />
+		<Unit filename="example/dce-iperf-mptcp.cc" />
+		<Unit filename="example/dce-iperf.cc" />
+		<Unit filename="example/dce-linux-simple.cc" />
+		<Unit filename="example/dce-linux.cc" />
+		<Unit filename="example/dce-local-simple.cc" />
+		<Unit filename="example/dce-ltp.cc" />
+		<Unit filename="example/dce-mptcp-handoff-v4v6.cc" />
+		<Unit filename="example/dce-mptcp-handoff-v6.cc" />
+		<Unit filename="example/dce-mptcp-lte-wifi-v6.cc" />
+		<Unit filename="example/dce-mptcp-lte-wifi.cc" />
+		<Unit filename="example/dce-ntimed.cc" />
+		<Unit filename="example/dce-ntpd.cc" />
+		<Unit filename="example/dce-sctp-simple.cc" />
+		<Unit filename="example/dce-tcp-ns3-nsc-comparison.cc" />
+		<Unit filename="example/dce-tcp-simple.cc" />
+		<Unit filename="example/dce-udp-perf.cc" />
+		<Unit filename="example/dce-udp-simple.cc" />
+		<Unit filename="example/dce-xfrm.cc" />
+		<Unit filename="example/freebsd-iproute.cc" />
+		<Unit filename="example/linear-udp-perf.cc" />
+		<Unit filename="example/sctp-client.cc" />
+		<Unit filename="example/sctp-server.cc" />
+		<Unit filename="example/tcp-client.cc" />
+		<Unit filename="example/tcp-loopback.cc" />
+		<Unit filename="example/tcp-server.cc" />
+		<Unit filename="example/udp-client.cc" />
+		<Unit filename="example/udp-echo-client.cc" />
+		<Unit filename="example/udp-echo-server.cc" />
+		<Unit filename="example/udp-perf.cc" />
+		<Unit filename="example/udp-server.cc" />
+		<Unit filename="example/unix-client.cc" />
+		<Unit filename="example/unix-server.cc" />
+		<Unit filename="model/arpa/dce-inet.h" />
+		<Unit filename="model/cmsg.cc" />
+		<Unit filename="model/cmsg.h" />
+		<Unit filename="model/cooja-loader-factory.cc" />
+		<Unit filename="model/cooja-loader-factory.h" />
+		<Unit filename="model/dce-alloc.cc" />
+		<Unit filename="model/dce-application.cc" />
+		<Unit filename="model/dce-application.h" />
+		<Unit filename="model/dce-at.cc" />
+		<Unit filename="model/dce-clock.h" />
+		<Unit filename="model/dce-credentials.cc" />
+		<Unit filename="model/dce-cxa.cc" />
+		<Unit filename="model/dce-cxa.h" />
+		<Unit filename="model/dce-debug.cc" />
+		<Unit filename="model/dce-dirent.cc" />
+		<Unit filename="model/dce-dirent.h" />
+		<Unit filename="model/dce-env.cc" />
+		<Unit filename="model/dce-errno.h" />
+		<Unit filename="model/dce-fcntl.h" />
+		<Unit filename="model/dce-fd.cc" />
+		<Unit filename="model/dce-global-variables.cc" />
+		<Unit filename="model/dce-global-variables.h" />
+		<Unit filename="model/dce-libc-private.h" />
+		<Unit filename="model/dce-locale.h" />
+		<Unit filename="model/dce-manager.cc" />
+		<Unit filename="model/dce-manager.h" />
+		<Unit filename="model/dce-misc.cc" />
+		<Unit filename="model/dce-misc.h" />
+		<Unit filename="model/dce-netdb.cc" />
+		<Unit filename="model/dce-netdb.h" />
+		<Unit filename="model/dce-node-context.cc" />
+		<Unit filename="model/dce-node-context.h" />
+		<Unit filename="model/dce-poll.cc" />
+		<Unit filename="model/dce-poll.h" />
+		<Unit filename="model/dce-pthread-cond.cc" />
+		<Unit filename="model/dce-pthread-mutex.cc" />
+		<Unit filename="model/dce-pthread.cc" />
+		<Unit filename="model/dce-pthread.h" />
+		<Unit filename="model/dce-pwd.cc" />
+		<Unit filename="model/dce-pwd.h" />
+		<Unit filename="model/dce-random.h" />
+		<Unit filename="model/dce-sched.h" />
+		<Unit filename="model/dce-semaphore.cc" />
+		<Unit filename="model/dce-semaphore.h" />
+		<Unit filename="model/dce-signal.cc" />
+		<Unit filename="model/dce-signal.h" />
+		<Unit filename="model/dce-stat.cc" />
+		<Unit filename="model/dce-stdarg.h" />
+		<Unit filename="model/dce-stdio.cc" />
+		<Unit filename="model/dce-stdio.h" />
+		<Unit filename="model/dce-stdlib.cc" />
+		<Unit filename="model/dce-stdlib.h" />
+		<Unit filename="model/dce-string.cc" />
+		<Unit filename="model/dce-string.h" />
+		<Unit filename="model/dce-syslog.cc" />
+		<Unit filename="model/dce-syslog.h" />
+		<Unit filename="model/dce-termio.cc" />
+		<Unit filename="model/dce-termio.h" />
+		<Unit filename="model/dce-time.cc" />
+		<Unit filename="model/dce-time.h" />
+		<Unit filename="model/dce-timerfd.cc" />
+		<Unit filename="model/dce-umask.cc" />
+		<Unit filename="model/dce-umask.h" />
+		<Unit filename="model/dce-unistd.h" />
+		<Unit filename="model/dce-vfs.cc" />
+		<Unit filename="model/dce-vfs.h" />
+		<Unit filename="model/dce-wait.cc" />
+		<Unit filename="model/dce-wait.h" />
+		<Unit filename="model/dce.cc" />
+		<Unit filename="model/dlm-loader-factory.cc" />
+		<Unit filename="model/dlm-loader-factory.h" />
+		<Unit filename="model/elf-cache.cc" />
+		<Unit filename="model/elf-cache.h" />
+		<Unit filename="model/elf-dependencies.cc" />
+		<Unit filename="model/elf-dependencies.h" />
+		<Unit filename="model/elf-ldd.cc" />
+		<Unit filename="model/elf-ldd.h" />
+		<Unit filename="model/exec-utils.cc" />
+		<Unit filename="model/exec-utils.h" />
+		<Unit filename="model/fiber-manager.cc" />
+		<Unit filename="model/fiber-manager.h" />
+		<Unit filename="model/fifo-buffer.cc" />
+		<Unit filename="model/fifo-buffer.h" />
+		<Unit filename="model/file-usage.cc" />
+		<Unit filename="model/file-usage.h" />
+		<Unit filename="model/freebsd-socket-fd-factory.cc" />
+		<Unit filename="model/freebsd-socket-fd-factory.h" />
+		<Unit filename="model/freebsd/ipv4-freebsd.cc" />
+		<Unit filename="model/freebsd/ipv4-freebsd.h" />
+		<Unit filename="model/ipv4-dce-routing.cc" />
+		<Unit filename="model/ipv4-dce-routing.h" />
+		<Unit filename="model/kernel-socket-fd-factory.cc" />
+		<Unit filename="model/kernel-socket-fd-factory.h" />
+		<Unit filename="model/kernel-socket-fd.cc" />
+		<Unit filename="model/kernel-socket-fd.h" />
+		<Unit filename="model/kingsley-alloc.cc" />
+		<Unit filename="model/kingsley-alloc.h" />
+		<Unit filename="model/libc-dce.cc" />
+		<Unit filename="model/libc-dce.h" />
+		<Unit filename="model/libc-global-variables.cc" />
+		<Unit filename="model/libc-globals.h" />
+		<Unit filename="model/libc-ns3.h" />
+		<Unit filename="model/libc-setup.cc" />
+		<Unit filename="model/libc.cc" />
+		<Unit filename="model/libc.h" />
+		<Unit filename="model/linux-socket-fd-factory.cc" />
+		<Unit filename="model/linux-socket-fd-factory.h" />
+		<Unit filename="model/linux/ipv4-linux.cc" />
+		<Unit filename="model/linux/ipv4-linux.h" />
+		<Unit filename="model/linux/ipv6-linux.cc" />
+		<Unit filename="model/linux/ipv6-linux.h" />
+		<Unit filename="model/linux/linux-dccp-socket-factory-impl.cc" />
+		<Unit filename="model/linux/linux-dccp-socket-factory-impl.h" />
+		<Unit filename="model/linux/linux-dccp-socket-factory.cc" />
+		<Unit filename="model/linux/linux-dccp-socket-factory.h" />
+		<Unit filename="model/linux/linux-dccp6-socket-factory-impl.cc" />
+		<Unit filename="model/linux/linux-dccp6-socket-factory-impl.h" />
+		<Unit filename="model/linux/linux-dccp6-socket-factory.cc" />
+		<Unit filename="model/linux/linux-dccp6-socket-factory.h" />
+		<Unit filename="model/linux/linux-ipv4-raw-socket-factory-impl.cc" />
+		<Unit filename="model/linux/linux-ipv4-raw-socket-factory-impl.h" />
+		<Unit filename="model/linux/linux-ipv4-raw-socket-factory.cc" />
+		<Unit filename="model/linux/linux-ipv4-raw-socket-factory.h" />
+		<Unit filename="model/linux/linux-ipv6-raw-socket-factory-impl.cc" />
+		<Unit filename="model/linux/linux-ipv6-raw-socket-factory-impl.h" />
+		<Unit filename="model/linux/linux-ipv6-raw-socket-factory.cc" />
+		<Unit filename="model/linux/linux-ipv6-raw-socket-factory.h" />
+		<Unit filename="model/linux/linux-sctp-socket-factory-impl.cc" />
+		<Unit filename="model/linux/linux-sctp-socket-factory-impl.h" />
+		<Unit filename="model/linux/linux-sctp-socket-factory.cc" />
+		<Unit filename="model/linux/linux-sctp-socket-factory.h" />
+		<Unit filename="model/linux/linux-sctp6-socket-factory-impl.cc" />
+		<Unit filename="model/linux/linux-sctp6-socket-factory-impl.h" />
+		<Unit filename="model/linux/linux-sctp6-socket-factory.cc" />
+		<Unit filename="model/linux/linux-sctp6-socket-factory.h" />
+		<Unit filename="model/linux/linux-socket-impl.cc" />
+		<Unit filename="model/linux/linux-socket-impl.h" />
+		<Unit filename="model/linux/linux-tcp-socket-factory-impl.cc" />
+		<Unit filename="model/linux/linux-tcp-socket-factory-impl.h" />
+		<Unit filename="model/linux/linux-tcp-socket-factory.cc" />
+		<Unit filename="model/linux/linux-tcp-socket-factory.h" />
+		<Unit filename="model/linux/linux-tcp6-socket-factory-impl.cc" />
+		<Unit filename="model/linux/linux-tcp6-socket-factory-impl.h" />
+		<Unit filename="model/linux/linux-tcp6-socket-factory.cc" />
+		<Unit filename="model/linux/linux-tcp6-socket-factory.h" />
+		<Unit filename="model/linux/linux-udp-socket-factory-impl.cc" />
+		<Unit filename="model/linux/linux-udp-socket-factory-impl.h" />
+		<Unit filename="model/linux/linux-udp-socket-factory.cc" />
+		<Unit filename="model/linux/linux-udp-socket-factory.h" />
+		<Unit filename="model/linux/linux-udp6-socket-factory-impl.cc" />
+		<Unit filename="model/linux/linux-udp6-socket-factory-impl.h" />
+		<Unit filename="model/linux/linux-udp6-socket-factory.cc" />
+		<Unit filename="model/linux/linux-udp6-socket-factory.h" />
+		<Unit filename="model/loader-factory.cc" />
+		<Unit filename="model/loader-factory.h" />
+		<Unit filename="model/local-datagram-socket-fd.cc" />
+		<Unit filename="model/local-datagram-socket-fd.h" />
+		<Unit filename="model/local-socket-fd-factory.cc" />
+		<Unit filename="model/local-socket-fd-factory.h" />
+		<Unit filename="model/local-socket-fd.cc" />
+		<Unit filename="model/local-socket-fd.h" />
+		<Unit filename="model/local-stream-socket-fd.cc" />
+		<Unit filename="model/local-stream-socket-fd.h" />
+		<Unit filename="model/net/dce-if.h" />
+		<Unit filename="model/ns3-socket-fd-factory.cc" />
+		<Unit filename="model/ns3-socket-fd-factory.h" />
+		<Unit filename="model/pipe-fd.cc" />
+		<Unit filename="model/pipe-fd.h" />
+		<Unit filename="model/process-delay-model.cc" />
+		<Unit filename="model/process-delay-model.h" />
+		<Unit filename="model/process.h" />
+		<Unit filename="model/pthread-fiber-manager.cc" />
+		<Unit filename="model/pthread-fiber-manager.h" />
+		<Unit filename="model/readversiondef.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="model/rr-task-scheduler.cc" />
+		<Unit filename="model/rr-task-scheduler.h" />
+		<Unit filename="model/socket-fd-factory.cc" />
+		<Unit filename="model/socket-fd-factory.h" />
+		<Unit filename="model/sys/dce-ioctl.h" />
+		<Unit filename="model/sys/dce-mman.h" />
+		<Unit filename="model/sys/dce-select.h" />
+		<Unit filename="model/sys/dce-socket.h" />
+		<Unit filename="model/sys/dce-stat.h" />
+		<Unit filename="model/sys/dce-time.h" />
+		<Unit filename="model/sys/dce-timerfd.h" />
+		<Unit filename="model/task-manager.cc" />
+		<Unit filename="model/task-manager.h" />
+		<Unit filename="model/task-scheduler.cc" />
+		<Unit filename="model/task-scheduler.h" />
+		<Unit filename="model/ucontext-fiber-manager.cc" />
+		<Unit filename="model/ucontext-fiber-manager.h" />
+		<Unit filename="model/unix-datagram-socket-fd.cc" />
+		<Unit filename="model/unix-datagram-socket-fd.h" />
+		<Unit filename="model/unix-fd.cc" />
+		<Unit filename="model/unix-fd.h" />
+		<Unit filename="model/unix-file-fd.cc" />
+		<Unit filename="model/unix-file-fd.h" />
+		<Unit filename="model/unix-socket-fd.cc" />
+		<Unit filename="model/unix-socket-fd.h" />
+		<Unit filename="model/unix-stream-socket-fd.cc" />
+		<Unit filename="model/unix-stream-socket-fd.h" />
+		<Unit filename="model/unix-timer-fd.cc" />
+		<Unit filename="model/unix-timer-fd.h" />
+		<Unit filename="model/utils.cc" />
+		<Unit filename="model/utils.h" />
+		<Unit filename="model/wait-queue.cc" />
+		<Unit filename="model/wait-queue.h" />
+		<Unit filename="model/waiter.cc" />
+		<Unit filename="model/waiter.h" />
+		<Unit filename="wscript" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

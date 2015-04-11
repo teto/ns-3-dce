@@ -136,8 +136,15 @@ int main (int argc, char *argv[])
   dce.SetBinary ("/home/teto/ntp/ntpd/ntpd");
   dce.ResetArguments ();
   dce.ResetEnvironment ();
-//  dce.AddArgument ("-s");
-//  dce.AddArgument ("-P");
+
+  //
+  dce.SetEuid(1000);
+  dce.AddArgument ("-c");
+  dce.AddArgument ("/home/teto/dce/myscripts/ntp/ntp.conf");
+//  dce.AddArgument ("/home/teto/dce/myscripts/ntp.conf");
+
+  // will block the server, don't uncomment
+//  dce.AddArgument ("-n"); // -n => don't fork
 //  dce.AddArgument ("1");
 //  if (useUdp)
 //    {
