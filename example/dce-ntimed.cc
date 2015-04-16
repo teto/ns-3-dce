@@ -34,11 +34,13 @@ NS_LOG_COMPONENT_DEFINE ("DceNtimed");
 int main (int argc, char *argv[])
 {
   std::string stack = "ns3";
-  bool useUdp = 0;
+  bool useDebug = true;
   std::string bandWidth = "1m";
+  Time simDuration = Seconds(10);
+
   CommandLine cmd;
   cmd.AddValue ("stack", "Name of IP stack: ns3/linux/freebsd.", stack);
-  cmd.AddValue ("udp", "Use UDP. Default false (0)", useUdp);
+  cmd.AddValue ("debug", "Debug. Default true (0)", useDebug);
   cmd.AddValue ("bw", "BandWidth. Default 1m.", bandWidth);
   cmd.Parse (argc, argv);
 
@@ -121,7 +123,7 @@ int main (int argc, char *argv[])
 //  dce.AddArgument ("1");
 //  dce.AddArgument ("--time");
 //  dce.AddArgument ("10");
-//  if (useUdp)
+//  if (useDebug)
 //    {
 //      dce.AddArgument ("-u");
 //      dce.AddArgument ("-b");
@@ -138,15 +140,21 @@ int main (int argc, char *argv[])
   dce.ResetEnvironment ();
 
   //
-  dce.SetEuid(1000);
+  uid_t root_uid = 0;
+  dce.SetEuid(root_uid);
+  dce.SetUid(root_uid);
   dce.AddArgument ("-c");
   dce.AddArgument ("/home/teto/dce/myscripts/ntp/ntp.conf");
+  if(useDebug) {
+    // -dddd to increase log level
+    dce.AddArgument("-ddd");
+  }
 //  dce.AddArgument ("/home/teto/dce/myscripts/ntp.conf");
 
   // will block the server, don't uncomment
 //  dce.AddArgument ("-n"); // -n => don't fork
 //  dce.AddArgument ("1");
-//  if (useUdp)
+//  if (useDebug)
 //    {
 //      dce.AddArgument ("-u");
 //    }
@@ -160,7 +168,7 @@ int main (int argc, char *argv[])
 //  setPos (nodes.Get (0), 1, 10, 0);
 //  setPos (nodes.Get (1), 50,10, 0);
 
-  Simulator::Stop (Seconds (40.0));
+  Simulator::Stop (simDuration);
   Simulator::Run ();
   Simulator::Destroy ();
 
