@@ -4,6 +4,7 @@
 #include "task-manager.h"
 #include "ns3/log.h"
 #include "ns3/breakpoint.h"
+#include "ns3/node-list.h"
 #include <list>
 #include <algorithm>
 

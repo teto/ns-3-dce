@@ -47,9 +47,17 @@ NS_LOG = ""
 # """
 NS_LOG += "*=error|warn|prefix_node|prefix_func"
 
-# DCE logs
+"""
+DCE logs
+"""
 NS_LOG += ":DceManager"
 NS_LOG += ":DceExecUtils"
+NS_LOG += ":DceApplication"
+NS_LOG += ":SimuSignal"
+NS_LOG += ":Dce"
+
+# to see the GetWallTime()
+NS_LOG += ":Node"
 
 # NS_LOG += ":PointToPointNetDevice"
 # NS_LOG += ":PointToPointChannel"
@@ -109,10 +117,10 @@ if ret:
 
 
 def print_result(folder):
-    os.system("echo '========= STDOUT' && cat %s/stdout" % (folder))
-    os.system("echo '========= STDERR' && cat %s/stderr" % (folder))
-    os.system("echo '========= SYSLOG' && cat %s/syslog" % (folder))
-
+    #os.system("echo '========= STDOUT' && cat %s/stdout" % (folder))
+    #os.system("echo '========= STDERR' && cat %s/stderr" % (folder))
+    #os.system("echo '========= SYSLOG' && cat %s/syslog" % (folder))
+    os.system("./dump_folder.sh %s" % (folder,))
 
 if args.graph:
     print("\n\n=== Outputs of node 0 (client) ===")

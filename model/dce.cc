@@ -27,6 +27,7 @@
 #include "dce-random.h"
 #include "net/dce-if.h"
 #include "ns3/node.h"
+#include "ns3/node-list.h"
 #include "ns3/log.h"
 #include "ns3/simulator.h"
 #include "ns3/names.h"
@@ -289,12 +290,19 @@ int dce_pause (void)
 
 int dce_gettimeofday (struct timeval *tv, struct timezone *tz)
 {
-  NS_LOG_FUNCTION (Current () << UtilsGetNodeId ());
-  NS_ASSERT (Current () != 0);
-  NS_ASSERT (tz == 0);
-  *tv = UtilsTimeToTimeval (UtilsSimulationTimeToTime (Now ()));
+  GET_CURRENT_NOLOG();
+  NS_LOG_FUNCTION (current << UtilsGetNodeId ());
+  NS_ASSERT (current != 0);
+  NS_ASSERT_MSG (tz == 0, "timezone parameter deprecated");
+
+  // Original code
+  // *tv = UtilsTimeToTimeval (UtilsSimulationTimeToTime (Now ()));
+
+  Ptr<Node> node = NodeList::GetNode(UtilsGetNodeId());
+  *tv = UtilsTimeToTimeval(node->GetWallTime());
   return 0;
 }
+
 int dce_nanosleep (const struct timespec *req, struct timespec *rem)
 {
   Thread *current = Current ();

@@ -1,0 +1,142 @@
+figlet
+
+ldd elf-cache/0/ntpd
+
+ntpd :
+-n => don't fork
+
+Pour tester
+utils.cc:GetTimeStamp 
+PrepareDoStartProcess
+dce_exit
+UnixSocketFd:Setsockopt(): Unsupported setsockopt requested. level: SOL_SOCKET, optname: 35 avec 35 correspondant à SO_TIMESTAMPNS / SO_TIMESTAMP
+
+Erreur qui apparait dans "ntp_rlimit":
+Cannot set RLIMIT_MEMLOCK: Operation not permitted
+
+ntp_rlimit: STACK: 50 4k pages
+ntp_rlimit: MEMLOCK: 32 MB
+ 1 Jan 00:00:00 ntpd[2022]: set_process_priority: Leave priority alone: priority_done is <2>
+========= STDERR
+ 1 Jan 00:00:00 ntpd[2022]: Cannot set RLIMIT_MEMLOCK: Operation not permitted
+ 1 Jan 00:00:00 ntpd[2022]: Fatal error: precision could not be measured (MINSTEP too large?)
+========= SYSLOG
+ntpd 4.2.8p1@1.3265-o Fri Apr 10 15:44:04 UTC 2015 (6): Starting
+Command line: /home/teto/ntp/ntpd/ntpd -c /home/teto/dce/myscripts/ntp/ntp.conf -ddd
+Cannot set RLIMIT_MEMLOCK: Operation not permitted
+set_process_priority: Leave priority alone: priority_done is <2>
+Fatal error: precision could not be measured (MINSTEP too large?)
+
+
+
+
+La logique de détection de la précision est dans ntp_proto.c, le pb apparaît dans measure_tick_fuzz. On peut afficher un l_fp via pretty_date()
+
+l_fp defined in ntp_fp.h . It means "long fixed point". C'est apparemment dans ntp_proto.h qu'on peut faire des choses intéressantes. La logique de get_systime est expliquée dans precision.c
+
+Dans libntp/systime.c. On peut s'inspirer de la version dans ntpsim.c qui ajoute 200ns a chaque itération.
+
+
+
+
+Les erreurs que j'ai:
+
+// Node, signal, XXX
+0.6s 1 SimuSignal:dce_sigaction(0x863130, 1, 1, 0x7f2a28dbd900, 0x7f2a28dbd9a0)
+0.6s 1 SimuSignal:dce_sigaction(0x863130, 1, 2, 0x7f2a28dbd900, 0x7f2a28dbd9a0)
+0.6s 1 SimuSignal:dce_sigaction(0x863130, 1, 3, 0x7f2a28dbd900, 0x7f2a28dbd9a0)
+0.6s 1 SimuSignal:dce_sigaction(0x863130, 1, 15, 0x7f2a28dbd900, 0x7f2a28dbd9a0)
+0.6s 1 SimuSignal:dce_sigaction(0x863130, 1, 7, 0x7f2a28dbd900, 0x7f2a28dbd9a0)
+0.6s 1 SimuSignal:dce_sigaction(0x863130, 1, 10, 0x7f2a28dbd900, 0x7f2a28dbd9a0)
+0.6s 1 SimuSignal:dce_sigaction(0x863130, 1, 12, 0x7f2a28dbd900, 0x7f2a28dbd9a0)
+0.6s 1 SimuSignal:dce_sigaction(0x863130, 1, 13, 0x7f2a28dbd900, 0x7f2a28dbd9a0)
+0.6s 1 SimuSignal:dce_sigaction(0x863130, 1, 14, 0x7f2a28dbd8f0, 0x7f2a28dbd990)
+
+Program received signal SIGBUS, Bus error.
+0x00007fffea375bc5 in fprintf () at ../model/libc-ns3.h:282
+282	NATIVE (fprintf)
+
+which translates sequentially, into:
+SIGHUP = 1
+SIGINT = 2
+SIGQUIT = 3
+SIGTERM = 15
+SIGBUS = 7
+SIGUSR1 = 10
+SIGUSR2 = 12
+SIGPIPE = 13 
+SIGALRM	= 14
+
+1 	SIGHUP 	Hang up—indicates that the terminal a process is using has closed. Daemons that don’t run in a terminal often respond to this signal by rereading configuration files or restarting their logging tools.
+2 	SIGINT 	Interrupt—end program operation. The kernel sends this signal when you press Ctrl+C.
+3 	SIGQUIT 	Quit—terminate and leave a core file for debugging purposes. Normally initiated by a user action.
+6 	SIGABRT 	Abort—terminate and leave a core file for debugging purposes. Normally initiated by a debugging process or self-detected error.
+9 	SIGKILL 	Kill—end program operation ungracefully; the program may not save open files, etc.
+10 	SIGUSR1 	User signal 1—Effect varies from one program to another.
+12 	SIGUSR2 	User signal 2—Effect varies from one program to another.
+15 	SIGTERM 	Terminate—end program operation gracefully (closing open files, etc.).
+18 	SIGCONT 	Continue—resume processing; undo the effect of a SIGSTOP signal.
+19 	SIGSTOP 	Stop—suspend program operation, similar (but not identical) to the effect of pressing Ctrl+Z.
+
+What I need is to implement dce_gettimeofday, 
+- if (signal(SIGINT, SIGINT_handler) == SIG_ERR)
+
+Pour accéder au node dce courant:
+- Thread *current = Current ();
+- GET_CURRENT_NOLOG()
+Process::nodeId
+
+ns3::NodeList::GetNode 	( 	uint32_t  	n	) 	
+UtilsGetNodeId()
+UtilsAdvanceTime ?
+
+coudron@ssh-ens:/Infos/lmd/2014/licence/ue/1I002-2015fev/TMESolo3/Groupe22.5a$
+
+dce_gettimeofday(0x179c630, 0)
+
+6s 1 Dce:dce_getpid(0x11a4130, 1)
+0.6s 1 Dce:dce___errno_location(0x11a4130, 1)
+0.6s 1 Dce:dce___errno_location(0x11a4130, 1)
+
+
+=sommeprod(B9:E9;B7:E7)/somme(B7:E7)
+
+
+Here is the output of a program I launched out of DCE:
+=====
+# NTIMED Format poll-server 1.0
+# Found 1 peers
+# Peer localhost 127.0.0.1
+Now 1428401811.943782000 NTP_PeerSet Poll
+Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000259399 0x494e4954 657576684.056172967 1428401811.943827000 0.000051238 0.000109441 0.000025175]
+Now 1428401812.943824000 NTP_PeerSet
+Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000274658 0x494e4954 657576683.055757999 1428401812.944242000 0.000060077 0.000127310 0.000069296]
+Now 1428401814.944233000 NTP_PeerSet
+Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000305176 0x494e4954 657576681.054224968 1428401814.945775000 0.000038088 0.000099004 0.000022348]
+Now 1428401818.945769000 NTP_PeerSet
+Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000366211 0x494e4954 657576677.050848961 1428401818.949151000 0.000045808 0.000111201 0.000022595]
+cat files-0/var/log/26481/stdout
+# NTIMED Format poll-server 1.0
+# Found 1 peers
+# Peer 10.1.1.2 10.1.1.2
+Now 1262304000.699999000 NTP_PeerSet Poll
+Now 1262304001.699999000 NTP_PeerSet
+Now 1262304003.699999000 NTP_PeerSet
+Now 1262304007.699999000 NTP_PeerSet
+Now 1262304015.699999000 NTP_PeerSet
+
+
+
+# NTIMED Format poll-server 1.0
+# Found 1 peers
+# Peer localhost 127.0.0.1
+Now 1428401811.943782000 NTP_PeerSet Poll
+Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000259399 0x494e4954 657576684.056172967 1428401811.943827000 0.000051238 0.000109441 0.000025175]
+Now 1428401812.943824000 NTP_PeerSet
+Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000274658 0x494e4954 657576683.055757999 1428401812.944242000 0.000060077 0.000127310 0.000069296]
+Now 1428401814.944233000 NTP_PeerSet
+Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000305176 0x494e4954 657576681.054224968 1428401814.945775000 0.000038088 0.000099004 0.000022348]
+Now 1428401818.945769000 NTP_PeerSet
+Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000366211 0x494e4954 657576677.050848961 1428401818.949151000 0.000045808 0.000111201 0.000022595]
+Now 1428401826.949145000 NTP_PeerSet
+Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000488281 0x494e4954 657576669.048253059 1428401826.951747000 0.000054237 0.000120264 0.000033321]
