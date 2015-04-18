@@ -6,6 +6,7 @@
 #include "ns3/applications-module.h"
 #include "ns3/netanim-module.h"
 #include "ns3/constant-position-mobility-model.h"
+#include "ns3/clock-perfect.h"
 #include "ccnx/misc-tools.h"
 
 using namespace ns3;
@@ -46,6 +47,10 @@ int main (int argc, char *argv[])
 
   NodeContainer nodes;
   nodes.Create (2);
+
+  Ptr<Node> nClient = nodes.Get (0);
+  Ptr<Node> nServer = nodes.Get (1);
+
 
   PointToPointHelper pointToPoint;
   pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("5Mbps"));
@@ -106,6 +111,21 @@ int main (int argc, char *argv[])
     }
 #endif
 
+  /**
+   Here we configure clocks:
+  - TODO a defective one (either with lower or faster frequency) on the client
+  - a nearly perfect one on the server (abs time + a random small offset). We needed
+  to add a random offset
+
+  install a defective clock on that node
+  */
+  // Pour l'instnat le client on s'en fout
+//  nClient->SetClock()
+  //!
+  Ptr<ClockPerfect> serverClock = CreateObject<ClockPerfect>();
+  serverClock->SetMaxRandomOffset(200);
+//  serverClock->SetTime(200);
+//  nServer->SetClock( serverClock );
 
   DceApplicationHelper dce;
   ApplicationContainer apps;
@@ -114,6 +134,9 @@ int main (int argc, char *argv[])
 
   // Launch ntp client on node 0
   dce.SetBinary ("/home/teto/ntimed/ntimed-client");
+
+  // TODO install a defective clock on that node
+
   dce.ResetArguments ();
   dce.ResetEnvironment ();
   dce.AddArgument ("--poll-server");
@@ -159,7 +182,8 @@ int main (int argc, char *argv[])
 //      dce.AddArgument ("-u");
 //    }
 
-  apps = dce.Install (nodes.Get (1));
+  apps = dce.Install (nServer);
+
 
   pointToPoint.EnablePcapAll ("ntp-" + stack, false);
 

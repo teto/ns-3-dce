@@ -58,6 +58,7 @@ NS_LOG += ":Dce"
 
 # to see the GetWallTime()
 NS_LOG += ":Node"
+NS_LOG += ":ClockPerfect=*"
 
 # NS_LOG += ":PointToPointNetDevice"
 # NS_LOG += ":PointToPointChannel"

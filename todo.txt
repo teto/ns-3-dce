@@ -1,9 +1,11 @@
-figlet
+  --with-ns3=WITH_NS3   Specify the installed directory of ns-3-dev
+Ne marche pas en fait, ne va pas chercher les headers dans le bon dossier
+
+
+hi, thehajime I don't know if it's a bug but in DCE,  when you do "waf configure --with-ns3=$HOME/ns3install" , gcc still searches the include folder in /usr/local instead of "$HOME/ns3install/include"
 
 ldd elf-cache/0/ntpd
 
-ntpd :
--n => don't fork
 
 Pour tester
 utils.cc:GetTimeStamp 
@@ -37,6 +39,18 @@ l_fp defined in ntp_fp.h . It means "long fixed point". C'est apparemment dans n
 Dans libntp/systime.c. On peut s'inspirer de la version dans ntpsim.c qui ajoute 200ns a chaque itération.
 
 
+7.7s 0 ClockPerfect:GetTime(0xe62f80)
+7.7s 0 Node:ChecksumEnabled()
+7.7s 0 Node:ChecksumEnabled()
+7.7s 0 Node:GetId(0xe69780)
+7.7s 0 Dce:dce_gettimeofday(0xec4710, 0)
+7.7s 0 Dce:dce_gettimeofday(0xec4710, 0)
+7.7s 0 Node:GetWallTime(0xe63040)
+7.7s 0 ClockPerfect:GetTime(0xe62f80)
+7.7s 0 Dce:dce_gettimeofday(0xec4710, 0)
+7.7s 0 Dce:dce_gettimeofday(0xec4710, 0)
+7.7s 0 Node:GetWallTime(0xe63040)
+7.7s 0 ClockPerfect:GetTime(0xe62f80)
 
 
 Les erreurs que j'ai:
