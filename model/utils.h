@@ -18,10 +18,9 @@
   Thread * current;                                      \
   current = Current ();                                 \
   do {                                                  \
-      NS_LOG_FUNCTION (current << UtilsGetNodeId ());       \
       NS_ASSERT (current != 0);                             \
     } while (false)
-
+//NS_LOG_FUNCTION (current << UtilsGetNodeId ());       \
 
 namespace ns3 {
 
