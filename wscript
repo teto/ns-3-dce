@@ -85,6 +85,11 @@ def configure(conf):
             os.environ['PKG_CONFIG_PATH']+= ":" + os.path.join(Options.options.with_ns3, 'lib', 'pkgconfig')
 
         conf.env.append_value('NS3_EXECUTABLE_PATH', os.path.join(conf.env['NS3_DIR'], 'bin'))
+        conf.env.append_value('INCLUDES', os.path.join(conf.env['NS3_DIR'], 'include/ns3-dev'))
+    #else:
+        #Logs.error("Please set with-ns3 ")
+        #raise SystemExit(1)
+        #return
 
     ns3waf.check_modules(conf, ['core', 'network', 'internet'], mandatory = True)
     ns3waf.check_modules(conf, ['point-to-point', 'tap-bridge', 'netanim'], mandatory = False)
