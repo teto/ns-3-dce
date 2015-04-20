@@ -55,6 +55,8 @@ NS_LOG += ":DceExecUtils"
 NS_LOG += ":DceApplication"
 NS_LOG += ":SimuSignal"
 NS_LOG += ":Dce"
+NS_LOG += ":ProcessUtils"
+NS_LOG += ":DceTime"
 
 # to see the GetWallTime()
 NS_LOG += ":Node"

@@ -36,6 +36,12 @@ std::string UtilsGetRealFilePath (std::string path);
 std::string UtilsGetAbsRealFilePath (uint32_t node, std::string path);
 std::string UtilsGetVirtualFilePath (std::string path);
 uint32_t UtilsGetNodeId (void);
+
+/**
+ * Get time of the node. To use with UtilsGetNodeId()
+ */
+Time UtilsNodeTime(uint32_t nodeId);
+
 Thread * Current (void);
 bool HasPendingSignal (void);
 Time UtilsTimeToSimulationTime (Time time);

@@ -9,6 +9,11 @@
 #include "ns3/clock-perfect.h"
 #include "ccnx/misc-tools.h"
 
+//#include "../model/ipv4-dce-routing.h"
+#include "../helper/ipv4-dce-routing-helper.h"
+
+
+
 using namespace ns3;
 NS_LOG_COMPONENT_DEFINE ("DceNtimed");
 // ===========================================================================
@@ -168,7 +173,8 @@ int main (int argc, char *argv[])
   dce.SetEuid(root_uid);
   dce.SetUid(root_uid);
   dce.AddArgument ("-c");
-  dce.AddArgument ("/home/teto/dce/myscripts/ntp/ntp.conf");
+//  dce.AddArgument ("/home/teto/dce/myscripts/ntp/ntp.conf");
+  dce.AddArgument ("/home/teto/dce/ntp.conf");
   if(useDebug) {
     // -dddd to increase log level
     dce.AddArgument("-ddd");
@@ -185,6 +191,9 @@ int main (int argc, char *argv[])
 
   apps = dce.Install (nServer);
 
+  Ipv4DceRoutingHelper dceRoutingHelper;
+
+  dceRoutingHelper.Create(nServer);
 
   pointToPoint.EnablePcapAll ("ntp-" + stack, false);
 
