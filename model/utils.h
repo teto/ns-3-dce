@@ -39,16 +39,30 @@ uint32_t UtilsGetNodeId (void);
 Thread * Current (void);
 bool HasPendingSignal (void);
 Time UtilsTimeToSimulationTime (Time time);
+
+/**
+* \brief translate ns3 time to epoch defined by GlobalValue "SimulationTimeBase"
+* \see SimulationTimeBase
+*/
 Time UtilsSimulationTimeToTime (Time time);
+
+/**
+* \brief Converts ns3 Time to linux timeval structure
+* \see UtilsTimevalToTime
+*/
 struct timeval UtilsTimeToTimeval (Time time);
 struct timespec UtilsTimeToTimespec (Time time);
+
 Time UtilsTimespecToTime (struct timespec tm);
 Time UtilsTimevalToTime (struct timeval tv);
 Time UtilsTimevalToTime (const struct timeval *tv);
 void UtilsSendSignal (Process *process, int signum);
 void UtilsDoSignal (void);
 int UtilsAllocateFd (void);
-// Little hack to advance time when detecting a possible infinite loop.
+
+/**
+ * \brief Little hack to advance time when detecting a possible infinite loop.
+ */
 void UtilsAdvanceTime (Thread *current);
 std::string GetTimeStamp ();
 bool CheckExeMode (struct stat *st, uid_t uid, gid_t gid);

@@ -22,6 +22,9 @@ NS_LOG_COMPONENT_DEFINE ("ProcessUtils");
 
 namespace ns3 {
 
+/**
+ * \brief Set the epoch of the simulation
+ */
 GlobalValue g_timeBase = GlobalValue ("SimulationTimeBase",
                                       "The timebase for this simulation",
                                       // January 1st, 2010, 00:00:00
@@ -153,24 +156,28 @@ struct timespec UtilsTimeToTimespec (Time time)
   tv.tv_nsec = n % 1000000000;
   return tv;
 }
+
 Time UtilsSimulationTimeToTime (Time time)
 {
   UintegerValue uintegerValue;
   GlobalValue::GetValueByName ("SimulationTimeBase", uintegerValue);
   return time + Seconds (uintegerValue.Get ());
 }
+
 Time UtilsTimeToSimulationTime (Time time)
 {
   UintegerValue uintegerValue;
   GlobalValue::GetValueByName ("SimulationTimeBase", uintegerValue);
   return time - Seconds (uintegerValue.Get ());
 }
+
 Time UtilsTimevalToTime (struct timeval tv)
 {
   Time time = Seconds (tv.tv_sec);
   time += MicroSeconds (tv.tv_usec);
   return time;
 }
+
 Time UtilsTimevalToTime (const struct timeval *tv)
 {
   if (tv == 0)

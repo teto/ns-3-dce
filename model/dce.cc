@@ -299,7 +299,16 @@ int dce_gettimeofday (struct timeval *tv, struct timezone *tz)
   // *tv = UtilsTimeToTimeval (UtilsSimulationTimeToTime (Now ()));
 
   Ptr<Node> node = NodeList::GetNode(UtilsGetNodeId());
-  *tv = UtilsTimeToTimeval(node->GetWallTime());
+  Time t = node->GetWallTime();
+  NS_LOG_INFO("Wall time before translation=" << t);
+  t = UtilsSimulationTimeToTime (t);
+  NS_LOG_INFO("Wall time after translation=" << t);
+  *tv = UtilsTimeToTimeval(t);
+  //(long int)
+  NS_LOG_INFO( "After conversion to timeval: " << tv->tv_sec << " s " << tv->tv_usec << " us");
+
+  dce_usleep(200); // send to sleep 1 microsec, we could sleep 200ns to imitate ntpsim
+  //Send node to sleep
   return 0;
 }
 
