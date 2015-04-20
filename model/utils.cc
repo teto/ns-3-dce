@@ -14,9 +14,11 @@
 #include <list>
 #include <fcntl.h>
 #include <unistd.h>
+#include "dce-unistd.h"
 #include "file-usage.h"
 #include "ns3/global-value.h"
 #include "ns3/uinteger.h"
+#include "ns3/node-list.h"
 
 NS_LOG_COMPONENT_DEFINE ("ProcessUtils");
 
@@ -155,6 +157,24 @@ struct timespec UtilsTimeToTimespec (Time time)
   tv.tv_sec = (time_t)(n / 1000000000L);
   tv.tv_nsec = n % 1000000000;
   return tv;
+}
+
+Time
+UtilsNodeTime(uint32_t nodeId)
+{
+  NS_LOG_FUNCTION(nodeId);
+
+  Ptr<Node> node = NodeList::GetNode(nodeId);
+
+  Time t = node->GetWallTime();
+  NS_LOG_INFO("Wall time before translation=" << t);
+  t = UtilsSimulationTimeToTime (t);
+  NS_LOG_INFO("Wall time after translation=" << t);
+//  *tv = UtilsTimeToTimeval(t);
+  //(long int)
+//  NS_LOG_INFO( "After conversion to timeval: " << tv->tv_sec << " s " << tv->tv_usec << " us");
+  dce_usleep(1); // send to sleep 1 microsec, we could sleep 200ns to imitate ntpsim
+  return t;
 }
 
 Time UtilsSimulationTimeToTime (Time time)
