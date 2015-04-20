@@ -7,7 +7,6 @@ fi
 
 folder="$1"
 
-
 echo '========= STDOUT' && cat $folder/stdout
 echo '========= STDERR' && cat $folder/stderr
 echo '========= SYSLOG' && cat $folder/syslog

@@ -60,11 +60,13 @@ NS_LOG += ":Dce"
 NS_LOG += ":Node"
 NS_LOG += ":ClockPerfect=*"
 
+
 # NS_LOG += ":PointToPointNetDevice"
 # NS_LOG += ":PointToPointChannel"
 # NS_LOG += ":DropTailQueue"
 #NS_LOG += ":MpTcpMultiSuite"
 #NS_LOG += ":MpTcpTestSuite"
+NS_LOG += ":RandomVariableStream"
 NS_LOG += ":TcpSocketBase"
 NS_LOG += ":TcpNewReno"
 #NS_LOG += ":MpTcpSchedulerRoundRobin"
@@ -125,7 +127,7 @@ def print_result(folder):
 
 if args.graph:
     print("\n\n=== Outputs of node 0 (client) ===")
-    print_result("~/dce/files-0/var/log/26481")
+    print_result("~/dce/files-0/var/log/*")
 
     print("\n\n=== Outputs of node 1 (server) ===")
-    print_result("~/dce/files-1/var/log/2022")
+    print_result("~/dce/files-1/var/log/*")

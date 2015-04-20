@@ -123,16 +123,17 @@ int main (int argc, char *argv[])
 //  nClient->SetClock()
   //!
   Ptr<ClockPerfect> serverClock = CreateObject<ClockPerfect>();
-  serverClock->SetMaxRandomOffset(200);
+//  serverClock->SetMaxRandomOffset(200);
 //  serverClock->SetTime(200);
 //  nServer->SetClock( serverClock );
-
+//  NS_LOG_UNCOND("");
   DceApplicationHelper dce;
   ApplicationContainer apps;
 
   dce.SetStackSize (1 << 20);
 
   // Launch ntp client on node 0
+  #if 0
   dce.SetBinary ("/home/teto/ntimed/ntimed-client");
 
   // TODO install a defective clock on that node
@@ -156,7 +157,7 @@ int main (int argc, char *argv[])
   apps = dce.Install (nodes.Get (0));
   apps.Start (Seconds (0.7));
   apps.Stop (Seconds (20));
-
+#endif
   // Launch ntp server on node 1
   dce.SetBinary ("/home/teto/ntp/ntpd/ntpd");
   dce.ResetArguments ();

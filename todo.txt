@@ -1,3 +1,9 @@
+  BOUTIQUE VOO - WATERLOO
+CHAUSSEE DE BRUXELLES 159
+1410 WATERLOO
+
+
+
   --with-ns3=WITH_NS3   Specify the installed directory of ns-3-dev
 Ne marche pas en fait, ne va pas chercher les headers dans le bon dossier
 
@@ -32,11 +38,39 @@ Fatal error: precision could not be measured (MINSTEP too large?)
 
 
 
+Comment ns3 récupère le temps ?
+=====
+
+Time
+DefaultSimulatorImpl::Now (void) const
+{
+  // Do not add function logging here, to avoid stack overflow
+  return TimeStep (m_currentTs);
+
+ sachant que
+ inline Time TimeStep (uint64_t ts)
+{
+  return Time (ts);
+}
+
+voir dans utils.cc
+  // *tv = UtilsTimeToTimeval (UtilsSimulationTimeToTime (Now ()));
+
+
+
+
+
+
+
+NTP
+=====
 La logique de détection de la précision est dans ntp_proto.c, le pb apparaît dans measure_tick_fuzz. On peut afficher un l_fp via pretty_date()
 
 l_fp defined in ntp_fp.h . It means "long fixed point". C'est apparemment dans ntp_proto.h qu'on peut faire des choses intéressantes. La logique de get_systime est expliquée dans precision.c
-
 Dans libntp/systime.c. On peut s'inspirer de la version dans ntpsim.c qui ajoute 200ns a chaque itération.
+
+measure_precision
+Utiliser nm pour voir les symboles
 
 
 7.7s 0 ClockPerfect:GetTime(0xe62f80)
