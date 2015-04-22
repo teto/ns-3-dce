@@ -1,0 +1,270 @@
+apparemment lamport_violated n'est pas vrai
+
+
+
+ldd elf-cache/0/ntpd
+http://pubs.opengroup.org/stage7tc1/
+
+NTP utilise UDP, port 123
+
+"hstr" program
+
+
+=== NS3Off ===
+Pour voir la config actuelle de ns3, regarder dans build/c4che
+./waf configure --prefix=install
+--enable-sudo 
+/home/teto/ns3off/install
+
+
+0.600098s 1 RandomVariableStream:GetValue(0x137ac10, 0)
+0.600099s 1 DceTime:dce_gmtime(0x136ac80, 1)
+0.600099s 1 Dce:dce_inet_ntop(0x136ac80, 1, 2, 0x7f87e1c68028, , 128)
+0.600099s 1 Dce:dce_inet_ntop(0x136ac80, 1, 2, 0x7f87e1c68060, , 128)
+0.600099s 1 Dce:dce_inet_ntop(0x136ac80, 1, 2, 0x7f87e1c68044, , 128)
+0.600099s 1 ProcessUtils:UtilsAllocateFd(0x136ac80)
+0.600099s 1 ProcessUtils:UtilsAllocateFd(): [DEBUG] Allocated fd=4
+0.600099s 1 ProcessUtils:UtilsGetRealFilePath(0x136ac80, /proc/net/if_inet6)
+0.600099s 1 ProcessUtils:UtilsGetVirtualFilePath(0x136ac80, /proc/net/if_inet6)
+0.600099s 1 ProcessUtils:UtilsAllocateFd(0x136ac80)
+0.600099s 1 ProcessUtils:UtilsAllocateFd(): [DEBUG] Allocated fd=4
+assert failed. cond="m_ipv4Routing != 0", msg="Netlink Socket requires Ipv4DceRouting to be installed on the node", file=../netlink/netlink-socket.cc, line=277
+terminate called without an active exception
+Command ['/home/teto/dce/build/bin/dce-ntimed'] terminated with signal SIGIOT. Run it under a debugger to get more information (./waf --run <program> --command-template="gdb --args %s <args>").
+Exported:
+ 1 Jan 00:00:00 ntpd[11279]: getconfig: Couldn't open </home/teto/dce/myscripts/ntp/ntp.conf>: No such file or directory
+
+ 1 Jan 00:00:00 ntpd[11279]: getconfig: Couldn't open </home/teto/dce/myscripts/ntp/ntp.conf>: No such file or directory
+
+=== DCE ===
+./waf configure --with-ns3=$HOME/ns3off/install
+
+Quand on fait waf configure, on peut utiliser
+"--with-ns3=" plutôt.
+  --with-ns3=WITH_NS3   Specify the installed directory of ns-3-dev
+./waf configure --with-ns3=$HOME/dce/build --enable-opt \
+                --enable-kernel-stack=$HOME/dce/net-next-sim/arch \
+                --prefix=$HOME/dce/build
+./waf build
+./waf install
+
+Utiliser l'option "--prefix" pour changer là où ns3 s'installe
+
+Checking for ns3-fd-net-device (None)            : not found
+Needs to enable module fd-net-device
+
+
+0.7s 0 DceExecUtils:SearchPath(): [DEBUG] Pushing path=/
+0.7s 0 DceExecUtils:SeekFile(/home/teto/ntimed/ntimed-client,  with cwd=, )
+0.7s 0 DceExecUtils:CheckFileExe(): [DEBUG] Checking exe /home/teto/ntimed/ntimed-client
+
+struct tm
+
+Breakpoint 1, dce_gmtime (timep=0x7ffff7fbc4d8) at ../model/dce-time.cc:33
+33	  NS_LOG_FUNCTION (Current () << UtilsGetNodeId ());
+(gdb) bt
+#0  dce_gmtime (timep=0x7ffff7fbc4d8) at ../model/dce-time.cc:33
+#1  0x00007ffff0f3f5c3 in localtime () at ../model/libc-ns3.h:338
+#2  0x00007fffefb83d81 in humanlogtime () at humandate.c:24
+#3  0x00007fffefb71790 in addto_syslog (level=5, 
+    msg=0x7ffff7fbc590 "ntpd 4.2.8p1@1.3265-o Mon Apr 20 14:03:05 UTC 2015 (9): Starting") at msyslog.c:189
+#4  0x00007fffefb71cad in msyslog (level=5, fmt=0x7fffefba1d03 "%s: Starting") at msyslog.c:357
+#5  0x00007fffefb1592d in ntpdmain (argc=0, argv=0x68cee0) at ntpd.c:493
+#6  0x00007fffefb1555c in main (argc=4, argv=0x68cec0) at ntpd.c:289
+
+
+=== Ntimed ===
+Pour le compiler
+$ CFLAGS="-fPIC -U_FORTIFY_SOURCE " LDFLAGS="-pie -rdynamic -ggdb" make
+./ntimed-client --poll-server 1.ubuntu.pool.ntp.org
+The '-t /tmp/somefile' arguments tells it to write a full blow-by-blow
+tracefile, for analysis and debugging.
+
+ntpq -p ntp.lip6.fr
+osiris.lip6.fr
+
+readelf -h ntimed-client |grep Type  (t'attends 'DYN' comme output)
+
+NTP_PeerSet a l'air intéressant
+
+ TB_Step() and TB_Adjust()
+
+=== NTP ===
+
+A un moment donné j'avais ce problème dans gdb: "which has no line number information"
+J'ai remplacé -g par -ggdb dans les CFLAGS et cela a résolu le pb
+
+Lancer le configure comme:
+$ CFLAGS="-fPIC -U_FORTIFY_SOURCE -ggdb" LDFLAGS="-pie -rdynamic" ./configure --enable-debugging
+You may need to add --with-openssl-libdir=/usr/lib/x86_64-linux-gnu
+
+Dans measure_tick_fuzz, ntp essaye de voir quelle est la précision max de l'horlge en mesurant rapidement 
+// 20e-9	== minimum clock increment (s)
+
+
+in ntpsim=.c:get_systime on a:
+    /*
+     * To fool the code that determines the local clock precision,
+     * we advance the clock a minimum of 200 nanoseconds on every
+     * clock read. This is appropriate for a typical modern machine
+     * with nanosecond clocks. Note we make no attempt here to
+     * simulate reading error, since the error is so small. This may
+     * change when the need comes to implement pi
+
+
+mon NTP utilise ca
+http://linux.die.net/man/3/clock_gettime
+rc = clock_gettime(CLOCK_REALTIME, tsp);
+
+addto_syslog appelle dce_time
+
+Dans ns3 le temps est représenté par   int64_t Time::m_data;  //!< Virtual time value, in the current unit.
+
+Why do we need MarkedTimes ??
+
+Pour lancer un serveur ntp local (dans le fichier de conf, ne configurer qu'un seul server
+127.0.0.1 stratum 1)
+# -n => don't fork
+sudo ntpd -c ~/im15/analysis/ntp.conf -n
+
+Les communications NTP font du 123 <-> 123
+En local on utilise horlogegps.reseau.jussieu.fr
+
+/etc/ntp.conf, ca peut générer des stats via les directives:
+- statsdir / filegen / statistics etc...
+http://www.thegeekstuff.com/2014/06/linux-ntp-server-client/
+
+You may have problems with apparmor:
+http://ubuntuforums.org/showthread.php?t=1008906
+- Désactiver le profil suivi d'un restart évidemment
+sudo ln -s /etc/apparmor.d/usr.sbin.ntpd /etc/apparmor.d/disable/
+sudo service apparmor restart
+
+
+
+
+You don't fudge the server's stratum. You declare its internal clock
+a reference clock, and fudge that.
+
+Reference clocks have addresses 127.127.x.y. The x encodes the type
+of clock, the y is simply a clock identifier.
+
+server 127.127.1.0
+fudge 127.127.1.0 stratum 10
+
+Reference clock type 1 is a computer's internal clock. It should be
+used only if an NTP server should (continue to) serve time when it
+(temporarily or permanently) has no real reference clock available,
+and should always be fudged to high stratum.
+
+
+fudge   127.127.1.0 stratum 10
+
+http://serverfault.com/questions/153206/setting-up-a-local-stratum-2-ntp-server
+
+http://lists.ntp.org/pipermail/questions/2003-November/001507.html
+NTPtrace permet 
+
+Pour tester:
+$ sudo ~/ntp/ntpd/ntpd -c ~/dce/myscripts/ntp/ntp.conf -n -D debug
+$ ~/ntimed/ntimed-client --poll-server localhost
+
+
+$ ntpdate -q ntp.lip6.fr
+$ ntpdate -q horlogegps.reseau.jussieu.fr
+server 134.157.254.19, stratum 0, offset 0.000000, delay 0.00000
+ 7 Apr 13:16:33 ntpdate[14274]: no server suitable for synchronization found
+
+
+
+
+
+teto_> thehajime, in the functions listed here: https://www.nsnam.org/docs/dce/release/1.0/manual/html/dce-user-tech.html I don't see any function to set time ? like clock_settime 
+<teto_> if I look at man clock_settime, it looks posix https://www.nsnam.org/docs/dce/release/1.0/manual/html/dce-user-tech.html
+<teto_> http://pubs.opengroup.org/stage7tc1/ *
+
+DCE définit l'EPOCH dans ce fichier:
+http://code.nsnam.org/ns-3-dce/file/3f4dfb7d8461/model/utils.cc#l25
+
+
+int clock_settime(clockid_t clk_id,  const  struct  timespec *tp)
+// TODO clock_setres
+
+ teto_: in ns-3 core, there is no epoch time
+<thehajime> (if i understand correctly)
+<thehajime> there is only delta time from the beginning of simulation
+<thehajime> otoh, DCE has a offset to return epoch time
+<thehajime> s/a/an/
+<thehajime> http://code.nsnam.org/ns-3-dce/file/3f4dfb7d8461/model/utils.cc#l25
+<thehajime> see the global (undocumented) attribute "SimulationTimeBase"
+<thehajime> this intends to return the time ("SimulationTimeBase + delta) for time(2) for instance.
+<swat_m> tomhenderson, i have a few things to ask about the gsoc proposal
+<teto_> thehajime, true but I would like to add per node clocks in ns3, so that one can run NTPd with DCE on ns3
+<tomhenderson> sure, go ahead
+<thehajime> per-node clock, i remember the email
+<teto_> that's why I am looking at the posix functions ntpd/ntimed use to set the time
+<swat_m> what are we supposed to write in the deliverables portion 
+<thehajime> okay so, i can assume SetTime member
+<teto_> I see that posix functions are implemented like "dce_*"
+<thehajime> right
+<thehajime> with DCE(clock_settime) macro in model/libc-ns3.h
+<thehajime> so you may need to implement:
+<tomhenderson> swat_m, I think you handled it correctly
+<teto_> nice I will have a look at the macro
+<thehajime> int dce_clock_settime(clockid_t clk_id, const struct timespec *tp)
+<thehajime> {
+<thehajime> ns3::SetTime(tp *blabla);
+<thehajime> return something;
+<thehajime> }
+<thehajime> (no indent here...)
+a marco, POSIX API wrapper, with the appropriate header file update would be the first step for you
+
+Dans "int dce_clock_gettime (clockid_t c, struct timespec *tp)" défini dans dce-time.h
+SimulationTimeBase
+UtilsTimeToSimulationTime
+
+Pour tester
+utils.cc:GetTimeStamp 
+PrepareDoStartProcess
+dce_exit
+UnixSocketFd:Setsockopt(): Unsupported setsockopt requested. level: SOL_SOCKET, optname: 35
+35 correspond à SO_TIMESTAMPNS / SO_TIMESTAMP
+
+Here is the output of a program I launched out of DCE:
+=====
+# NTIMED Format poll-server 1.0
+# Found 1 peers
+# Peer localhost 127.0.0.1
+Now 1428401811.943782000 NTP_PeerSet Poll
+Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000259399 0x494e4954 657576684.056172967 1428401811.943827000 0.000051238 0.000109441 0.000025175]
+Now 1428401812.943824000 NTP_PeerSet
+Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000274658 0x494e4954 657576683.055757999 1428401812.944242000 0.000060077 0.000127310 0.000069296]
+Now 1428401814.944233000 NTP_PeerSet
+Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000305176 0x494e4954 657576681.054224968 1428401814.945775000 0.000038088 0.000099004 0.000022348]
+Now 1428401818.945769000 NTP_PeerSet
+Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000366211 0x494e4954 657576677.050848961 1428401818.949151000 0.000045808 0.000111201 0.000022595]
+cat files-0/var/log/26481/stdout
+# NTIMED Format poll-server 1.0
+# Found 1 peers
+# Peer 10.1.1.2 10.1.1.2
+Now 1262304000.699999000 NTP_PeerSet Poll
+Now 1262304001.699999000 NTP_PeerSet
+Now 1262304003.699999000 NTP_PeerSet
+Now 1262304007.699999000 NTP_PeerSet
+Now 1262304015.699999000 NTP_PeerSet
+
+
+
+# NTIMED Format poll-server 1.0
+# Found 1 peers
+# Peer localhost 127.0.0.1
+Now 1428401811.943782000 NTP_PeerSet Poll
+Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000259399 0x494e4954 657576684.056172967 1428401811.943827000 0.000051238 0.000109441 0.000025175]
+Now 1428401812.943824000 NTP_PeerSet
+Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000274658 0x494e4954 657576683.055757999 1428401812.944242000 0.000060077 0.000127310 0.000069296]
+Now 1428401814.944233000 NTP_PeerSet
+Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000305176 0x494e4954 657576681.054224968 1428401814.945775000 0.000038088 0.000099004 0.000022348]
+Now 1428401818.945769000 NTP_PeerSet
+Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000366211 0x494e4954 657576677.050848961 1428401818.949151000 0.000045808 0.000111201 0.000022595]
+Now 1428401826.949145000 NTP_PeerSet
+Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000488281 0x494e4954 657576669.048253059 1428401826.951747000 0.000054237 0.000120264 0.000033321]
