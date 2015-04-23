@@ -3,6 +3,15 @@ CHAUSSEE DE BRUXELLES 159
 1410 WATERLOO
 
 
+waf 1.8 a supprimé run_c_code 
+d491de7486faac3b924da5a5c4045ebe42ccec5b
+
+Erreur provoquée par 
+        retval = conf.run_build(code='#include <stdio.h>\nint main() { return 0; }\n',↲                                               
+                                 env=env, compile_filename=fname,↲
+                                 features=[mode, mode+'program'], execute=False)↲
+
+
 
   --with-ns3=WITH_NS3   Specify the installed directory of ns-3-dev
 Ne marche pas en fait, ne va pas chercher les headers dans le bon dossier
