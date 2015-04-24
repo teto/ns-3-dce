@@ -2,9 +2,26 @@
 CHAUSSEE DE BRUXELLES 159
 1410 WATERLOO
 
+I'm assuming you are missing the following;
+
+LinuxStackHelper stack;
+Ipv4DceRoutingHelper ipv4RoutingHelper;
+stack.SetRoutingHelper (ipv4RoutingHelper);
+stack.Install (nodes);
+
 
 waf 1.8 a supprimé run_c_code 
 d491de7486faac3b924da5a5c4045ebe42ccec5b
+
+
+/home/teto/dce/build/bin/dce-ntimed: relocation error: elf-cache/0/ntpd: symbol mlockall, version GLIBC_2.2.5 not defined in file 0001.so.6 with link time reference
+Command ['/home/teto/dce/build/bin/dce-ntimed'] exited with code 127
+
+
+== Comment compiler waf
+The files present in the folder waflib/extras represent extensions (Waf tools) that are in a testing phase. They may be added to the Waf binary by using the --tools switch:
+$ python waf-light --tools=compat15,swig,doxygen
+$ ./waf-light --tools=clang_compilation_database
 
 Erreur provoquée par 
         retval = conf.run_build(code='#include <stdio.h>\nint main() { return 0; }\n',↲                                               

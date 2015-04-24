@@ -12,6 +12,9 @@ void * dce_mmap64 (void *start, size_t length, int prot, int flags,
                    int fd, off64_t offset);
 int dce_munmap (void *start, size_t length);
 
+int dce_mlockall(int flags);
+int dce_munlockall(void);
+
 #ifdef __cplusplus
 }
 #endif

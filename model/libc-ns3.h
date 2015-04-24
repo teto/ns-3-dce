@@ -351,6 +351,10 @@ DCE (timer_create)
 DCE (timer_settime)
 DCE (timer_gettime)
 
+// MMAN.H
+DCE(mlockall);
+DCE(munlockall);
+
 // UTIME.H
 DCE (utime)
 DCE (tzset)

@@ -70,11 +70,17 @@ int main (int argc, char *argv[])
   devices2 = pointToPoint.Install (nodes);
 
   DceManagerHelper dceManager;
+  Ipv4DceRoutingHelper ipv4RoutingHelper;
+
   dceManager.SetTaskManagerAttribute ("FiberManagerType", StringValue ("UcontextFiberManager"));
 
   if (stack == "ns3")
     {
       InternetStackHelper stack;
+
+      stack.SetRoutingHelper (ipv4RoutingHelper);
+//      stack.Install (nodes);
+
       stack.Install (nodes);
       dceManager.Install (nodes);
     }
@@ -195,9 +201,9 @@ int main (int argc, char *argv[])
 
   apps = dce.Install (nServer);
 
-  Ipv4DceRoutingHelper dceRoutingHelper;
 
-  dceRoutingHelper.Create(nServer);
+
+//  dceRoutingHelper.Create(nServer);
 
   pointToPoint.EnablePcapAll ("ntp-" + stack, false);
 
