@@ -611,6 +611,7 @@ def build(bld):
         'model/dce-pthread-cond.cc',
         'model/dce-timerfd.cc',
         'model/dce-time.cc',
+        'model/dce-mman.cc',
         'model/dce-stat.cc',
         'model/dce-syslog.cc',
         'model/dce-global-variables.cc',

@@ -63,6 +63,15 @@ NS_LOG_COMPONENT_DEFINE ("SimuFd");
   }
 
 
+
+
+
+
+// MMAN.H
+//DCE(mlockall);
+//DCE(munlockall);
+
+
 using namespace ns3;
 int dce_open64 (const char *path, int flags, ...)
 {
@@ -74,6 +83,7 @@ int dce_open64 (const char *path, int flags, ...)
 
   return status;
 }
+
 
 int dce_open (const char *path, int flags, ...)
 {
