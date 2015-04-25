@@ -149,6 +149,7 @@
 		<Unit filename="model/dce-manager.h" />
 		<Unit filename="model/dce-misc.cc" />
 		<Unit filename="model/dce-misc.h" />
+		<Unit filename="model/dce-mman.cc" />
 		<Unit filename="model/dce-netdb.cc" />
 		<Unit filename="model/dce-netdb.h" />
 		<Unit filename="model/dce-node-context.cc" />
