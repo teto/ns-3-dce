@@ -71,6 +71,7 @@
 #include <sys/mman.h>
 #include <sys/timerfd.h>
 #include <sys/time.h>
+#include <sys/timex.h>
 #include <sys/types.h>
 #include <sys/resource.h>
 #include <sys/socket.h>

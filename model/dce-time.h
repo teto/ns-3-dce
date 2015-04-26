@@ -38,6 +38,7 @@ int dce_utime (const char *filename, const struct utimbuf *times);
 int dce_timer_create(clockid_t clockid, struct sigevent *sevp, timer_t *timerid);
 int dce_timer_settime(int timerid, int flags, const struct itimerspec *new_value, struct itimerspec *old_value);
 int dce_timer_gettime(int timerid, struct itimerspec *cur_value);
+int dce_adjtimex(struct timex *buf);
 
 #ifdef __cplusplus
 }
