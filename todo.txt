@@ -4,12 +4,21 @@ CHAUSSEE DE BRUXELLES 159
 
 I'm assuming you are missing the following;
 
-LinuxStackHelper stack;
-Ipv4DceRoutingHelper ipv4RoutingHelper;
-stack.SetRoutingHelper (ipv4RoutingHelper);
-stack.Install (nodes);
+We have no such guide yet :-)
 
 
+Try to adapt the configuration test using the following model:
+    def build(bld):
+        lib_node = bld.srcnode.make_node('libdir/liblc1.c')
+        lib_node.parent.mkdir()
+        lib_node.write('#include <stdio.h>\nint lib_func(void) { FILE *f = fopen("foo", "r");}\n', 'w')
+        bld(features='c cshlib', cflags='-O2', linkflags='-g3', source=[lib_node], linkflags=conf.env.EXTRA_LDFLAGS, target='sometarget')
+    conf.check(build_fun=build, msg=msg)
+
+Thomas
+
+bldpath got removed
+https://code.google.com/p/waf/source/diff?spec=svnc21317c7276d8ab693908fca0efbb17c6d17e153&r=c21317c7276d8ab693908fca0efbb17c6d17e153&format=side&path=/waflib/Node.py
 waf 1.8 a supprimé run_c_code 
 d491de7486faac3b924da5a5c4045ebe42ccec5b
 

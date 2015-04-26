@@ -351,6 +351,9 @@ DCE (timer_create)
 DCE (timer_settime)
 DCE (timer_gettime)
 
+// TIMEX.H
+DCE(adjtimex)
+
 // MMAN.H
 DCE(mlockall);
 DCE(munlockall);

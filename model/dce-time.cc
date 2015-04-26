@@ -176,4 +176,8 @@ int dce_timer_gettime (int fd, struct itimerspec *cur_value)
   OPENED_FD_METHOD (int, Gettime (cur_value))
 }
 
+int dce_adjtimex(struct timex *buf)
+{
+    NS_LOG_INFO("DCE_adjtimex");
+}
 
