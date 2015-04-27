@@ -622,6 +622,7 @@ NATIVE (ceil)
 NATIVE (floor)
 NATIVE (ldexp)
 NATIVE (log)
+NATIVE (log10)
 NATIVE (exp)
 NATIVE (lround)
 

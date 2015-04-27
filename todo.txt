@@ -2,29 +2,148 @@
 CHAUSSEE DE BRUXELLES 159
 1410 WATERLOO
 
-I'm assuming you are missing the following;
+Erreurs courantes:
+getconfig: Couldn't open </home/teto/dce/ntp.conf>: No such file or directory
 
-We have no such guide yet :-)
-
-
-Try to adapt the configuration test using the following model:
-    def build(bld):
-        lib_node = bld.srcnode.make_node('libdir/liblc1.c')
-        lib_node.parent.mkdir()
-        lib_node.write('#include <stdio.h>\nint lib_func(void) { FILE *f = fopen("foo", "r");}\n', 'w')
-        bld(features='c cshlib', cflags='-O2', linkflags='-g3', source=[lib_node], linkflags=conf.env.EXTRA_LDFLAGS, target='sometarget')
-    conf.check(build_fun=build, msg=msg)
-
-Thomas
-
-bldpath got removed
-https://code.google.com/p/waf/source/diff?spec=svnc21317c7276d8ab693908fca0efbb17c6d17e153&r=c21317c7276d8ab693908fca0efbb17c6d17e153&format=side&path=/waflib/Node.py
-waf 1.8 a supprimé run_c_code 
-d491de7486faac3b924da5a5c4045ebe42ccec5b
+/home/teto/dce/build/bin/dce-ntimed: relocation error: elf-cache/0/ntpd: symbol pthread_attr_init, version GLIBC_2.2.5 not defined in file 0002thread.so.0 with link time reference
 
 
-/home/teto/dce/build/bin/dce-ntimed: relocation error: elf-cache/0/ntpd: symbol mlockall, version GLIBC_2.2.5 not defined in file 0001.so.6 with link time reference
-Command ['/home/teto/dce/build/bin/dce-ntimed'] exited with code 127
+Essaye d'ouvrir 
+/proc/net/if_inet6
+
+1 UnixSocketFd:Setsockopt(): Unsupported setsockopt requested. level: SOL_SOCKET, optname: 2
+0.600098s 1 SimuFd:dce_setsockopt(0x12ea670, 1, 5, 0, 1, 0x7f692e77a834, 4)
+1 UnixSocketFd:Setsockopt(): Unsupported setsockopt requested. level: SOL_IP, optname: 1
+0.600098s 1 SimuFd:dce_bind(0x12ea670, 1, 5, 0x7f692e5c4024, 16)
+0.600098s 1 SimuFd:dce_setsockopt(0x12ea670, 1, 5, 1, 35, 0x7f692e77a82c, 4)
+1 UnixSocketFd:Setsockopt(): Unsupported setsockopt requested. level: SOL_SOCKET, optname: 35
+
+
+start_kern_loop: ntp_loopfilter.c line 1013: unhandled return value 6407616 from ntp_adjtime in ntp_adjtime_error_handler at line 328
+
+1.60002s 1 RandomVariableStream:GetValue(0x25d6dc0, 0)
+1.60002s 1 DceTime:dce_gmtime(0x25d8700, 1)
+1.60002s 1 RandomVariableStream:GetValue(0x25d6dc0)
+1.60002s 1 RandomVariableStream:GetValue(0x25d6dc0, 0)
+2.6s 1 ProcessUtils:UtilsDoSignal(): [DEBUG] deliver signal=14
+2.6s 1 RandomVariableStream:GetValue(0x25d6dc0)
+2.6s 1 RandomVariableStream:GetValue(0x25d6dc0, 0)
+3.6s 1 ProcessUtils:UtilsDoSignal(): [DEBUG] deliver signal=14
+3.6s 1 RandomVariableStream:GetValue(0x25d6dc0)
+3.6s 1 RandomVariableStream:GetValue(0x25d6dc0, 0)
+4.6s 1 ProcessUtils:UtilsDoSignal(): [DEBUG] deliver signal=14
+4.6s 1 RandomVariableStream:GetValue(0x25d6dc0)
+4.6s 1 RandomVariableStream:GetValue(0x25d6dc0, 0)
+5.6s 1 ProcessUtils:UtilsDoSignal(): [DEBUG] deliver signal=14
+5.6s 1 RandomVariableStream:GetValue(0x25d6dc0)
+5.6s 1 RandomVariableStream:GetValue(0x25d6dc0, 0)
+6.6s 1 ProcessUtils:UtilsDoSignal(): [DEBUG] deliver signal=14
+6.6s 1 RandomVariableStream:GetValue(0x25d6dc0)
+6.6s 1 RandomVariableStream:GetValue(0x25d6dc0, 0)
+7.6s 1 ProcessUtils:UtilsDoSignal(): [DEBUG] deliver signal=14
+7.6s 1 RandomVariableStream:GetValue(0x25d6dc0)
+7.6s 1 RandomVariableStream:GetValue(0x25d6dc0, 0)
+8.6s 1 ProcessUtils:UtilsDoSignal(): [DEBUG] deliver signal=14
+8.6s 1 RandomVariableStream:GetValue(0x25d6dc0)
+8.6s 1 RandomVariableStream:GetValue(0x25d6dc0, 0)
+9.6s 1 ProcessUtils:UtilsDoSignal(): [DEBUG] deliver signal=14
+9.6s 1 RandomVariableStream:GetValue(0x25d6dc0)
+9.6s 1 RandomVariableStream:GetValue(0x25d6dc0, 0)
+Node:DoDispose(0x261d5d0)
+RandomVariableStream:~RandomVariableStream(0x2620050)
+RandomVariableStream:~RandomVariableStream(0x261ad10)
+RandomVariableStream:~RandomVariableStream(0x261c5f0)
+RandomVariableStream:~RandomVariableStream(0x261c710)
+RandomVariableStream:~RandomVariableStream(0x261c820)
+DceManager:DoDispose(0x25da090)
+DceTime:dce_clock_gettime(0x25d8700, 1)
+ProcessUtils:UtilsNodeTime(1)
+
+Start Time: NS3 Time:          0s (           +599999999.0ns) , REAL Time: 1430089708
+      Time: NS3 Time:          0s (           +599999999.0ns) , REAL Time: 1430089708 --> Starting: /home/teto/ntp/ntpd/ntpd
+ 1 Jan 00:00:00 ntpd[2022]: Cannot set RLIMIT_MEMLOCK: Operation not permitted
+ 1 Jan 00:00:01 ntpd[2022]: ./../lib/isc/unix/ifiter_getifaddrs.c:99: unexpected error:
+ 1 Jan 00:00:01 ntpd[2022]: getting interface addresses: getifaddrs: Invalid argument
+ 1 Jan 00:00:01 ntpd[2022]: mlockall(): No such file or directory
+ 1 Jan 00:00:00 ntpd[2022]: ntpd 4.2.8p1@1.3265-o Mon Apr 20 18:24:07 UTC 2015 (10): Starting
+ 1 Jan 00:00:00 ntpd[2022]: Command line: /home/teto/ntp/ntpd/ntpd -c /home/teto/dce/ntp.conf -ddd
+ 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600001999 us
+ntp_rlimit: STACK: 50 4k pages
+ntp_rlimit: MEMLOCK: 32 MB
+ 1 Jan 00:00:00 ntpd[2022]: set_process_priority: Leave priority alone: priority_done is <2>
+ 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600005999 us
+ 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call before the loop => 1a24f480.9999fe3f  Sat, Jan  1 2050  0:00:00.600
+ 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600009999 us
+ 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call within the loop => 1a24f480.999a415b  Sat, Jan  1 2050  0:00:00.600
+ 1 Jan 00:00:00 ntpd[2022]: MATT: ldiff = 00000000.0000431c  Thu, Feb  7 2036  6:28:16.000
+ 1 Jan 00:00:00 ntpd[2022]: MATT: ENTERED IS GREATER
+ 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600016999 us
+ 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call within the loop => 1a24f480.999ab6cc  Sat, Jan  1 2050  0:00:00.600
+ 1 Jan 00:00:00 ntpd[2022]: MATT: ldiff = 00000000.00007571  Thu, Feb  7 2036  6:28:16.000
+ 1 Jan 00:00:00 ntpd[2022]: MATT: ENTERED IS GREATER
+ 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600023999 us
+ 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call within the loop => 1a24f480.999b2c3d  Sat, Jan  1 2050  0:00:00.600
+ 1 Jan 00:00:00 ntpd[2022]: MATT: ldiff = 00000000.00007571  Thu, Feb  7 2036  6:28:16.000
+ 1 Jan 00:00:00 ntpd[2022]: MATT: ENTERED IS GREATER
+ 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600030999 us
+ 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call within the loop => 1a24f480.999ba1ad  Sat, Jan  1 2050  0:00:00.600
+ 1 Jan 00:00:00 ntpd[2022]: MATT: ldiff = 00000000.00007570  Thu, Feb  7 2036  6:28:16.000
+ 1 Jan 00:00:00 ntpd[2022]: MATT: ENTERED IS GREATER
+ 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600037999 us
+ 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call within the loop => 1a24f480.999c171e  Sat, Jan  1 2050  0:00:00.600
+ 1 Jan 00:00:00 ntpd[2022]: MATT: ldiff = 00000000.00007571  Thu, Feb  7 2036  6:28:16.000
+ 1 Jan 00:00:00 ntpd[2022]: MATT: ENTERED IS GREATER
+ 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600044999 us
+ 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call within the loop => 1a24f480.999c8c8f  Sat, Jan  1 2050  0:00:00.600
+ 1 Jan 00:00:00 ntpd[2022]: MATT: ldiff = 00000000.00007571  Thu, Feb  7 2036  6:28:16.000
+ 1 Jan 00:00:00 ntpd[2022]: MATT: ENTERED IS GREATER
+ 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600051999 us
+ 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call within the loop => 1a24f480.999d0200  Sat, Jan  1 2050  0:00:00.600
+ 1 Jan 00:00:00 ntpd[2022]: MATT: ldiff = 00000000.00007571  Thu, Feb  7 2036  6:28:16.000
+ 1 Jan 00:00:00 ntpd[2022]: MATT: ENTERED IS GREATER
+ 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600058999 us
+ 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call within the loop => 1a24f480.999d7770  Sat, Jan  1 2050  0:00:00.600
+ 1 Jan 00:00:00 ntpd[2022]: MATT: ldiff = 00000000.00007570  Thu, Feb  7 2036  6:28:16.000
+ 1 Jan 00:00:00 ntpd[2022]: MATT: ENTERED IS GREATER
+ 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600065999 us
+ 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call within the loop => 1a24f480.999dece1  Sat, Jan  1 2050  0:00:00.600
+ 1 Jan 00:00:00 ntpd[2022]: MATT: ldiff = 00000000.00007571  Thu, Feb  7 2036  6:28:16.000
+ 1 Jan 00:00:00 ntpd[2022]: MATT: ENTERED IS GREATER
+ 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600072999 us
+ 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call within the loop => 1a24f480.999e6252  Sat, Jan  1 2050  0:00:00.600
+ 1 Jan 00:00:00 ntpd[2022]: MATT: ldiff = 00000000.00007571  Thu, Feb  7 2036  6:28:16.000
+ 1 Jan 00:00:00 ntpd[2022]: MATT: ENTERED IS GREATER
+ 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600079999 us
+ 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call within the loop => 1a24f480.999ed7c3  Sat, Jan  1 2050  0:00:00.600
+ 1 Jan 00:00:00 ntpd[2022]: MATT: ldiff = 00000000.00007571  Thu, Feb  7 2036  6:28:16.000
+ 1 Jan 00:00:00 ntpd[2022]: MATT: ENTERED IS GREATER
+ 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600086999 us
+ 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call within the loop => 1a24f480.999f4d33  Sat, Jan  1 2050  0:00:00.600
+ 1 Jan 00:00:00 ntpd[2022]: MATT: ldiff = 00000000.00007570  Thu, Feb  7 2036  6:28:16.000
+ 1 Jan 00:00:00 ntpd[2022]: MATT: ENTERED IS GREATER
+ 1 Jan 00:00:00 ntpd[2022]: proto: precision = 4.000 usec (-18)
+ 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600094999 us
+ 1 Jan 00:00:00 ntpd[2022]: getconfig: Couldn't open </home/teto/dce/ntp.conf>: No such file or directory
+create_sockets(123)
+move_fd: estimated max descriptors: 1024, initial socket boundary: 16
+ 1 Jan 00:00:00 ntpd[2022]: Listen and drop on 0 v4wildcard 0.0.0.0:123
+created interface #0: fd=5, bfd=-1, name=v4wildcard, flags=0x89, ifindex=0, sin=0.0.0.0, bcast=0.0.0.0, mask=255.255.255.255, Disabled:
+update_interfaces(123)
+create_sockets: Total interfaces = 1
+ 1 Jan 00:00:01 ntpd[2022]: Listening on routing socket on fd #6 for interface updates
+io_open_sockets: maxactivefd 6
+loop_config: item 1 freq 0.000000
+ 1 Jan 00:00:01 ntpd[2022]: start_kern_loop: ntp_loopfilter.c line 1013: unhandled return value 6407616 from ntp_adjtime in ntp_adjtime_error_handler at line 328
+ 1 Jan 00:00:01 ntpd[2022]: MATT: after get_ostime 2524608001 s 600009999 us
+event at 0 0.0.0.0 c01d 0d kern kernel time sync enabled
+ 1 Jan 00:00:01 ntpd[2022]: set_freq: ntp_loopfilter.c line 976: unhandled return value 6407616 from ntp_adjtime in ntp_adjtime_error_handler at line 328
+ 1 Jan 00:00:01 ntpd[2022]: MATT: after get_ostime 2524608001 s 600012999 us
+event at 0 0.0.0.0 c012 02 freq_set kernel 0.000 PPM
+local_clock: mu 0 state 1 poll 3 count 0
+ 1 Jan 00:00:01 ntpd[2022]: MATT: after get_ostime 2524608001 s 600014999 us
+event at 0 0.0.0.0 c011 01 freq_not_set
+ 1 Jan 00:00:01 ntpd[2022]: MATT: after get_ostime 2524608001 s 600016999 us
+event at 0 0.0.0.0 c016 06 restart
 
 
 == Comment compiler waf

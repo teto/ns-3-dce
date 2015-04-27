@@ -9,6 +9,7 @@
 #include "sys/dce-timerfd.h"
 #include "unix-timer-fd.h"
 #include "file-usage.h"
+#include <sys/timex.h>
 
 NS_LOG_COMPONENT_DEFINE ("DceTime");
 
@@ -179,5 +180,17 @@ int dce_timer_gettime (int fd, struct itimerspec *cur_value)
 int dce_adjtimex(struct timex *buf)
 {
     NS_LOG_INFO("DCE_adjtimex");
+
+//       On success, adjtimex() returns the clock state:
+//
+//           #define TIME_OK   0 /* clock synchronized */
+//           #define TIME_INS  1 /* insert leap second */
+//           #define TIME_DEL  2 /* delete leap second */
+//           #define TIME_OOP  3 /* leap second in progress */
+//           #define TIME_WAIT 4 /* leap second has occurred */
+//           #define TIME_BAD  5 /* clock not synchronized */
+
+//       On failure, adjtimex() returns -1 and sets errno.
+    return TIME_OK;
 }
 

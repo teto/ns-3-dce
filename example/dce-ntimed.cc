@@ -184,7 +184,7 @@ int main (int argc, char *argv[])
   dce.SetUid(root_uid);
   dce.AddArgument ("-c");
 //  dce.AddArgument ("/home/teto/dce/myscripts/ntp/ntp.conf");
-  dce.AddArgument ("/home/teto/dce/ntp.conf");
+  dce.AddArgument ("/tmp/ntp.conf");
   if(useDebug) {
     // -dddd to increase log level
     dce.AddArgument("-ddd");
