@@ -164,8 +164,8 @@ UtilsNodeTime(uint32_t nodeId)
 {
   NS_LOG_FUNCTION(nodeId);
 
-  Ptr<Node> node = NodeList::GetNode(nodeId);
-
+  Ptr<Node> node(NodeList::GetNode(nodeId));
+  NS_ASSERT(node);
   Time t = node->GetWallTime();
   NS_LOG_INFO("Wall time before translation=" << t);
   t = UtilsSimulationTimeToTime (t);

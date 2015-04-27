@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import shutil
 import os
 import argparse
 import subprocess
@@ -54,6 +55,7 @@ NS_LOG += ":DceManager"
 NS_LOG += ":DceExecUtils"
 NS_LOG += ":DceApplication"
 NS_LOG += ":SimuSignal"
+NS_LOG += ":SimuFd"
 NS_LOG += ":Dce"
 NS_LOG += ":ProcessUtils"
 NS_LOG += ":DceTime"
@@ -68,7 +70,7 @@ NS_LOG += ":ClockPerfect=*"
 # NS_LOG += ":DropTailQueue"
 #NS_LOG += ":MpTcpMultiSuite"
 #NS_LOG += ":MpTcpTestSuite"
-NS_LOG += ":RandomVariableStream"
+#NS_LOG += ":RandomVariableStream"
 NS_LOG += ":TcpSocketBase"
 NS_LOG += ":TcpNewReno"
 #NS_LOG += ":MpTcpSchedulerRoundRobin"
@@ -101,6 +103,11 @@ os.environ['NS_LOG'] = NS_LOG
 os.environ['DCE_ROOT'] = '/'
 os.environ['DCE_PATH'] = ''
 
+
+
+# we first need to copy the file
+os.makedirs("files-1/tmp", exist_ok=True)
+shutil.copyfile("/home/teto/dce/ntp.conf", "files-1/tmp/ntp.conf")
 
 try:
     #os.system("echo DCE_ROOT=$DCE_ROOT")
