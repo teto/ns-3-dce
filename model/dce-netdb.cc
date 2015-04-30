@@ -243,6 +243,8 @@ struct ifaddrs_storage
 static int
 netlink_request (struct netlink_handle *h, int type)
 {
+  NS_LOG_FUNCTION(type);
+
   int ret;
   struct sockaddr_nl snl;
   struct netlink_res *nlm_next;
@@ -272,6 +274,7 @@ netlink_request (struct netlink_handle *h, int type)
                     (struct sockaddr *) &snl, sizeof snl);
   if (ret < 0)
     {
+      NS_LOG_WARN("sendto failed");
       return -1;
     }
 
@@ -280,6 +283,7 @@ netlink_request (struct netlink_handle *h, int type)
   buf = (char *)dce_malloc (buf_size);
   if (!buf)
     {
+      NS_LOG_WARN("malloc failed");
       return -1;
     }
   struct iovec iov =
@@ -300,6 +304,7 @@ netlink_request (struct netlink_handle *h, int type)
       read_len = dce_recvmsg (h->fd, &msg, 0);
       if (read_len < 0)
         {
+          NS_LOG_WARN("read_len=" << read_len << " < 0");
           goto out_fail;
         }
 
@@ -310,6 +315,7 @@ netlink_request (struct netlink_handle *h, int type)
 
       if (__builtin_expect (msg.msg_flags & MSG_TRUNC, 0))
         {
+          NS_LOG_WARN("__builtin_expect");
           goto out_fail;
         }
 
@@ -329,11 +335,13 @@ netlink_request (struct netlink_handle *h, int type)
           if (nlmh->nlmsg_type == NLMSG_DONE)
             {
               /* We found the end, leave the loop.  */
+              NS_LOG_DEBUG("NLMSG_DONE");
               done = true;
               break;
             }
           if (nlmh->nlmsg_type == NLMSG_ERROR)
             {
+              NS_LOG_WARN("NLMSG_ERROR");
               struct nlmsgerr *nlerr = (struct nlmsgerr *) NLMSG_DATA (nlmh);
               if (nlmh->nlmsg_len < NLMSG_LENGTH (sizeof (struct nlmsgerr)))
                 {
@@ -435,6 +443,9 @@ __netlink_free_handle (struct netlink_handle *h)
 int
 dce_getifaddrs (struct ifaddrs **ifap)
 {
+//  NS_LOG_FUNCTION(type);
+  NS_LOG_INFO("MATT");
+
   struct netlink_handle nh =
   {
     0, 0, 0, NULL, NULL
@@ -452,6 +463,7 @@ dce_getifaddrs (struct ifaddrs **ifap)
   nh.fd = dce_socket (PF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
   if (nh.fd < 0)
     {
+      NS_LOG_WARN("Netlink handle has no fd");
       Current ()->err = EINVAL;
       return -1;
     }
@@ -460,6 +472,7 @@ dce_getifaddrs (struct ifaddrs **ifap)
   nladdr.nl_family = AF_NETLINK;
   if (dce_bind (nh.fd, (struct sockaddr *) &nladdr, sizeof (nladdr)) < 0)
     {
+      NS_LOG_WARN("Could not bind netlink handle");
       dce_close (nh.fd);
       Current ()->err = EINVAL;
       return -1;
@@ -467,15 +480,17 @@ dce_getifaddrs (struct ifaddrs **ifap)
   socklen_t addr_len = sizeof (nladdr);
   if (dce_getsockname (nh.fd, (struct sockaddr *) &nladdr, &addr_len) < 0)
     {
+      NS_LOG_WARN("Could not get sockname.");
       dce_close (nh.fd);
       Current ()->err = EINVAL;
       return -1;
     }
   nh.pid = nladdr.nl_pid;
 
-
+  // MATT: c la que ca foire
   if (netlink_request (&nh, RTM_GETLINK) < 0)
     {
+      NS_LOG_WARN("Could not RTM_GETLINK.");
       dce_close (nh.fd);
       Current ()->err = EINVAL;
       return -1;
@@ -484,6 +499,7 @@ dce_getifaddrs (struct ifaddrs **ifap)
   ++nh.seq;
   if (netlink_request (&nh, RTM_GETADDR) < 0)
     {
+      NS_LOG_WARN("Could not RTM_GETADDR.");
       dce_close (nh.fd);
       Current ()->err = EINVAL;
       return -1;

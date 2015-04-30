@@ -13,7 +13,10 @@ namespace ns3 {
 class Waiter;
 class DceManager;
 
-// This class heritate from Object for Dispose and Reference Counting features.
+/**
+This class heritate from Object for Dispose and Reference Counting features.
+Nearly all functions are pure virtual
+**/
 class UnixFd : public Object
 {
 public:

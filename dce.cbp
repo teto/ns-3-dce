@@ -57,6 +57,7 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<Unit filename="example/bash/dce-bash-simple.cc" />
+		<Unit filename="example/bash/run-bash-simple.sh" />
 		<Unit filename="example/ccnx/dce-ccn-cache.cc" />
 		<Unit filename="example/ccnx/dce-ccnd-linear-multiple.cc" />
 		<Unit filename="example/ccnx/dce-ccnd-short-stuff.cc" />
@@ -68,6 +69,9 @@
 		<Unit filename="example/ccnx/dce-wifi-ccnx.cc" />
 		<Unit filename="example/ccnx/misc-tools.cc" />
 		<Unit filename="example/ccnx/misc-tools.h" />
+		<Unit filename="example/ccnx/run-tap-ccnd.sh" />
+		<Unit filename="example/ccnx/run-tap-udp-echo.sh" />
+		<Unit filename="example/ccnx/run-tap-vlc.sh" />
 		<Unit filename="example/dccp-client.cc" />
 		<Unit filename="example/dccp-server.cc" />
 		<Unit filename="example/dce-cradle-mptcp.cc" />

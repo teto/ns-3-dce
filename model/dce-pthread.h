@@ -11,6 +11,13 @@ int dce_pthread_create (pthread_t * thread,
                         const pthread_attr_t * attr,
                         void *(*start_routine)(void*),
                         void *arg);
+
+//int dce_pthread_attr_init(pthread_attr_t *attr);
+//int dce_pthread_attr_destroy(pthread_attr_t *attr);
+//       int pthread_attr_setdetachstate(pthread_attr_t *attr, int detachstate);
+//       int pthread_attr_getdetachstate(pthread_attr_t *attr, int *detachstate);
+// pthread_attr_getstacksize
+
 void dce_pthread_exit (void *arg);
 int dce_pthread_join (pthread_t thread, void **value_ptr);
 int dce_pthread_detach (pthread_t thread);

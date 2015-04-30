@@ -5,6 +5,9 @@
 
 namespace ns3 {
 
+/**
+
+*/
 class UnixFileFdBase : public UnixFd
 {
 public:

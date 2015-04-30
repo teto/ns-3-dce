@@ -402,6 +402,14 @@ DCE    (kill)
 NATIVE (sys_siglist)
 
 // PTHREAD.H
+// These may create chaos
+NATIVE(pthread_attr_init)
+NATIVE(pthread_attr_destroy)
+NATIVE(pthread_attr_setdetachstate)
+NATIVE(pthread_attr_getdetachstate)
+NATIVE(pthread_attr_getstacksize)
+
+
 DCE (pthread_create)
 DCE (pthread_exit)
 DCE (pthread_self)

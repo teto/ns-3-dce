@@ -141,14 +141,17 @@ ssize_t
 UnixDatagramSocketFd::DoRecvmsg (struct msghdr *msg, int flags)
 {
   Thread *current = Current ();
-  NS_LOG_FUNCTION (this << current);
+  NS_LOG_FUNCTION (this << current << "flags=" << flags);
   NS_ASSERT (current != 0);
 
   if (flags & MSG_ERRQUEUE)
     {
+      NS_LOG_WARN("MSG_ERRQUEUE flagged");
+
       // MSG_ERRQUEUE is valid only for DGRAM sockets.
       if (m_errQueue.empty ())
         {
+          NS_LOG_WARN("Queue is empty");
           current->err = EAGAIN;
           return -1;
         }
@@ -156,6 +159,7 @@ UnixDatagramSocketFd::DoRecvmsg (struct msghdr *msg, int flags)
       Cmsg cmsg = Cmsg (msg);
       if (IsRecvErr ())
         {
+          NS_LOG_WARN("Dunno what's going on");
           cmsg.Add (SOL_IP, IP_RECVERR, sizeof (struct Error), (const uint8_t*)&m_errQueue.front ());
         }
       if (IsRecvTtl ())
@@ -169,11 +173,13 @@ UnixDatagramSocketFd::DoRecvmsg (struct msghdr *msg, int flags)
     }
   else
     {
+      NS_LOG_DEBUG("Not in MSG_ERRQUEUE");
       // msg->msg_controllen = 0; // why???
     }
 
   if (!WaitRecvDoSignal (flags & MSG_DONTWAIT))
     {
+      NS_LOG_WARN("WaitRecvDoSignal error");
       // current->err set by call above.
       return -1;
     }
@@ -188,6 +194,7 @@ UnixDatagramSocketFd::DoRecvmsg (struct msghdr *msg, int flags)
 
   if (packet == 0)
     {
+      NS_LOG_ERROR("Empty packet");
       current->err = ErrnoToSimuErrno ();
       return -1;
     }
@@ -195,6 +202,7 @@ UnixDatagramSocketFd::DoRecvmsg (struct msghdr *msg, int flags)
     {
       if (msg->msg_namelen < sizeof (sockaddr_ll))
         {
+          NS_LOG_WARN("Problem with msg length");
           current->err = EINVAL;
           return -1;
         }
@@ -215,6 +223,10 @@ UnixDatagramSocketFd::DoRecvmsg (struct msghdr *msg, int flags)
         {
           CopyMacAddress (pst.GetDestAddress (), buf);
         }
+      else {
+        NS_LOG_WARN("Packet tag not found. Is it important ?");
+      }
+
       found = packet->PeekPacketTag (sat);
       if (found)
         {
@@ -224,6 +236,10 @@ UnixDatagramSocketFd::DoRecvmsg (struct msghdr *msg, int flags)
               CopyMacAddress (psa.GetPhysicalAddress (), buf);
             }
         }
+      else {
+        NS_LOG_WARN("Socket tag not found");
+      }
+
       memcpy (buf + 12, &(((struct sockaddr_ll *)msg->msg_name)->sll_protocol), 2);
     }
   else
@@ -272,6 +288,9 @@ UnixDatagramSocketFd::DoRecvmsg (struct msghdr *msg, int flags)
             }
           cmsg.Finish ();
         }
+        else {
+            NS_LOG_WARN("msg_controllen < 0 , is that a problem ?");
+        }
 
       // XXX: we ignore MSG_TRUNC for the return value.
       NS_ASSERT (packet->GetSize ()  <= count);
@@ -319,7 +338,7 @@ UnixDatagramSocketFd::DoSendmsg (const struct msghdr *msg, int flags)
           packet->AddHeader (ipHeader);
         }
 
-      int result;
+      int result;   //! Not initialized ?
       if (msg->msg_name != 0 && msg->msg_namelen != 0)
         {
           Address ad;
@@ -343,14 +362,20 @@ UnixDatagramSocketFd::DoSendmsg (const struct msghdr *msg, int flags)
 
                   pad.SetProtocol (pad2.GetProtocol ());
                 }
+              else {
+
+                NS_LOG_ERROR("Matt: Seems like an unhandled case to me ?");
+              }
 
               // Set Interface index
               if (addr->sll_ifindex > 0)
                 {
+                  NS_LOG_DEBUG("Set single device");
                   pad.SetSingleDevice (addr->sll_ifindex - 1);
                 }
               else
                 {
+                  NS_LOG_DEBUG("Set all devices");
                   pad.SetAllDevices ();
                 }
 
@@ -370,20 +395,25 @@ UnixDatagramSocketFd::DoSendmsg (const struct msghdr *msg, int flags)
         }
       else
         {
+          NS_LOG_DEBUG("msg_name empty");
           TaskManager *manager = TaskManager::Current ();
           result = -1;
           manager->ExecOnMain (MakeEvent (&UnixDatagramSocketFd::MainSend,
                                           this, &result, packet));
         }
+
       if (result == -1)
         {
+          NS_LOG_WARN("An error happened");
           current->err = ErrnoToSimuErrno ();
           return -1;
         }
+      // why ?
       retval += result;
     }
   return retval;
 }
+
 int
 UnixDatagramSocketFd::Listen (int backlog)
 {
@@ -460,6 +490,7 @@ UnixDatagramSocketFd::MainSendTo (int *r, Ptr<Packet> p, uint32_t f, Address ad)
 void
 UnixDatagramSocketFd::MainSend (int *r, Ptr<Packet> p)
 {
+  NS_LOG_FUNCTION(this);
   *r = m_socket->Send (p);
 }
 } // namespace ns3

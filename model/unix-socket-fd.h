@@ -88,6 +88,7 @@ protected:
   bool WaitRecvDoSignal (bool blocking);
   Time GetRecvTimeout (void);
   Time GetSendTimeout (void);
+  //!
   bool IsRecvErr (void) const;
   bool IsRecvTtl (void) const;
   // bool IsRecvPktInfo (void) const;
