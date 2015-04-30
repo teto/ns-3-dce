@@ -200,6 +200,7 @@ void dce_herror (const char *string)
 
 // Copy from glibc source
 // eglibc-2.11.1/sysdeps/unix/sysv/linux/ifaddr.c
+// we may be able to include glibc/sysdeps/unix/sysv/linux/netlinkaccess.h
 struct netlink_res
 {
   struct netlink_res *next;
@@ -239,6 +240,11 @@ struct ifaddrs_storage
   } addr, netmask, broadaddr;
   char name[IF_NAMESIZE + 1];
 };
+
+
+/**
+ * \param type can be RTM_GETLINK
+ */
 #define PAGE_SIZE 4096
 static int
 netlink_request (struct netlink_handle *h, int type)
@@ -255,8 +261,8 @@ netlink_request (struct netlink_handle *h, int type)
 
   struct
   {
-    struct nlmsghdr nlh;
-    struct rtgenmsg g;
+    struct nlmsghdr nlh;  //!< Netlink header
+    struct rtgenmsg g;  //!<
   } req;
 
   memset (&snl, 0, sizeof snl);

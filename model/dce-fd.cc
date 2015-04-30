@@ -252,7 +252,7 @@ ssize_t dce_send (int fd, const void *buf, size_t len, int flags)
 ssize_t dce_sendto (int fd, const void *buf, size_t len, int flags,
                     const struct sockaddr *to, socklen_t tolen)
 {
-  NS_LOG_FUNCTION (Current () << fd << buf << len << flags << to << tolen);
+  NS_LOG_FUNCTION (Current () << " fd=" << fd << "buf=" << buf << len << " flags=" << flags << " to=" << to << " socklen="<< tolen);
   NS_ASSERT (Current () != 0);
   struct msghdr msg;
   struct iovec iov;
@@ -271,7 +271,7 @@ ssize_t dce_sendto (int fd, const void *buf, size_t len, int flags,
 ssize_t dce_sendmsg (int fd, const struct msghdr *msg, int flags)
 {
   Thread *current = Current ();
-  NS_LOG_FUNCTION (current << UtilsGetNodeId () << fd << msg << flags);
+  NS_LOG_FUNCTION (current << "nodeId=" << UtilsGetNodeId () << fd << msg << flags);
   NS_ASSERT (current != 0);
 
   OPENED_FD_METHOD (ssize_t, Sendmsg (msg, flags))
