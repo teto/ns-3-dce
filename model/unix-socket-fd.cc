@@ -221,6 +221,7 @@ UnixSocketFd::Read (void *buf, size_t count)
 ssize_t
 UnixSocketFd::Recvmsg (struct msghdr *msg, int flags)
 {
+  NS_LOG_FUNCTION(" flags=" << flags);
   bool nonBlocking = (m_statusFlags & O_NONBLOCK) == O_NONBLOCK;
   flags |= nonBlocking ? MSG_DONTWAIT : 0;
   return DoRecvmsg (msg, flags);

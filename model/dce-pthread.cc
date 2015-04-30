@@ -67,6 +67,10 @@ CleanupPthreadKeys (void)
   current->keyValues.clear ();
 }
 
+int dce_pthread_attr_init(pthread_attr_t *attr);
+int dce_pthread_attr_destroy(pthread_attr_t *attr);
+
+
 void dce_exit (int status)
 {
   Thread *current = Current ();

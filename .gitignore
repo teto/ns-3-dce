@@ -4,3 +4,4 @@
 .waf*
 build/
 ns3waf/__init__.pyc
+**/Makefile

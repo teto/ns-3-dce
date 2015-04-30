@@ -2,160 +2,153 @@
 CHAUSSEE DE BRUXELLES 159
 1410 WATERLOO
 
-Erreurs courantes:
-getconfig: Couldn't open </home/teto/dce/ntp.conf>: No such file or directory
 
-/home/teto/dce/build/bin/dce-ntimed: relocation error: elf-cache/0/ntpd: symbol pthread_attr_init, version GLIBC_2.2.5 not defined in file 0002thread.so.0 with link time reference
-
-
-Essaye d'ouvrir 
-/proc/net/if_inet6
-
-1 UnixSocketFd:Setsockopt(): Unsupported setsockopt requested. level: SOL_SOCKET, optname: 2
-0.600098s 1 SimuFd:dce_setsockopt(0x12ea670, 1, 5, 0, 1, 0x7f692e77a834, 4)
-1 UnixSocketFd:Setsockopt(): Unsupported setsockopt requested. level: SOL_IP, optname: 1
-0.600098s 1 SimuFd:dce_bind(0x12ea670, 1, 5, 0x7f692e5c4024, 16)
-0.600098s 1 SimuFd:dce_setsockopt(0x12ea670, 1, 5, 1, 35, 0x7f692e77a82c, 4)
-1 UnixSocketFd:Setsockopt(): Unsupported setsockopt requested. level: SOL_SOCKET, optname: 35
+== Analyse du log
+newpeer: <null>->127.127.1.0 mode 3 vers 4 poll 6 6 flags 0x9 0x1 ttl 0 key 00000000
+fait référence à soi même: on est soi mm l'hrologe de réf cf "server 127.127.1.0" dans la config
 
 
-start_kern_loop: ntp_loopfilter.c line 1013: unhandled return value 6407616 from ntp_adjtime in ntp_adjtime_error_handler at line 328
+ 1 Jan 00:00:00 ntp_intres[2022]: receive_blocking_req_internal: pipe read No such file or directory
+ est dans work_fork.c l. 236
+DPRINTF(3, ("newpeer(%s): local interface currently not bound\n",
+			stoa(srcadr)));	
+est dans ntp_peer.c l. 865
 
-1.60002s 1 RandomVariableStream:GetValue(0x25d6dc0, 0)
-1.60002s 1 DceTime:dce_gmtime(0x25d8700, 1)
-1.60002s 1 RandomVariableStream:GetValue(0x25d6dc0)
-1.60002s 1 RandomVariableStream:GetValue(0x25d6dc0, 0)
-2.6s 1 ProcessUtils:UtilsDoSignal(): [DEBUG] deliver signal=14
-2.6s 1 RandomVariableStream:GetValue(0x25d6dc0)
-2.6s 1 RandomVariableStream:GetValue(0x25d6dc0, 0)
-3.6s 1 ProcessUtils:UtilsDoSignal(): [DEBUG] deliver signal=14
-3.6s 1 RandomVariableStream:GetValue(0x25d6dc0)
-3.6s 1 RandomVariableStream:GetValue(0x25d6dc0, 0)
-4.6s 1 ProcessUtils:UtilsDoSignal(): [DEBUG] deliver signal=14
-4.6s 1 RandomVariableStream:GetValue(0x25d6dc0)
-4.6s 1 RandomVariableStream:GetValue(0x25d6dc0, 0)
-5.6s 1 ProcessUtils:UtilsDoSignal(): [DEBUG] deliver signal=14
-5.6s 1 RandomVariableStream:GetValue(0x25d6dc0)
-5.6s 1 RandomVariableStream:GetValue(0x25d6dc0, 0)
-6.6s 1 ProcessUtils:UtilsDoSignal(): [DEBUG] deliver signal=14
-6.6s 1 RandomVariableStream:GetValue(0x25d6dc0)
-6.6s 1 RandomVariableStream:GetValue(0x25d6dc0, 0)
-7.6s 1 ProcessUtils:UtilsDoSignal(): [DEBUG] deliver signal=14
-7.6s 1 RandomVariableStream:GetValue(0x25d6dc0)
-7.6s 1 RandomVariableStream:GetValue(0x25d6dc0, 0)
-8.6s 1 ProcessUtils:UtilsDoSignal(): [DEBUG] deliver signal=14
-8.6s 1 RandomVariableStream:GetValue(0x25d6dc0)
-8.6s 1 RandomVariableStream:GetValue(0x25d6dc0, 0)
-9.6s 1 ProcessUtils:UtilsDoSignal(): [DEBUG] deliver signal=14
-9.6s 1 RandomVariableStream:GetValue(0x25d6dc0)
-9.6s 1 RandomVariableStream:GetValue(0x25d6dc0, 0)
-Node:DoDispose(0x261d5d0)
-RandomVariableStream:~RandomVariableStream(0x2620050)
-RandomVariableStream:~RandomVariableStream(0x261ad10)
-RandomVariableStream:~RandomVariableStream(0x261c5f0)
-RandomVariableStream:~RandomVariableStream(0x261c710)
-RandomVariableStream:~RandomVariableStream(0x261c820)
-DceManager:DoDispose(0x25da090)
-DceTime:dce_clock_gettime(0x25d8700, 1)
-ProcessUtils:UtilsNodeTime(1)
 
-Start Time: NS3 Time:          0s (           +599999999.0ns) , REAL Time: 1430089708
-      Time: NS3 Time:          0s (           +599999999.0ns) , REAL Time: 1430089708 --> Starting: /home/teto/ntp/ntpd/ntpd
- 1 Jan 00:00:00 ntpd[2022]: Cannot set RLIMIT_MEMLOCK: Operation not permitted
- 1 Jan 00:00:01 ntpd[2022]: ./../lib/isc/unix/ifiter_getifaddrs.c:99: unexpected error:
- 1 Jan 00:00:01 ntpd[2022]: getting interface addresses: getifaddrs: Invalid argument
- 1 Jan 00:00:01 ntpd[2022]: mlockall(): No such file or directory
- 1 Jan 00:00:00 ntpd[2022]: ntpd 4.2.8p1@1.3265-o Mon Apr 20 18:24:07 UTC 2015 (10): Starting
- 1 Jan 00:00:00 ntpd[2022]: Command line: /home/teto/ntp/ntpd/ntpd -c /home/teto/dce/ntp.conf -ddd
- 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600001999 us
+Le code provoquant l'erreur suivante:
+ 1 Jan 00:00:00 ntpd[2022]: ./../lib/isc/unix/ifiter_ioctl.c:181: unexpected error:
+ 1 Jan 00:00:00 ntpd[2022]: get interface configuration: maximum buffer size exceeded
+est dans unix/ifiter_ioctl.c
+/*%
+ * Size of buffer for SIOCGLIFCONF, in bytes.  We assume no sane system
+ * will have more than a megabyte of interface configuration data.
+ */
+#define IFCONF_BUFSIZE_INITIAL	4096
+fait appel aux ioctl (en particulier) qui sont SIOCGIFCONF
+
+What does that mean ?
+"local interface currently not bound"
+
+http://www.commandlinefu.com/commands/view/5710/intersection-between-two-files
+
+0.600022s 1 DceNetdb:dce_getifaddrs(): [INFO ] MATT
+0.600022s 1 SimuFd:dce_socket(0x8f6680, 1, 16, 3, 0)
+0.600022s 1 ProcessUtils:UtilsAllocateFd(0x8f6680)
+0.600022s 1 ProcessUtils:UtilsAllocateFd(): [DEBUG] Allocated fd=5
+0.600022s 1 SimuFd:dce_bind(0x8f6680, 1, 5, 0x7f82f1d2f360, 12)
+0.600022s 1 SimuFd:dce_getsockname(0x8f6680, 1, 0x7f82f1d2f360, 0x7f82f1d2f1ec)
+0.600022s 1 DceNetdb:netlink_request(18)
+0.600022s 1 SimuFd:dce_sendto(0x8f6680, 5, 0x7f82f1d2f150, 20, 0, 0x7f82f1d2f120, 12)
+0.600022s 1 SimuFd:dce_sendmsg(0x8f6680, 1, 5, 0x7f82f1d2efe0, 0)
+0.600022s 1 UnixDatagramSocketFd:DoSendmsg(0x99c830, 0x8f6680)
+0.600022s 1 Node:GetNDevices(0x911fe0)
+0.600022s 1 Node:GetDevice(0x911fe0, 0)
+0.600022s 1 Node:GetNDevices(0x911fe0)
+0.600022s 1 Node:GetDevice(0x911fe0, 1)
+0.600022s 1 Node:GetNDevices(0x911fe0)
+0.600022s 1 Node:GetDevice(0x911fe0, 2)
+0.600022s 1 Node:GetNDevices(0x911fe0)
+0.600022s 1 SimuFd:dce_recvmsg(0x8f6680, nodeId=, 1,  fd=, 5,  msg=, 0x7f82f1d2f170,  flags=, 0)
+0.600022s 1 UnixDatagramSocketFd:DoRecvmsg(0x99c830, 0x8f6680, flags=, 0)
+0.600022s 1 UnixDatagramSocketFd:DoRecvmsg(): [WARN ] Kesako ?
+0.600022s 1 UnixDatagramSocketFd:DoRecvmsg(): [WARN ] msg_controllen < 0 , is that a problem ?
+0.600022s 1 SimuFd:dce_recvmsg(0x8f6680, nodeId=, 1,  fd=, 5,  msg=, 0x7f82f1d2f170,  flags=, 0)
+0.600022s 1 UnixDatagramSocketFd:DoRecvmsg(0x99c830, 0x8f6680, flags=, 0)
+0.600022s 1 UnixDatagramSocketFd:DoRecvmsg(): [WARN ] Kesako ?
+1.6s 1 ProcessUtils:UtilsDoSignal(): [DEBUG] deliver signal=14
+1.6s 1 SimuFd:dce_write(0x8f6680, 1, 1, 0x7f82e9b1b90d, 28)
+1.6s 1 UnixFileFd:Write(0x8916d0, 0x8f6680, 0x7f82e9b1b90d, 28)
+1.6s 1 UnixDatagramSocketFd:DoRecvmsg(): [WARN ] Empty packet
+1.6s 1 DceNetdb:netlink_request(): [WARN ] read_len=-1 < 0
+1.6s 1 DceNetdb:dce_getifaddrs(): [WARN ] Could not RTM_GETLINK.
+1.6s 1 SimuFd:dce_close(0x8f6680, 1, 5)
+1.6s 1 DceTime:dce_time(0x8f6680, 1)
+1.6s 1 ProcessUtils:UtilsNodeTime(1)
+1.6s 1 Node:GetWallTime(0x911fe0)
+1 ClockPerfect:GetTime(0x9120f0)
+
+
+do-release-upgrade pr maj ubuntu
+
+// passer les defines
+xrdb -D
+:set aliases bu "open -t http://bugs.debian.org/"
+
+i3-msg mark irssi
+
+===
+Netlink dissection is available in wireshark
+
+
+utils.h
+
+#define OPENED_FD_METHOD(rettype, args) OPENED_FD_METHOD_ERR (-1, rettype, args)
+
+1 Jan 00:00:01 ntpd[2022]: ./../lib/isc/unix/ifiter_getifaddrs.c:99: unexpected error:
+1 Jan 00:00:01 ntpd[2022]: getting interface addresses: getifaddrs: Invalid argument
+1 Jan 00:00:01 ntp_intres[2022]: receive_blocking_req_internal: pipe read No such file or directory
+
+
+
+========= STDOUT
+ 1 Jan 00:00:00 ntpd[2022]: ntpd 4.3.21@1.2483-o Mon Apr 27 16:52:03 UTC 2015 (3): Starting
+ 1 Jan 00:00:00 ntpd[2022]: Command line: /home/teto/ntp/ntpd/ntpd -c /tmp/ntp.conf -ddd
 ntp_rlimit: STACK: 50 4k pages
 ntp_rlimit: MEMLOCK: 32 MB
  1 Jan 00:00:00 ntpd[2022]: set_process_priority: Leave priority alone: priority_done is <2>
- 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600005999 us
- 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call before the loop => 1a24f480.9999fe3f  Sat, Jan  1 2050  0:00:00.600
- 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600009999 us
- 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call within the loop => 1a24f480.999a415b  Sat, Jan  1 2050  0:00:00.600
- 1 Jan 00:00:00 ntpd[2022]: MATT: ldiff = 00000000.0000431c  Thu, Feb  7 2036  6:28:16.000
- 1 Jan 00:00:00 ntpd[2022]: MATT: ENTERED IS GREATER
- 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600016999 us
- 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call within the loop => 1a24f480.999ab6cc  Sat, Jan  1 2050  0:00:00.600
- 1 Jan 00:00:00 ntpd[2022]: MATT: ldiff = 00000000.00007571  Thu, Feb  7 2036  6:28:16.000
- 1 Jan 00:00:00 ntpd[2022]: MATT: ENTERED IS GREATER
- 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600023999 us
- 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call within the loop => 1a24f480.999b2c3d  Sat, Jan  1 2050  0:00:00.600
- 1 Jan 00:00:00 ntpd[2022]: MATT: ldiff = 00000000.00007571  Thu, Feb  7 2036  6:28:16.000
- 1 Jan 00:00:00 ntpd[2022]: MATT: ENTERED IS GREATER
- 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600030999 us
- 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call within the loop => 1a24f480.999ba1ad  Sat, Jan  1 2050  0:00:00.600
- 1 Jan 00:00:00 ntpd[2022]: MATT: ldiff = 00000000.00007570  Thu, Feb  7 2036  6:28:16.000
- 1 Jan 00:00:00 ntpd[2022]: MATT: ENTERED IS GREATER
- 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600037999 us
- 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call within the loop => 1a24f480.999c171e  Sat, Jan  1 2050  0:00:00.600
- 1 Jan 00:00:00 ntpd[2022]: MATT: ldiff = 00000000.00007571  Thu, Feb  7 2036  6:28:16.000
- 1 Jan 00:00:00 ntpd[2022]: MATT: ENTERED IS GREATER
- 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600044999 us
- 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call within the loop => 1a24f480.999c8c8f  Sat, Jan  1 2050  0:00:00.600
- 1 Jan 00:00:00 ntpd[2022]: MATT: ldiff = 00000000.00007571  Thu, Feb  7 2036  6:28:16.000
- 1 Jan 00:00:00 ntpd[2022]: MATT: ENTERED IS GREATER
- 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600051999 us
- 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call within the loop => 1a24f480.999d0200  Sat, Jan  1 2050  0:00:00.600
- 1 Jan 00:00:00 ntpd[2022]: MATT: ldiff = 00000000.00007571  Thu, Feb  7 2036  6:28:16.000
- 1 Jan 00:00:00 ntpd[2022]: MATT: ENTERED IS GREATER
- 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600058999 us
- 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call within the loop => 1a24f480.999d7770  Sat, Jan  1 2050  0:00:00.600
- 1 Jan 00:00:00 ntpd[2022]: MATT: ldiff = 00000000.00007570  Thu, Feb  7 2036  6:28:16.000
- 1 Jan 00:00:00 ntpd[2022]: MATT: ENTERED IS GREATER
- 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600065999 us
- 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call within the loop => 1a24f480.999dece1  Sat, Jan  1 2050  0:00:00.600
- 1 Jan 00:00:00 ntpd[2022]: MATT: ldiff = 00000000.00007571  Thu, Feb  7 2036  6:28:16.000
- 1 Jan 00:00:00 ntpd[2022]: MATT: ENTERED IS GREATER
- 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600072999 us
- 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call within the loop => 1a24f480.999e6252  Sat, Jan  1 2050  0:00:00.600
- 1 Jan 00:00:00 ntpd[2022]: MATT: ldiff = 00000000.00007571  Thu, Feb  7 2036  6:28:16.000
- 1 Jan 00:00:00 ntpd[2022]: MATT: ENTERED IS GREATER
- 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600079999 us
- 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call within the loop => 1a24f480.999ed7c3  Sat, Jan  1 2050  0:00:00.600
- 1 Jan 00:00:00 ntpd[2022]: MATT: ldiff = 00000000.00007571  Thu, Feb  7 2036  6:28:16.000
- 1 Jan 00:00:00 ntpd[2022]: MATT: ENTERED IS GREATER
- 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600086999 us
- 1 Jan 00:00:00 ntpd[2022]: MATT: get_systime call within the loop => 1a24f480.999f4d33  Sat, Jan  1 2050  0:00:00.600
- 1 Jan 00:00:00 ntpd[2022]: MATT: ldiff = 00000000.00007570  Thu, Feb  7 2036  6:28:16.000
- 1 Jan 00:00:00 ntpd[2022]: MATT: ENTERED IS GREATER
- 1 Jan 00:00:00 ntpd[2022]: proto: precision = 4.000 usec (-18)
- 1 Jan 00:00:00 ntpd[2022]: MATT: after get_ostime 2524608000 s 600094999 us
- 1 Jan 00:00:00 ntpd[2022]: getconfig: Couldn't open </home/teto/dce/ntp.conf>: No such file or directory
+ 1 Jan 00:00:00 ntpd[2022]: proto: precision = 1.000 usec (-20)
+Finished Parsing!!
 create_sockets(123)
 move_fd: estimated max descriptors: 1024, initial socket boundary: 16
  1 Jan 00:00:00 ntpd[2022]: Listen and drop on 0 v4wildcard 0.0.0.0:123
-created interface #0: fd=5, bfd=-1, name=v4wildcard, flags=0x89, ifindex=0, sin=0.0.0.0, bcast=0.0.0.0, mask=255.255.255.255, Disabled:
+created interface #0: fd=6, bfd=-1, name=v4wildcard, flags=0x89, ifindex=0, sin=0.0.0.0, bcast=0.0.0.0, mask=255.255.255.255, Disabled:
 update_interfaces(123)
 create_sockets: Total interfaces = 1
- 1 Jan 00:00:01 ntpd[2022]: Listening on routing socket on fd #6 for interface updates
-io_open_sockets: maxactivefd 6
-loop_config: item 1 freq 0.000000
- 1 Jan 00:00:01 ntpd[2022]: start_kern_loop: ntp_loopfilter.c line 1013: unhandled return value 6407616 from ntp_adjtime in ntp_adjtime_error_handler at line 328
- 1 Jan 00:00:01 ntpd[2022]: MATT: after get_ostime 2524608001 s 600009999 us
-event at 0 0.0.0.0 c01d 0d kern kernel time sync enabled
- 1 Jan 00:00:01 ntpd[2022]: set_freq: ntp_loopfilter.c line 976: unhandled return value 6407616 from ntp_adjtime in ntp_adjtime_error_handler at line 328
- 1 Jan 00:00:01 ntpd[2022]: MATT: after get_ostime 2524608001 s 600012999 us
-event at 0 0.0.0.0 c012 02 freq_set kernel 0.000 PPM
-local_clock: mu 0 state 1 poll 3 count 0
- 1 Jan 00:00:01 ntpd[2022]: MATT: after get_ostime 2524608001 s 600014999 us
-event at 0 0.0.0.0 c011 01 freq_not_set
- 1 Jan 00:00:01 ntpd[2022]: MATT: after get_ostime 2524608001 s 600016999 us
-event at 0 0.0.0.0 c016 06 restart
+ 1 Jan 00:00:00 ntpd[2022]: Listening on routing socket on fd #7 for interface updates
+io_open_sockets: maxactivefd 7
+configuring filegen:
+	dir:	/var/NTP/ -> /var/NTP/
+	fname:	loopstats -> loopstats
+	type:	2 -> 2
+	flag: 1 -> 81
+configuring filegen:
+	dir:	/var/NTP/ -> /var/NTP/
+	fname:	peerstats -> peerstats
+	type:	2 -> 2
+	flag: 1 -> 81
+configuring filegen:
+	dir:	/var/NTP/ -> /var/NTP/
+	fname:	clockstats -> clockstats
+	type:	2 -> 2
+	flag: 1 -> 81
+getnetnum given 0.0.0.0, got 0.0.0.0
+getnetnum given 0.0.0.0, got 0.0.0.0
+restrict: op 1 addr 0.0.0.0 mask 0.0.0.0 mflags 00000000 flags 000001d0
+getnetnum given 127.0.0.1, got 127.0.0.1
+restrict: op 1 addr 127.0.0.1 mask 255.255.255.255 mflags 00000000 flags 00000000
+restrict: op 1 addr ::1 mask ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff mflags 00000000 flags 00000000
+findexistingpeer_addr(127.127.1.0:123, NULL, 3, 0x1)
+newpeer(127.127.1.0): local interface currently not bound
+key_expire: at 0 associd 16467
+peer_clear: at 0 next 1 associd 16467 refid INIT
+event at 0 LOCAL(0) 8011 81 mobilize assoc 16467
+newpeer: <null>->127.127.1.0 mode 3 vers 4 poll 6 6 flags 0x9 0x1 ttl 0 key 00000000
+========= STDERR
+ 1 Jan 00:00:00 ntpd[2022]: Cannot set RLIMIT_MEMLOCK: Operation not permitted
+ 1 Jan 00:00:00 ntpd[2022]: ./../lib/isc/unix/ifiter_ioctl.c:181: unexpected error:
+ 1 Jan 00:00:00 ntpd[2022]: get interface configuration: maximum buffer size exceeded
+ 1 Jan 00:00:00 ntp_intres[2022]: receive_blocking_req_internal: pipe read No such file or directory
+========= SYSLOG
+receive_blocking_req_internal: pipe read No such file or directory
 
+
+
+kod = kiss of death packet
 
 == Comment compiler waf
 The files present in the folder waflib/extras represent extensions (Waf tools) that are in a testing phase. They may be added to the Waf binary by using the --tools switch:
 $ python waf-light --tools=compat15,swig,doxygen
 $ ./waf-light --tools=clang_compilation_database
-
-Erreur provoquée par 
-        retval = conf.run_build(code='#include <stdio.h>\nint main() { return 0; }\n',↲                                               
-                                 env=env, compile_filename=fname,↲
-                                 features=[mode, mode+'program'], execute=False)↲
-
 
 
   --with-ns3=WITH_NS3   Specify the installed directory of ns-3-dev
@@ -173,43 +166,9 @@ PrepareDoStartProcess
 dce_exit
 UnixSocketFd:Setsockopt(): Unsupported setsockopt requested. level: SOL_SOCKET, optname: 35 avec 35 correspondant à SO_TIMESTAMPNS / SO_TIMESTAMP
 
-Erreur qui apparait dans "ntp_rlimit":
-Cannot set RLIMIT_MEMLOCK: Operation not permitted
-
-ntp_rlimit: STACK: 50 4k pages
-ntp_rlimit: MEMLOCK: 32 MB
- 1 Jan 00:00:00 ntpd[2022]: set_process_priority: Leave priority alone: priority_done is <2>
-========= STDERR
- 1 Jan 00:00:00 ntpd[2022]: Cannot set RLIMIT_MEMLOCK: Operation not permitted
- 1 Jan 00:00:00 ntpd[2022]: Fatal error: precision could not be measured (MINSTEP too large?)
-========= SYSLOG
-ntpd 4.2.8p1@1.3265-o Fri Apr 10 15:44:04 UTC 2015 (6): Starting
-Command line: /home/teto/ntp/ntpd/ntpd -c /home/teto/dce/myscripts/ntp/ntp.conf -ddd
-Cannot set RLIMIT_MEMLOCK: Operation not permitted
-set_process_priority: Leave priority alone: priority_done is <2>
-Fatal error: precision could not be measured (MINSTEP too large?)
-
-
-
 
 Comment ns3 récupère le temps ?
 =====
-
-Time
-DefaultSimulatorImpl::Now (void) const
-{
-  // Do not add function logging here, to avoid stack overflow
-  return TimeStep (m_currentTs);
-
- sachant que
- inline Time TimeStep (uint64_t ts)
-{
-  return Time (ts);
-}
-
-voir dans utils.cc
-  // *tv = UtilsTimeToTimeval (UtilsSimulationTimeToTime (Now ()));
-
 
 
 
@@ -226,19 +185,6 @@ Dans libntp/systime.c. On peut s'inspirer de la version dans ntpsim.c qui ajoute
 measure_precision
 Utiliser nm pour voir les symboles
 
-
-7.7s 0 ClockPerfect:GetTime(0xe62f80)
-7.7s 0 Node:ChecksumEnabled()
-7.7s 0 Node:ChecksumEnabled()
-7.7s 0 Node:GetId(0xe69780)
-7.7s 0 Dce:dce_gettimeofday(0xec4710, 0)
-7.7s 0 Dce:dce_gettimeofday(0xec4710, 0)
-7.7s 0 Node:GetWallTime(0xe63040)
-7.7s 0 ClockPerfect:GetTime(0xe62f80)
-7.7s 0 Dce:dce_gettimeofday(0xec4710, 0)
-7.7s 0 Dce:dce_gettimeofday(0xec4710, 0)
-7.7s 0 Node:GetWallTime(0xe63040)
-7.7s 0 ClockPerfect:GetTime(0xe62f80)
 
 
 Les erreurs que j'ai:
@@ -292,8 +238,6 @@ ns3::NodeList::GetNode 	( 	uint32_t  	n	)
 UtilsGetNodeId()
 UtilsAdvanceTime ?
 
-coudron@ssh-ens:/Infos/lmd/2014/licence/ue/1I002-2015fev/TMESolo3/Groupe22.5a$
-
 dce_gettimeofday(0x179c630, 0)
 
 6s 1 Dce:dce_getpid(0x11a4130, 1)
@@ -302,43 +246,3 @@ dce_gettimeofday(0x179c630, 0)
 
 
 =sommeprod(B9:E9;B7:E7)/somme(B7:E7)
-
-
-Here is the output of a program I launched out of DCE:
-=====
-# NTIMED Format poll-server 1.0
-# Found 1 peers
-# Peer localhost 127.0.0.1
-Now 1428401811.943782000 NTP_PeerSet Poll
-Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000259399 0x494e4954 657576684.056172967 1428401811.943827000 0.000051238 0.000109441 0.000025175]
-Now 1428401812.943824000 NTP_PeerSet
-Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000274658 0x494e4954 657576683.055757999 1428401812.944242000 0.000060077 0.000127310 0.000069296]
-Now 1428401814.944233000 NTP_PeerSet
-Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000305176 0x494e4954 657576681.054224968 1428401814.945775000 0.000038088 0.000099004 0.000022348]
-Now 1428401818.945769000 NTP_PeerSet
-Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000366211 0x494e4954 657576677.050848961 1428401818.949151000 0.000045808 0.000111201 0.000022595]
-cat files-0/var/log/26481/stdout
-# NTIMED Format poll-server 1.0
-# Found 1 peers
-# Peer 10.1.1.2 10.1.1.2
-Now 1262304000.699999000 NTP_PeerSet Poll
-Now 1262304001.699999000 NTP_PeerSet
-Now 1262304003.699999000 NTP_PeerSet
-Now 1262304007.699999000 NTP_PeerSet
-Now 1262304015.699999000 NTP_PeerSet
-
-
-
-# NTIMED Format poll-server 1.0
-# Found 1 peers
-# Peer localhost 127.0.0.1
-Now 1428401811.943782000 NTP_PeerSet Poll
-Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000259399 0x494e4954 657576684.056172967 1428401811.943827000 0.000051238 0.000109441 0.000025175]
-Now 1428401812.943824000 NTP_PeerSet
-Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000274658 0x494e4954 657576683.055757999 1428401812.944242000 0.000060077 0.000127310 0.000069296]
-Now 1428401814.944233000 NTP_PeerSet
-Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000305176 0x494e4954 657576681.054224968 1428401814.945775000 0.000038088 0.000099004 0.000022348]
-Now 1428401818.945769000 NTP_PeerSet
-Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000366211 0x494e4954 657576677.050848961 1428401818.949151000 0.000045808 0.000111201 0.000022595]
-Now 1428401826.949145000 NTP_PeerSet
-Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000488281 0x494e4954 657576669.048253059 1428401826.951747000 0.000054237 0.000120264 0.000033321]

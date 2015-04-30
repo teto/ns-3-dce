@@ -526,11 +526,12 @@ ssize_t dce_recvfrom (int fd, void *buf, size_t len, int flags,
 ssize_t dce_recvmsg (int fd, struct msghdr *msg, int flags)
 {
   Thread *current = Current ();
-  NS_LOG_FUNCTION (current << UtilsGetNodeId () << fd << msg << flags);
+  NS_LOG_FUNCTION (current << "nodeId=" << UtilsGetNodeId () << " fd=" << fd << " msg=" << msg << " flags=" << flags);
   NS_ASSERT (current != 0);
 
   OPENED_FD_METHOD (ssize_t, Recvmsg (msg, flags))
 }
+
 int dce_setsockopt (int fd, int level, int optname,
                     const void *optval, socklen_t optlen)
 {
@@ -540,15 +541,17 @@ int dce_setsockopt (int fd, int level, int optname,
 
   OPENED_FD_METHOD (int, Setsockopt (level, optname, optval, optlen))
 }
+
 int dce_getsockopt (int fd, int level, int optname,
                     void *optval, socklen_t *optlen)
 {
   Thread *current = Current ();
-  NS_LOG_FUNCTION (current << UtilsGetNodeId () << fd << level << optname << optval << optlen);
+  NS_LOG_FUNCTION (current << "nodeId=" << UtilsGetNodeId () << " fd=" << fd << " level=" << level << optname << optval << optlen);
   NS_ASSERT (current != 0);
 
   OPENED_FD_METHOD (int, Getsockopt (level, optname, optval, optlen))
 }
+
 int dce_getsockname (int fd, struct sockaddr *name, socklen_t *namelen)
 {
   Thread *current = Current ();
@@ -557,6 +560,7 @@ int dce_getsockname (int fd, struct sockaddr *name, socklen_t *namelen)
 
   OPENED_FD_METHOD (int, Getsockname (name, namelen))
 }
+
 int dce_getpeername (int fd, struct sockaddr *name, socklen_t *namelen)
 {
   Thread *current = Current ();
@@ -565,6 +569,7 @@ int dce_getpeername (int fd, struct sockaddr *name, socklen_t *namelen)
 
   OPENED_FD_METHOD (int, Getpeername (name, namelen))
 }
+
 int dce_dup (int oldfd)
 {
   Thread *current = Current ();

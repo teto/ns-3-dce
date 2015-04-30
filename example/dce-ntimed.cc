@@ -148,7 +148,7 @@ int main (int argc, char *argv[])
   dce.SetStackSize (1 << 20);
 
   // Launch ntp client on node 0
-  #if 0
+#if 0
   dce.SetBinary ("/home/teto/ntimed/ntimed-client");
 
   // TODO install a defective clock on that node
@@ -173,6 +173,7 @@ int main (int argc, char *argv[])
   apps.Start (Seconds (0.7));
   apps.Stop (Seconds (20));
 #endif
+
   // Launch ntp server on node 1
   dce.SetBinary ("/home/teto/ntp/ntpd/ntpd");
   dce.ResetArguments ();
@@ -187,7 +188,7 @@ int main (int argc, char *argv[])
   dce.AddArgument ("/tmp/ntp.conf");
   if(useDebug) {
     // -dddd to increase log level
-    dce.AddArgument("-ddd");
+    dce.AddArgument("-ddddd");
   }
 //  dce.AddArgument ("/home/teto/dce/myscripts/ntp.conf");
 

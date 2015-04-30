@@ -1,2 +1,4 @@
 prefix SimuFd logger with Dce
 we may be able to copy some functions from https://github.com/mlichvar/clknetsim
+Creer un script qui permet de trouver la compatibilité entre les 
+http://www.commandlinefu.com/commands/view/5710/intersection-between-two-files

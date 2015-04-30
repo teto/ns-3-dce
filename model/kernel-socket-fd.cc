@@ -65,10 +65,12 @@ KernelSocketFd::Read (void *buf, size_t count)
 ssize_t
 KernelSocketFd::Recvmsg (struct msghdr *msg, int flags)
 {
+  NS_LOG_FUNCTION("flags=" << flags);
   bool nonBlocking = (m_statusFlags & O_NONBLOCK) == O_NONBLOCK;
   flags |= nonBlocking ? MSG_DONTWAIT : 0;
   return m_factory->Recvmsg (m_socket, msg, flags);
 }
+
 ssize_t
 KernelSocketFd::Sendmsg (const struct msghdr *msg, int flags)
 {

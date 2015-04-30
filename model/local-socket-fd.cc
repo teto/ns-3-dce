@@ -103,7 +103,7 @@ LocalSocketFd::Setsockopt (int level, int optname, const void *optval, socklen_t
 
     case SO_PASSCRED:
       {
-        NS_LOG_DEBUG ("LocalSocketFd SO_PASSCRED NOT IMPLEMENTED");
+        NS_LOG_WARN("LocalSocketFd SO_PASSCRED NOT IMPLEMENTED");
         current->err = EINVAL;
         return -1;
       }
@@ -160,6 +160,7 @@ LocalSocketFd::Setsockopt (int level, int optname, const void *optval, socklen_t
 int
 LocalSocketFd::Ioctl (unsigned long request, char *argp)
 {
+  NS_LOG_FUNCTION(request);
   Current ()->err = EINVAL;
   return -1;
 }
@@ -209,6 +210,7 @@ LocalSocketFd::Settime (int flags, const struct itimerspec *new_value, struct it
   current->err = EINVAL;
   return -1;
 }
+
 int
 LocalSocketFd::Gettime (struct itimerspec *cur_value) const
 {

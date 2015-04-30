@@ -85,16 +85,19 @@ std::string UtilsGetCurrentDirName (void);
 
 #define MAX_FDS 1024
 
+/* there must be a 'fd' variable in the outer scope */
 #define OPENED_FD_METHOD_ERR(errCode, rettype, args) \
   std::map < int,FileUsage * > ::iterator it = current->process->openFiles.find (fd); \
   if (current->process->openFiles.end () == it) \
     { \
+      NS_LOG_WARN("Could not find fd " << fd); \
       current->err = EBADF; \
       return (rettype) errCode; \
     } \
   FileUsage *fu = it->second; \
   if (fu->IsClosed ()) \
     { \
+      NS_LOG_WARN("Fd " << fd << " closed"); \
       current->err = EBADF; \
       return (rettype) errCode; \
     } \
@@ -109,6 +112,10 @@ std::string UtilsGetCurrentDirName (void);
 \
   return retval;
 
+/**
+ * \param args should be a member of UnixFd
+ * \return -1 in case of error
+ */
 #define OPENED_FD_METHOD(rettype, args) OPENED_FD_METHOD_ERR (-1, rettype, args)
 
 } // namespace ns3

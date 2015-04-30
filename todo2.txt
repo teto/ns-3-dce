@@ -17,24 +17,6 @@ Pour voir la config actuelle de ns3, regarder dans build/c4che
 /home/teto/ns3off/install
 
 
-0.600098s 1 RandomVariableStream:GetValue(0x137ac10, 0)
-0.600099s 1 DceTime:dce_gmtime(0x136ac80, 1)
-0.600099s 1 Dce:dce_inet_ntop(0x136ac80, 1, 2, 0x7f87e1c68028, , 128)
-0.600099s 1 Dce:dce_inet_ntop(0x136ac80, 1, 2, 0x7f87e1c68060, , 128)
-0.600099s 1 Dce:dce_inet_ntop(0x136ac80, 1, 2, 0x7f87e1c68044, , 128)
-0.600099s 1 ProcessUtils:UtilsAllocateFd(0x136ac80)
-0.600099s 1 ProcessUtils:UtilsAllocateFd(): [DEBUG] Allocated fd=4
-0.600099s 1 ProcessUtils:UtilsGetRealFilePath(0x136ac80, /proc/net/if_inet6)
-0.600099s 1 ProcessUtils:UtilsGetVirtualFilePath(0x136ac80, /proc/net/if_inet6)
-0.600099s 1 ProcessUtils:UtilsAllocateFd(0x136ac80)
-0.600099s 1 ProcessUtils:UtilsAllocateFd(): [DEBUG] Allocated fd=4
-assert failed. cond="m_ipv4Routing != 0", msg="Netlink Socket requires Ipv4DceRouting to be installed on the node", file=../netlink/netlink-socket.cc, line=277
-terminate called without an active exception
-Command ['/home/teto/dce/build/bin/dce-ntimed'] terminated with signal SIGIOT. Run it under a debugger to get more information (./waf --run <program> --command-template="gdb --args %s <args>").
-Exported:
- 1 Jan 00:00:00 ntpd[11279]: getconfig: Couldn't open </home/teto/dce/myscripts/ntp/ntp.conf>: No such file or directory
-
- 1 Jan 00:00:00 ntpd[11279]: getconfig: Couldn't open </home/teto/dce/myscripts/ntp/ntp.conf>: No such file or directory
 
 === DCE ===
 ./waf configure --with-ns3=$HOME/ns3off/install
@@ -52,25 +34,6 @@ Utiliser l'option "--prefix" pour changer là où ns3 s'installe
 
 Checking for ns3-fd-net-device (None)            : not found
 Needs to enable module fd-net-device
-
-
-0.7s 0 DceExecUtils:SearchPath(): [DEBUG] Pushing path=/
-0.7s 0 DceExecUtils:SeekFile(/home/teto/ntimed/ntimed-client,  with cwd=, )
-0.7s 0 DceExecUtils:CheckFileExe(): [DEBUG] Checking exe /home/teto/ntimed/ntimed-client
-
-struct tm
-
-Breakpoint 1, dce_gmtime (timep=0x7ffff7fbc4d8) at ../model/dce-time.cc:33
-33	  NS_LOG_FUNCTION (Current () << UtilsGetNodeId ());
-(gdb) bt
-#0  dce_gmtime (timep=0x7ffff7fbc4d8) at ../model/dce-time.cc:33
-#1  0x00007ffff0f3f5c3 in localtime () at ../model/libc-ns3.h:338
-#2  0x00007fffefb83d81 in humanlogtime () at humandate.c:24
-#3  0x00007fffefb71790 in addto_syslog (level=5, 
-    msg=0x7ffff7fbc590 "ntpd 4.2.8p1@1.3265-o Mon Apr 20 14:03:05 UTC 2015 (9): Starting") at msyslog.c:189
-#4  0x00007fffefb71cad in msyslog (level=5, fmt=0x7fffefba1d03 "%s: Starting") at msyslog.c:357
-#5  0x00007fffefb1592d in ntpdmain (argc=0, argv=0x68cee0) at ntpd.c:493
-#6  0x00007fffefb1555c in main (argc=4, argv=0x68cec0) at ntpd.c:289
 
 
 === Ntimed ===
@@ -95,8 +58,18 @@ A un moment donné j'avais ce problème dans gdb: "which has no line number info
 J'ai remplacé -g par -ggdb dans les CFLAGS et cela a résolu le pb
 
 Lancer le configure comme:
-$ CFLAGS="-fPIC -U_FORTIFY_SOURCE -ggdb" LDFLAGS="-pie -rdynamic" ./configure --enable-debugging
+$ CFLAGS="-fPIC -U_FORTIFY_SOURCE -ggdb" LDFLAGS="-pie -rdynamic" ./configure --enable-debugging  --enable-getifaddrs --enable-thread-support=no
+
+If you set --enable-getifaddrs=no then you resort to ioctl (SIOCGIFCONF) which seems broken on linux
+
+In stock dce getifaddr seems to have a bug
+
 You may need to add --with-openssl-libdir=/usr/lib/x86_64-linux-gnu
+
+  --enable-getifaddrs     + Enable the use of getifaddrs() [[yes|no]].
+  --enable-slew-always    s always slew the time
+  --enable-step-slew      s step and slew the time
+  --enable-ntpdate-step   s if ntpdate should step the time
 
 Dans measure_tick_fuzz, ntp essaye de voir quelle est la précision max de l'horlge en mesurant rapidement 
 // 20e-9	== minimum clock increment (s)
@@ -230,41 +203,3 @@ dce_exit
 UnixSocketFd:Setsockopt(): Unsupported setsockopt requested. level: SOL_SOCKET, optname: 35
 35 correspond à SO_TIMESTAMPNS / SO_TIMESTAMP
 
-Here is the output of a program I launched out of DCE:
-=====
-# NTIMED Format poll-server 1.0
-# Found 1 peers
-# Peer localhost 127.0.0.1
-Now 1428401811.943782000 NTP_PeerSet Poll
-Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000259399 0x494e4954 657576684.056172967 1428401811.943827000 0.000051238 0.000109441 0.000025175]
-Now 1428401812.943824000 NTP_PeerSet
-Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000274658 0x494e4954 657576683.055757999 1428401812.944242000 0.000060077 0.000127310 0.000069296]
-Now 1428401814.944233000 NTP_PeerSet
-Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000305176 0x494e4954 657576681.054224968 1428401814.945775000 0.000038088 0.000099004 0.000022348]
-Now 1428401818.945769000 NTP_PeerSet
-Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000366211 0x494e4954 657576677.050848961 1428401818.949151000 0.000045808 0.000111201 0.000022595]
-cat files-0/var/log/26481/stdout
-# NTIMED Format poll-server 1.0
-# Found 1 peers
-# Peer 10.1.1.2 10.1.1.2
-Now 1262304000.699999000 NTP_PeerSet Poll
-Now 1262304001.699999000 NTP_PeerSet
-Now 1262304003.699999000 NTP_PeerSet
-Now 1262304007.699999000 NTP_PeerSet
-Now 1262304015.699999000 NTP_PeerSet
-
-
-
-# NTIMED Format poll-server 1.0
-# Found 1 peers
-# Peer localhost 127.0.0.1
-Now 1428401811.943782000 NTP_PeerSet Poll
-Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000259399 0x494e4954 657576684.056172967 1428401811.943827000 0.000051238 0.000109441 0.000025175]
-Now 1428401812.943824000 NTP_PeerSet
-Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000274658 0x494e4954 657576683.055757999 1428401812.944242000 0.000060077 0.000127310 0.000069296]
-Now 1428401814.944233000 NTP_PeerSet
-Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000305176 0x494e4954 657576681.054224968 1428401814.945775000 0.000038088 0.000099004 0.000022348]
-Now 1428401818.945769000 NTP_PeerSet
-Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000366211 0x494e4954 657576677.050848961 1428401818.949151000 0.000045808 0.000111201 0.000022595]
-Now 1428401826.949145000 NTP_PeerSet
-Poll localhost 127.0.0.1 [3 4 4   0   4  -21 0.000000000 0.000488281 0x494e4954 657576669.048253059 1428401826.951747000 0.000054237 0.000120264 0.000033321]

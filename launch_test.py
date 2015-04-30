@@ -7,41 +7,6 @@ import subprocess
 available_suites = [
     "dce-ntimed",
 ]
-
-# type=argparse.FileType('w'),
-parser = argparse.ArgumentParser(description="Helper to debug mptcp")
-
-parser.add_argument("suite", choices=available_suites, help="Launch gdb")
-parser.add_argument("--debug", '-d', action="store_true", help="Launch gdb")
-parser.add_argument("--out", "-o", default="", nargs='?', help="redirect ns3 results output to a file")
-parser.add_argument("--verbose", "-v", action="store_const", default="", const="--verbose", help="to enable more output")
-parser.add_argument("--graph", "-g", action="store_true", help="Convert pcap to sqlite db and then plot")
-
-args = parser.parse_args()
-
-timeout = None
-
-if args.debug:
-    autorun = " -ex 'run  {verbose} {tofile}'"
-    cmd = "./waf --run {{suite}} --command-template=\"gdb {autorun} --args %s \" ".format(
-            autorun="",
-        )
-else:
-    timeout = 200
-    cmd = "./waf --run \"{suite}  {verbose} \" {tofile}"
-
-
-tofile = " > %s 2>&1" % args.out if args.out else ""
-# tofile = " > xp.txt 2>&1"
-
-cmd = cmd.format(
-    suite=args.suite,
-    verbose=args.verbose,
-    # out=
-    tofile=tofile,
-    fullness="QUICK",
-)
-
 # WITH_GDB=0
 NS_LOG = ""
 # NS_LOG += "***"
@@ -58,7 +23,11 @@ NS_LOG += ":SimuSignal"
 NS_LOG += ":SimuFd"
 NS_LOG += ":Dce"
 NS_LOG += ":ProcessUtils"
+NS_LOG += ":DceNetdb"
 NS_LOG += ":DceTime"
+NS_LOG += ":UnixFileFd"
+NS_LOG += ":KernelSocketFd"
+NS_LOG += ":UnixDatagramSocketFd"
 
 # to see the GetWallTime()
 NS_LOG += ":Node"
@@ -97,6 +66,41 @@ NS_LOG += ":TcpRxBuffer"
 # OUTPUT_FILENAME="xp.txt"
 # NS_LOG=":MpTcpTestSuite=*|prefix_func:Socket=*"
 # """
+
+# type=argparse.FileType('w'),
+parser = argparse.ArgumentParser(description="Helper to debug mptcp")
+
+parser.add_argument("suite", choices=available_suites, help="Launch gdb")
+parser.add_argument("--debug", '-d', action="store_true", help="Launch gdb")
+parser.add_argument("--out", "-o", default="", nargs='?', help="redirect ns3 results output to a file")
+parser.add_argument("--verbose", "-v", action="store_const", default="", const="--verbose", help="to enable more output")
+parser.add_argument("--graph", "-g", action="store_true", help="Convert pcap to sqlite db and then plot")
+
+args = parser.parse_args()
+
+timeout = None
+
+if args.debug:
+    autorun = " -ex 'run  {verbose} {tofile}'"
+    cmd = "./waf --run {{suite}} --command-template=\"gdb {autorun} --args %s \" ".format(
+            autorun="",
+        )
+else:
+    timeout = 200
+    cmd = "./waf --run \"{suite}  {verbose} \" {tofile}"
+
+
+tofile = " > %s 2>&1" % args.out if args.out else ""
+# tofile = " > xp.txt 2>&1"
+
+cmd = cmd.format(
+    suite=args.suite,
+    verbose=args.verbose,
+    # out=
+    tofile=tofile,
+    fullness="QUICK",
+)
+
 
 os.environ['NS_LOG'] = NS_LOG
 #os.environ['DCE_ROOT'] = '/'
@@ -139,4 +143,4 @@ if args.graph:
     print_result("~/dce/files-0/var/log/*")
 
     print("\n\n=== Outputs of node 1 (server) ===")
-    print_result("~/dce/files-1/var/log/*")
+    print_result("~/dce/files-1/var/log/2022")
