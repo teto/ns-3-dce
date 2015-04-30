@@ -59,6 +59,7 @@ public:
   virtual int SendTo (Ptr<Packet> p, uint32_t flags, const Address &address);
   virtual uint32_t GetRxAvailable (void) const;
   virtual Ptr<Packet> Recv (uint32_t maxSize, uint32_t flags);
+  // From parent:  Read a single packet from the socket and retrieve the sender address.
   virtual Ptr<Packet> RecvFrom (uint32_t maxSize, uint32_t flags,
                                 Address &fromAddress);
   virtual int GetSockName (Address &address) const;
