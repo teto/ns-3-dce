@@ -141,7 +141,7 @@ ssize_t
 UnixDatagramSocketFd::DoRecvmsg (struct msghdr *msg, int flags)
 {
   Thread *current = Current ();
-  NS_LOG_FUNCTION (this << current << "flags=" << flags);
+  NS_LOG_FUNCTION ("this=" << this << "current=" << current << "flags=" << flags);
   NS_ASSERT (current != 0);
 
   if (flags & MSG_ERRQUEUE)
@@ -313,17 +313,21 @@ UnixDatagramSocketFd::DoSendmsg (const struct msghdr *msg, int flags)
 
   ssize_t retval = 0;
   Ipv4Header ipHeader;
+
+  NS_LOG_DEBUG("msg->msg_iovlen=" << msg->msg_iovlen << "(nb of *elements*)");
   for (uint32_t i = 0; i < msg->msg_iovlen; ++i)
     {
       uint8_t *buf = (uint8_t *)msg->msg_iov[i].iov_base;
       uint32_t len = msg->msg_iov[i].iov_len;
 
+      NS_LOG_DEBUG("Element #" << i << " in iov, of length [" << len << "]");
       if (isIpHeaderIncluded && i == 0)
         {
           struct ip *iph = (struct ip *)buf;
           NS_ASSERT_MSG (m_socket->GetInstanceTypeId () == TypeId::LookupByName ("ns3::Ipv4RawSocketImpl"),
                          "IsIpHdrIncl==TRUE make sense only for Ipv4RawSocketImpl sockets");
 
+          NS_LOG_DEBUG("IP header included");
           ipHeader.SetSource (Ipv4Address (htonl (iph->ip_src.s_addr)));
           ipHeader.SetDestination (Ipv4Address (htonl (iph->ip_dst.s_addr)));
           ipHeader.SetProtocol (iph->ip_p);
@@ -342,7 +346,7 @@ UnixDatagramSocketFd::DoSendmsg (const struct msghdr *msg, int flags)
       if (msg->msg_name != 0 && msg->msg_namelen != 0)
         {
           Address ad;
-
+          NS_LOG_DEBUG("msg->msg_namelen != 0");
           if (DynamicCast<PacketSocket> (m_socket))
             {
               Ptr<PacketSocket> s = DynamicCast<PacketSocket> (m_socket);
@@ -390,6 +394,7 @@ UnixDatagramSocketFd::DoSendmsg (const struct msghdr *msg, int flags)
           TaskManager *manager = TaskManager::Current ();
 
           result = -1;
+          NS_LOG_DEBUG("Sending the packet");
           manager->ExecOnMain (MakeEvent (&UnixDatagramSocketFd::MainSendTo,
                                           this, &result, packet, flags, ad));
         }
@@ -460,6 +465,7 @@ UnixDatagramSocketFd::CopyMacAddress (const Address &a,  uint8_t* const buf)
 int
 UnixDatagramSocketFd::Poll (PollTable* ptable)
 {
+  NS_LOG_FUNCTION("Polling");
   int ret = 0;
 
   if (CanRecv ())
@@ -485,6 +491,7 @@ UnixDatagramSocketFd::Poll (PollTable* ptable)
 void
 UnixDatagramSocketFd::MainSendTo (int *r, Ptr<Packet> p, uint32_t f, Address ad)
 {
+  NS_LOG_FUNCTION("Sending to " << ad);
   *r = m_socket->SendTo (p, f, ad);
 }
 void
