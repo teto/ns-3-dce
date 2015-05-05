@@ -17,6 +17,9 @@
 #include "sys/dce-socket.h"
 #include "dce-unistd.h"
 #include "dce-signal.h"
+#include "ns3/node.h"
+#include "socket-fd-factory.h"
+
 
 NS_LOG_COMPONENT_DEFINE ("DceNetdb");
 
@@ -250,7 +253,8 @@ static int
 netlink_request (struct netlink_handle *h, int type)
 {
   NS_LOG_FUNCTION(type);
-
+  // TODO we should be able to convert type to some known value
+  // 18 = GETLINK
   int ret;
   struct sockaddr_nl snl;
   struct netlink_res *nlm_next;
@@ -442,6 +446,15 @@ __netlink_free_handle (struct netlink_handle *h)
   Current ()->err = saved_errno;
 }
 
+/**
+**/
+static int
+dce_getifaddrs_ns3(struct ifaddrs **ifap)
+{
+  NS_LOG_FUNCTION("NS3 stack getifaddr");
+  NS_FATAL_ERROR("Not implemented yet");
+}
+
 /*
  * Try to emulate netlink socket query to work both ns3 stack and
  * linux stack.
@@ -450,7 +463,20 @@ int
 dce_getifaddrs (struct ifaddrs **ifap)
 {
 //  NS_LOG_FUNCTION(type);
-  NS_LOG_INFO("MATT");
+  NS_LOG_INFO("MATT dce_getifaddr");
+/*
+MATT
+Depending on the socket factory type Id I can distinguish if I run a real or ns3 stack.
+TODO I could check the type of
+*/
+
+// this is useless since the factory is not exported
+//  Ptr<Node> node = UtilsGetNode();
+////  node->GetObject("ns3::Ns3SocketFdFactory");
+//  //"ns3::Ns3SocketFdFactory"
+//  if(node->GetObject<ns3::Ns3SocketFdFactory>()){
+//    return dce_getifaddrs_ns3(ifap);
+//  }
 
   struct netlink_handle nh =
   {

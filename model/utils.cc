@@ -19,6 +19,7 @@
 #include "ns3/global-value.h"
 #include "ns3/uinteger.h"
 #include "ns3/node-list.h"
+#include "ns3/node.h"
 
 NS_LOG_COMPONENT_DEFINE ("ProcessUtils");
 
@@ -159,13 +160,27 @@ struct timespec UtilsTimeToTimespec (Time time)
   return tv;
 }
 
+Ptr<Node>
+UtilsGetNode()
+{
+  return UtilsGetNode(UtilsGetNodeId());
+}
+
+Ptr<Node>
+UtilsGetNode(uint32_t nodeId)
+{
+  NS_LOG_FUNCTION(nodeId);
+  Ptr<Node> node(NodeList::GetNode(nodeId));
+  NS_ASSERT(node);
+  return node;
+}
+
 Time
 UtilsNodeTime(uint32_t nodeId)
 {
   NS_LOG_FUNCTION(nodeId);
 
-  Ptr<Node> node(NodeList::GetNode(nodeId));
-  NS_ASSERT(node);
+  Ptr<Node> node(UtilsGetNode(nodeId));
   Time t = node->GetWallTime();
   NS_LOG_INFO("Wall time before translation=" << t);
   t = UtilsSimulationTimeToTime (t);

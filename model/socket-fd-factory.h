@@ -14,6 +14,10 @@ class SocketFdFactory : public Object
 public:
   static TypeId GetTypeId (void);
   virtual ~SocketFdFactory ();
+
+  /**
+   *
+   */
   virtual UnixFd * CreateSocket (int domain, int type, int protocol) = 0;
   virtual void UnlinkNotify (std::string path);
 };

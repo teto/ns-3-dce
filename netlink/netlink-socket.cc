@@ -168,7 +168,7 @@ NetlinkSocket::ErrnoToSimuErrno (void)
 void
 NetlinkSocket::SetNode (Ptr<Node> node)
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   m_node = node;
 
   NS_LOG_DEBUG ("SetNode: " << node->GetId ());

@@ -2,7 +2,24 @@
 CHAUSSEE DE BRUXELLES 159
 1410 WATERLOO
 
-improve
+Pour dce_getifaddr on pourrait se passer de Netlink si l'on detecte qu'il s'agit d'une stack ns3 ?
+repo ntp
+DCE agrège au Node une SocketFdFactory qui va dépendre du type de stack à priori. On peut récupérer leur type pour
+justement les comparer: Ns3SocketFdFactory pour ns3
+
+Le NotifyNewAggregate. est appelé quand un object vient d'être agrégé. 
+Cela pourrait être utilisé lorsque l'on agrège une horloge (pour MAJ l'offset)
+
+
+ Ns3SocketFdFactory:CreateSocket(): [INFO ] Requesting for PF_NETLINK
+
+Check that the netlink messages are well received
+RTM_GETLINK
+
+./waf --run "test-runner" if you want to launch tests
+
+
+improv
 https://www.nsnam.org/developers/roadmap/
 
 == Analyse du log

@@ -26,6 +26,7 @@ namespace ns3 {
 
 class Thread;
 class Process;
+class Node;
 
 // Little hack in order to have a context usable when disposing the Task Manager and the hidden goal is to flush the open FILEs.
 extern Thread *gDisposingThreadContext;
@@ -41,6 +42,10 @@ uint32_t UtilsGetNodeId (void);
  * Get time of the node. To use with UtilsGetNodeId()
  */
 Time UtilsNodeTime(uint32_t nodeId);
+//! rename to current Node ?
+Ptr<Node> UtilsGetNode(uint32_t nodeId);
+// Resorts to UtilsGetNodeId
+Ptr<Node> UtilsGetNode();
 
 Thread * Current (void);
 bool HasPendingSignal (void);

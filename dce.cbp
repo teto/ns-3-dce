@@ -337,6 +337,18 @@
 		<Unit filename="model/wait-queue.h" />
 		<Unit filename="model/waiter.cc" />
 		<Unit filename="model/waiter.h" />
+		<Unit filename="netlink/netlink-attribute.cc" />
+		<Unit filename="netlink/netlink-attribute.h" />
+		<Unit filename="netlink/netlink-message-route.cc" />
+		<Unit filename="netlink/netlink-message-route.h" />
+		<Unit filename="netlink/netlink-message.cc" />
+		<Unit filename="netlink/netlink-message.h" />
+		<Unit filename="netlink/netlink-socket-address.cc" />
+		<Unit filename="netlink/netlink-socket-address.h" />
+		<Unit filename="netlink/netlink-socket-factory.cc" />
+		<Unit filename="netlink/netlink-socket-factory.h" />
+		<Unit filename="netlink/netlink-socket.cc" />
+		<Unit filename="netlink/netlink-socket.h" />
 		<Unit filename="wscript" />
 		<Extensions>
 			<code_completion />
