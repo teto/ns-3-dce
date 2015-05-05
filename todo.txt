@@ -22,10 +22,36 @@ RTM_GETLINK
 improv
 https://www.nsnam.org/developers/roadmap/
 
+$ i3-msg mark irssi
+$ i3-msg '[con_mark="irssi"] focus'
+$ i3-msg unmark irssi
+
+
+But when the Alt key is used in a key combination (that is by actually pressing Alt+x), its release will not be registered by i3 and the mode "foo" will remain active until pressing and releasing key 108 again (or by pressing Escape).
+
+
+# Simulate ctrl+v upon pressing $mod+x
+bindsym --release $mod+x exec --no-startup-id xdotool key --clearmodifiers ctrl+v
+
+# Take a screenshot upon pressing $mod+x (select an area)
+bindsym --release $mod+x exec --no-startup-id import /tmp/latest-screenshot.png
+
+
+md5 mathematica 1523e5ed52161e8bb3f55bd688e11f35
+
+ $ doc/doxygen.warnings.report.sh -m mesh/helper
 == Analyse du log
 newpeer: <null>->127.127.1.0 mode 3 vers 4 poll 6 6 flags 0x9 0x1 ttl 0 key 00000000
 fait référence à soi même: on est soi mm l'hrologe de réf cf "server 127.127.1.0" dans la config
-
+ * \verbatim
+ *                          1                   2                   3
+ *      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+ *     +---------------+---------------+-------+-----------------------+
+ *     |     Kind      |    Length     |Subtype|                       |
+ *     +---------------+---------------+-------+                       |
+ *     |                     Subtype-specific data                     |
+ *     |                       (variable length)                       |
+ *     +---------------------------------------------------------------+
 
  1 Jan 00:00:00 ntp_intres[2022]: receive_blocking_req_internal: pipe read No such file or directory
  est dans work_fork.c l. 236
@@ -89,6 +115,7 @@ http://www.commandlinefu.com/commands/view/5710/intersection-between-two-files
 1.6s 1 Node:GetWallTime(0x911fe0)
 1 ClockPerfect:GetTime(0x9120f0)
 
+\defgroup
 
 do-release-upgrade pr maj ubuntu
 
