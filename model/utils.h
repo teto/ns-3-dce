@@ -57,6 +57,9 @@ Time UtilsTimeToSimulationTime (Time time);
 */
 Time UtilsSimulationTimeToTime (Time time);
 
+// For now return true if ns3
+bool UtilsHasNs3Stack(Ptr<Node> node);
+
 /**
 * \brief Converts ns3 Time to linux timeval structure
 * \see UtilsTimevalToTime

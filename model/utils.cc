@@ -20,6 +20,7 @@
 #include "ns3/uinteger.h"
 #include "ns3/node-list.h"
 #include "ns3/node.h"
+#include "socket-fd-factory.h"
 
 NS_LOG_COMPONENT_DEFINE ("ProcessUtils");
 
@@ -173,6 +174,25 @@ UtilsGetNode(uint32_t nodeId)
   Ptr<Node> node(NodeList::GetNode(nodeId));
   NS_ASSERT(node);
   return node;
+}
+
+bool UtilsHasNs3Stack(Ptr<Node> node)
+{
+  NS_LOG_FUNCTION(node);
+
+//  Ptr<Node> node = UtilsGetNode();
+  // Replace with Ns3SocketFdFactory::GetTypeId()
+  TypeId t = TypeId::LookupByName ("ns3::Ns3SocketFdFactory");
+
+  Ptr<SocketFdFactory> facto = node->GetObject<SocketFdFactory>( t );
+  //"ns3::Ns3SocketFdFactory"
+  if(facto){
+//    return dce_getifaddrs_ns3(ifap);
+//    NS_FATAL_ERROR("IT WORKD !");
+    NS_LOG_INFO(node << " uses an ns3 stack");
+    return true;
+  }
+  return false;
 }
 
 Time
