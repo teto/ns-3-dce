@@ -10,7 +10,7 @@ justement les comparer: Ns3SocketFdFactory pour ns3
 Le NotifyNewAggregate. est appelé quand un object vient d'être agrégé. 
 Cela pourrait être utilisé lorsque l'on agrège une horloge (pour MAJ l'offset)
 
-
+TypeId::LookupByName 
  Ns3SocketFdFactory:CreateSocket(): [INFO ] Requesting for PF_NETLINK
 
 Check that the netlink messages are well received
@@ -40,6 +40,16 @@ bindsym --release $mod+x exec --no-startup-id import /tmp/latest-screenshot.png
 md5 mathematica 1523e5ed52161e8bb3f55bd688e11f35
 
  $ doc/doxygen.warnings.report.sh -m mesh/helper
+
+
+
+proto: precision = 3.000 usec (-18)
+Listen and drop on 0 v4wildcard 0.0.0.0:123
+./../lib/isc/unix/ifiter_getifaddrs.c:155: INSIST(ifa->ifa_name != ((void *)0)) failed
+exiting (due to assertion failure)
+
+
+
 == Analyse du log
 newpeer: <null>->127.127.1.0 mode 3 vers 4 poll 6 6 flags 0x9 0x1 ttl 0 key 00000000
 fait référence à soi même: on est soi mm l'hrologe de réf cf "server 127.127.1.0" dans la config

@@ -18,7 +18,9 @@
 #include "dce-unistd.h"
 #include "dce-signal.h"
 #include "ns3/node.h"
-#include "socket-fd-factory.h"
+#include "ns3/ipv4.h"
+#include "ns3/ipv4-interface-address.h"
+//#include "socket-fd-factory.h"
 
 
 NS_LOG_COMPONENT_DEFINE ("DceNetdb");
@@ -446,13 +448,81 @@ __netlink_free_handle (struct netlink_handle *h)
   Current ()->err = saved_errno;
 }
 
+#if 0
+           struct ifaddrs {
+               struct ifaddrs  *ifa_next;    /* Next item in list */
+               char            *ifa_name;    /* Name of interface */
+               unsigned int     ifa_flags;   /* Flags from SIOCGIFFLAGS */
+               struct sockaddr *ifa_addr;    /* Address of interface */
+               struct sockaddr *ifa_netmask; /* Netmask of interface */
+               union {
+                   struct sockaddr *ifu_broadaddr;
+                                    /* Broadcast address of interface */
+                   struct sockaddr *ifu_dstaddr;
+                                    /* Point-to-point destination address */
+               } ifa_ifu;
+           #define              ifa_broadaddr ifa_ifu.ifu_broadaddr
+           #define              ifa_dstaddr   ifa_ifu.ifu_dstaddr
+               void            *ifa_data;    /* Address-specific data */
+           };
+
+#endif
+
+
+//struct in_addr {
+//    unsigned long s_addr;          // load with inet_pton()
+//};
+// TODO convert from ns3 type to sockaddr
+static
+struct sockaddr_in*
+AllocAddr(Ipv4InterfaceAddress addr) {
+
+  struct sockaddr_in *saddr = (struct sockaddr_in*)dce_malloc (sizeof(struct sockaddr_in));
+  NS_ASSERT(saddr);
+  saddr ->sin_family = AF_INET; // append 6 for ipv6
+
+//  struct in_addr *saddr = (struct in_addr*)dce_malloc (sizeof(struct in_addr));
+  struct in_addr ip;
+  ip.s_addr = addr.GetLocal().Get(); //!< cehck endianness
+  saddr->sin_addr = ip;
+  return saddr;
+}
+
+
 /**
+ Let's fill with every address
+ For now we only return 1 address (to check)
 **/
 static int
-dce_getifaddrs_ns3(struct ifaddrs **ifap)
+dce_getifaddrs_ns3(Ptr<Node> node, struct ifaddrs **ifap)
 {
   NS_LOG_FUNCTION("NS3 stack getifaddr");
-  NS_FATAL_ERROR("Not implemented yet");
+  Ptr<Ipv4> ipv4 = node->GetObject<Ipv4>();
+
+  // TODO build the linked list
+  struct ifaddrs *backup = ;
+
+//  NS_FATAL_ERROR("Not implemented yet");
+  // TODO fill ifaddr with data
+  for ( int i = 0; i < ipv4->GetNInterfaces (); ++i) {
+//    Ptr<NetDevice> device = node->GetDevice(i);
+    for (int addrIndex=0; addrIndex < ipv4->GetNAddresses (i); ++addrIndex) {
+
+      //! why does it return Ipv4InterfaceAddress only ?
+      Ipv4InterfaceAddress address =	ipv4->GetAddress( i, addrIndex);
+
+//      address.GetLocal ()
+      struct ifaddrs *if_addr = (struct ifaddrs*)dce_malloc (sizeof(struct ifaddrs));
+      *ifap = if_addr;
+      if_addr->ifa_name = "eth0"; // for now
+      if_addr->ifa_next = 0; // for now we only give one ip
+      if_addr->ifa_addr = (struct sockaddr*)AllocAddr( address );
+      if_addr->ifa_flags = 0; //! What should go there ?
+//      return 0;
+    }
+  }
+
+  return 0;
 }
 
 /*
@@ -470,13 +540,22 @@ Depending on the socket factory type Id I can distinguish if I run a real or ns3
 TODO I could check the type of
 */
 
+// TODO enum UtilsGetStackType()
 // this is useless since the factory is not exported
 //  Ptr<Node> node = UtilsGetNode();
-////  node->GetObject("ns3::Ns3SocketFdFactory");
-//  //"ns3::Ns3SocketFdFactory"
-//  if(node->GetObject<ns3::Ns3SocketFdFactory>()){
-//    return dce_getifaddrs_ns3(ifap);
+//  // Replace with Ns3SocketFdFactory::GetTypeId()
+//  TypeId t = TypeId::LookupByName ("ns3::Ns3SocketFdFactory");
+//
+//  Ptr<SocketFdFactory> facto = node->GetObject<SocketFdFactory>( t );
+////  //"ns3::Ns3SocketFdFactory"
+//  if(facto){
+////    return dce_getifaddrs_ns3(ifap);
+//    NS_FATAL_ERROR("IT WORKD !");
 //  }
+  Ptr<Node> node = UtilsGetNode();
+  if(UtilsHasNs3Stack(node)) {
+    return dce_getifaddrs_ns3(node, ifap);
+  }
 
   struct netlink_handle nh =
   {

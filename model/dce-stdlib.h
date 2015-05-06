@@ -14,6 +14,7 @@ long unsigned int dce_strtoul (const char *nptr, char **endptr, int base);
 long long unsigned int dce_strtoull (const char *nptr, char **endptr, int base);
 double dce_strtod (const char *nptr, char **endptr);
 void * dce_calloc (size_t nmemb, size_t size);
+// Maybe it should assert when correct fails ?
 void * dce_malloc (size_t size);
 void dce_free (void *ptr);
 void * dce_realloc (void *ptr, size_t size);
