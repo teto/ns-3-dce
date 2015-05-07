@@ -2,6 +2,70 @@
 CHAUSSEE DE BRUXELLES 159
 1410 WATERLOO
 
+
+0.600072s 1 DceNetdb:dce_getifaddrs(): [INFO ] MATT dce_getifaddr
+0.600072s 1 SimuFd:dce_socket(0xb94bf0, 1, 16, 3, 0)
+0.600072s 1 Ns3SocketFdFactory:CreateSocket(): [INFO ] Requesting for PF_NETLINK
+0.600072s 1 DceNetlinkSocketFactory:CreateSocket()
+0.600072s 1 DceNetlinkSocket:NetlinkSocket()
+0.600072s 1 DceNetlinkSocket:SetNode(0xc442d0)
+0.600072s 1 DceNetlinkSocket:SetNode(): [DEBUG] SetNode: 1
+0.600072s 1 ProcessUtils:UtilsAllocateFd(0xb94bf0)
+0.600072s 1 ProcessUtils:UtilsAllocateFd(): [DEBUG] Allocated fd=5
+0.600072s 1 SimuFd:dce_bind(0xb94bf0, 1, 5, 0x7fee5d33b360, 12)
+0.600072s 1 DceNetlinkSocket:Bind(0xc442d0, 04-08-00:00:00:00:00:00:00:00)
+0.600072s 1 DceNetlinkSocket:DoBind(0xc442d0, pid: 0, group: 0)
+0.600072s 1 SimuFd:dce_getsockname(0xb94bf0, 1, 0x7fee5d33b360, 0x7fee5d33b1ec)
+0.600072s 1 DceNetlinkSocket:GetSockName()
+0.600072s 1 DceNetlinkSocket:GetPid()
+0.600072s 1 DceNetlinkSocket:GetGroups()
+0.600072s 1 DceNetdb:netlink_request(18)
+0.600072s 1 SimuFd:dce_sendto(0xb94bf0,  fd=, 5, buf=, 0x7fee5d33b150, 20,  flags=, 0,  to=, 0x7fee5d33b120,  socklen=, 12)
+0.600072s 1 SimuFd:dce_sendmsg(0xb94bf0, nodeId=, 1, 5, 0x7fee5d33afe0, 0)
+0.600072s 1 UnixDatagramSocketFd:DoSendmsg(0xc446f0, 0xb94bf0)
+0.600072s 1 UnixDatagramSocketFd:DoSendmsg(): [DEBUG] msg->msg_iovlen=1(nb of *elements*)
+0.600072s 1 UnixDatagramSocketFd:DoSendmsg(): [DEBUG] Element #0 in iov, of length [20]
+0.600072s 1 UnixDatagramSocketFd:DoSendmsg(): [DEBUG] msg->msg_namelen != 0
+0.600072s 1 UnixDatagramSocketFd:DoSendmsg(): [DEBUG] Sending the packet
+0.600072s 1 UnixDatagramSocketFd:MainSendTo(Sending to , 04-08-00:00:00:00:00:00:00:00)
+0.600072s 1 DceNetlinkSocket:SendTo(0xc442d0, 0xc1b3e0, 0, 04-08-00:00:00:00:00:00:00:00)
+0.600072s 1 DceNetlinkSocket:SendTo(): [INFO ] send netlink message to pid = pid: 0, group: 0
+0.600072s 1 DceNetlinkSocket:SendTo(): [DEBUG] At 0.600072s sending netlink message from node 1
+0.600072s 1 DceNetlinkSocket:HandleMessage(0xc442d0)
+0.600072s 1 DceNetlinkSocket:HandleNetlinkRouteMessage(0xc442d0)
+0.600072s 1 DceNetlinkSocket:DumpNetlinkRouteMessage(0xc442d0, 18, 0)
+0.600072s 1 DceNetlinkSocket:DumpNetlinkRouteMessage(): [INFO ] SETLINKfamily 
+0.600072s 1 DceNetlinkSocket:BuildInterfaceInfoDumpMessages(0xc442d0, MATT)
+0.600072s 1 DceNetlinkSocket:BuildInterfaceInfoDumpMessage(0xc442d0, interface_num=, 0)
+0.600072s 1 DceNetlinkSocket:BuildInterfaceInfoDumpMessage(0xc442d0, interface_num=, 1)
+0.600072s 1 DceNetlinkSocket:BuildInterfaceInfoDumpMessage(0xc442d0, interface_num=, 2)
+0.600072s 1 DceNetlinkSocket:SendMessageUnicast(0xc442d0, 1)
+0.600072s 1 DceNetlinkSocket:ForwardUp(0xc442d0, 0xb94d60, pid: 0, group: 0)
+0.600072s 1 SimuFd:dce_recvmsg(0xb94bf0, nodeId=, 1,  fd=, 5,  msg=, 0x7fee5d33b170,  flags=, 0)
+0.600072s 1 UnixDatagramSocketFd:DoRecvmsg(this=, 0xc446f0, current=, 0xb94bf0, flags=, 0)
+0.600072s 1 UnixDatagramSocketFd:DoRecvmsg(): [DEBUG] Not in MSG_ERRQUEUE
+0.600072s 1 DceNetlinkSocket:GetRxAvailable()
+0.600072s 1 DceNetlinkSocket:GetRxAvailable()
+0.600072s 1 DceNetlinkSocket:RecvFrom(0xc442d0, 4096, 0, 00-00-00)
+0.600072s 1 DceNetlinkSocket:Recv(0xc442d0, 4096, 0)
+0.600072s 1 UnixDatagramSocketFd:DoRecvmsg(): [WARN ] msg_controllen < 0 , is that a problem ?
+0.600072s 1 SimuFd:dce_recvmsg(0xb94bf0, nodeId=, 1,  fd=, 5,  msg=, 0x7fee5d33b170,  flags=, 0)
+0.600072s 1 UnixDatagramSocketFd:DoRecvmsg(this=, 0xc446f0, current=, 0xb94bf0, flags=, 0)
+0.600072s 1 UnixDatagramSocketFd:DoRecvmsg(): [DEBUG] Not in MSG_ERRQUEUE
+0.600072s 1 DceNetlinkSocket:GetRxAvailable()
+1.6s 1 ProcessUtils:UtilsDoSignal(): [DEBUG] deliver signal=14
+1.6s 1 SimuFd:dce_write(0xb94bf0, 1, 1, 0x7fee4e36df0d, 28)
+1.6s 1 UnixFileFd:Write(0xb2a7c0, 0xb94bf0, 0x7fee4e36df0d, 28)
+1.6s 1 DceNetlinkSocket:RecvFrom(0xc442d0, 4096, 0, 00-00-00)
+1.6s 1 DceNetlinkSocket:Recv(0xc442d0, 4096, 0)
+1.6s 1 UnixDatagramSocketFd:DoRecvmsg(): [ERROR] Empty packet
+1.6s 1 DceNetlinkSocket:GetErrno()
+1.6s 1 DceNetdb:netlink_request(): [WARN ] read_len=-1 < 0
+1.6s 1 DceNetdb:dce_getifaddrs(): [WARN ] Could not RTM_GETLINK.
+
+https://github.com/direct-code-execution/ns-3-dce/issues/2#issuecomment-99727349
+Apparemment ns3 est censé recevoir les messages netlink. Vérifier avec netlink socket
+
 Pour dce_getifaddr on pourrait se passer de Netlink si l'on detecte qu'il s'agit d'une stack ns3 ?
 repo ntp
 DCE agrège au Node une SocketFdFactory qui va dépendre du type de stack à priori. On peut récupérer leur type pour
@@ -18,6 +82,12 @@ RTM_GETLINK
 
 ./waf --run "test-runner" if you want to launch tests
 
+./waf --run "test-runner --verbose --test-name=netlink-socket
+NS_LOG="*" ./waf --run "test-runner --verbose --test-name=netlink-socket" > nl_xp.txt 2>&1
+
+J'ai quand mm "DceNetlinkSocket:BuildInterfaceInfoDumpMessage" qui est appelé
+
+Quand on a un RTM_GETLINK , la socket doit renoyver BuildInterfaceInfoDumpMessages
 
 improv
 https://www.nsnam.org/developers/roadmap/

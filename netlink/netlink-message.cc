@@ -606,6 +606,7 @@ MultipartNetlinkMessage::Print (std::ostream &os) const
   for (uint32_t i = 0; i <  m_netlinkMessages.size (); i++)
     {
       m_netlinkMessages[i].Print (os);
+      os << std::endl;
     }
 }
 uint32_t

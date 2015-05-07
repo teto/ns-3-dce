@@ -30,8 +30,11 @@ NS_LOG += ":KernelSocketFd"
 NS_LOG += ":UnixDatagramSocketFd"
 NS_LOG += ":LinuxSocketImpl"
 NS_LOG += ":Ns3SocketFdFactory"
+NS_LOG += ":DceNetlinkSocket:DceNetlinkSocketFactory"
+NS_LOG += ":NetlinkMessage"
+NS_LOG += ":UnixFd"
 
-NS_LOG = "*"
+#NS_LOG = "*"
 # to see the GetWallTime()
 #NS_LOG += ":Node"
 #NS_LOG += ":ClockPerfect=*"

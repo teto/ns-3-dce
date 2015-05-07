@@ -520,7 +520,7 @@ NetlinkSocket::ForwardUp (Ptr<Packet> packet, const NetlinkSocketAddress &addres
 int32_t
 NetlinkSocket::SendMessageUnicast (const MultipartNetlinkMessage &nlmsg, int32_t nonblock)
 {
-  NS_LOG_FUNCTION (this << nonblock);
+  NS_LOG_FUNCTION (this << "nonblocking=" << nonblock);
 
   //here we send message instantly
   Ptr<Packet> p = Create<Packet> ();
@@ -626,6 +626,7 @@ NetlinkSocket::HandleNetlinkRouteMessage (const NetlinkMessage &nlmsg)
   /* Only requests are handled by kernel now */
   if (!NetlinkMessage::IsMessageFlagsRequest (nlmsg.GetHeader ().GetMsgFlags ()))
     {
+      NS_LOG_WARN("Only requests are handled by kernel now");
       return 0;
     }
 
@@ -634,6 +635,7 @@ NetlinkSocket::HandleNetlinkRouteMessage (const NetlinkMessage &nlmsg)
   /* A control message: ignore them */
   if (NetlinkMessage::IsMessageNetlinkControl (type))
     {
+      NS_LOG_WARN("Ignoring message control");
       return 0;
     }
   else if (NetlinkMessage::IsMessageNetlinkRoute (type))
@@ -670,6 +672,8 @@ int32_t
 NetlinkSocket::DumpNetlinkRouteMessage (const NetlinkMessage &nlmsg, uint16_t type, uint8_t family)
 {
   NS_LOG_FUNCTION (this << type << (int)family);
+  // TODO
+  NS_LOG_INFO(NetlinkRtmTypeToStr(type) << "family ");
 
   NS_ASSERT (type == NETLINK_RTM_GETADDR || type == NETLINK_RTM_GETROUTE || type == NETLINK_RTM_GETLINK);
 
@@ -702,7 +706,7 @@ NetlinkSocket::DumpNetlinkRouteMessage (const NetlinkMessage &nlmsg, uint16_t ty
   nlmsg_done.SetHeader (nhr2);
   //kernel append nlmsg_dump size to it, here we omit it
   nlmsg_dump.AppendMessage (nlmsg_done);
-
+  NS_LOG_UNCOND("MATT " << nlmsg_dump);
   err = SendMessageUnicast (nlmsg_dump, 1);
   return err;
 }
@@ -848,7 +852,7 @@ NetlinkSocket::BuildInterfaceAddressDumpMessages ()
 NetlinkMessage
 NetlinkSocket::BuildInterfaceInfoDumpMessage (uint32_t interface_num)
 {
-  NS_LOG_FUNCTION (this << interface_num);
+  NS_LOG_FUNCTION (this << "interface_num=" << interface_num);
 
   Ptr<Ipv4> ipv4 = m_node->GetObject<Ipv4> ();
   Ptr<NetDevice> dev = m_node->GetDevice (interface_num);
@@ -920,7 +924,7 @@ NetlinkSocket::BuildInterfaceInfoDumpMessage (uint32_t interface_num)
 MultipartNetlinkMessage
 NetlinkSocket::BuildInterfaceInfoDumpMessages ()
 {
-  NS_LOG_FUNCTION (this);
+  NS_LOG_FUNCTION (this << "MATT");
   MultipartNetlinkMessage nlmsg_dump;
   for (uint32_t i = 0; i < m_node->GetNDevices (); i++)
     {

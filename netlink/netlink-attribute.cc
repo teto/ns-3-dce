@@ -144,6 +144,7 @@ NetlinkAttributeValue::GetU8 (void) const
   return m_u8;
 }
 
+
 void
 NetlinkAttributeValue::Serialize (Buffer::Iterator& start) const
 {
@@ -277,10 +278,25 @@ NetlinkAttributeValue::GetSize () const
   return len;
 }
 
+std::string
+NetlinkAttribute::TypeToStr(NetlinkAttributeValueType type)
+{
+  static const char* str[] = {
+    "UNSPEC", // invalid initial value.
+  "U8",
+  "U16",
+  "U32",
+  "U64",
+  "STRING",
+  "ADDRESS"
+  };
+  return str[type];
+}
+
 void
 NetlinkAttributeValue::Print (std::ostream &os) const
 {
-  os << "NetlinkAttributeValue (type= " << m_type << ", v= ";
+  os << "NetlinkAttributeValue (type= " << NetlinkAttribute::TypeToStr(m_type) << ", v= ";
   if (m_type == U8)
     {
       os << m_u8;
