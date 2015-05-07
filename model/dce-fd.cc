@@ -352,7 +352,7 @@ int dce_socket (int domain, int type, int protocol)
 {
   Thread *current = Current ();
   DceManager *manager = current->process->manager;
-  NS_LOG_FUNCTION (current << UtilsGetNodeId () << domain << type << protocol);
+  NS_LOG_FUNCTION (current << "nodeId" << UtilsGetNodeId () << domain << type << "protocol=" << protocol);
   NS_ASSERT (current != 0);
   NS_ASSERT (manager != 0);
 

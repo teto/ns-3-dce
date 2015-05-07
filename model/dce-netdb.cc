@@ -493,6 +493,7 @@ AllocAddr(Ipv4InterfaceAddress addr) {
  Let's fill with every address
  For now we only return 1 address (to check)
 **/
+#if 0
 static int
 dce_getifaddrs_ns3(Ptr<Node> node, struct ifaddrs **ifap)
 {
@@ -524,6 +525,7 @@ dce_getifaddrs_ns3(Ptr<Node> node, struct ifaddrs **ifap)
 
   return 0;
 }
+#endif
 
 /*
  * Try to emulate netlink socket query to work both ns3 stack and
@@ -552,10 +554,10 @@ TODO I could check the type of
 ////    return dce_getifaddrs_ns3(ifap);
 //    NS_FATAL_ERROR("IT WORKD !");
 //  }
-  Ptr<Node> node = UtilsGetNode();
-  if(UtilsHasNs3Stack(node)) {
-    return dce_getifaddrs_ns3(node, ifap);
-  }
+//  Ptr<Node> node = UtilsGetNode();
+//  if(UtilsHasNs3Stack(node)) {
+//    return dce_getifaddrs_ns3(node, ifap);
+//  }
 
   struct netlink_handle nh =
   {
