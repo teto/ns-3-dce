@@ -2,6 +2,12 @@
 CHAUSSEE DE BRUXELLES 159
 1410 WATERLOO
 
+NodeContainer::GetGlobal ();
+EnablePcapInternal doit etre implémenté par les Device, par exemple regarder à FdNetDevice
+PcapHelper::HookDefaultSink
+
+supergrass - Alright
+EMF - Unbelievable
 
 0.600072s 1 DceNetdb:dce_getifaddrs(): [INFO ] MATT dce_getifaddr
 0.600072s 1 SimuFd:dce_socket(0xb94bf0, 1, 16, 3, 0)
