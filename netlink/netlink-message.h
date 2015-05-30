@@ -42,7 +42,7 @@ class MultipartNetlinkMessage;
 There are three levels to a Netlink message: The general Netlink
 message header, the IP service specific template, and the IP service
 specific data.
-
+\verbatim
 0                   1                   2                   3
 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -58,6 +58,7 @@ specific data.
 |                  IP Service specific data in TLVs             |
 |                                                               |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+\endverbatim
 */
 
 enum NetlinkMessageFlag
@@ -92,10 +93,20 @@ enum NetlinkMessageType
 #define NETLINK_MSG_ALIGNTO 4
 #define NETLINK_MSG_ALIGN(X)    (((X) + NETLINK_MSG_ALIGNTO - 1) & ~(NETLINK_MSG_ALIGNTO - 1))
 
+/**
+ * \todo shouldn't it inherit from Header ?
+ */
 class NetlinkMessageHeader : public ObjectBase
 {
 public:
   NetlinkMessageHeader ();
+
+  /**
+   * \param type NETLINK_RTM_NEWADDR or NETLINK_RTM_NEWLINK or ...
+   * \param flags
+   * \param seq
+   * \param pid
+   */
   NetlinkMessageHeader (uint16_t type, uint16_t flags, uint32_t seq, uint32_t pid);
 
   static TypeId GetTypeId (void);
@@ -230,6 +241,9 @@ private:
   RouteMessage m_routeTemplate;
 };
 
+/**
+ *
+ */
 class MultipartNetlinkMessage : public Header
 {
 public:
