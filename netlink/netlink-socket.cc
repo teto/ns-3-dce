@@ -103,6 +103,11 @@ NetlinkSocket::GetTypeId (void)
                    CallbackValue (),
                    MakeCallbackAccessor (&NetlinkSocket::m_icmpCallback),
                    MakeCallbackChecker ())
+    .AddTraceSource ("PromiscSniffer",
+                     "Trace source simulating a promiscuous "
+                     "packet sniffer attached to the device",
+                     MakeTraceSourceAccessor (&NetlinkSocket::m_promiscSnifferTrace),
+                     "ns3::Packet::TracedCallback")
   ;
   return tid;
 }
@@ -507,6 +512,10 @@ NetlinkSocket::ForwardUp (Ptr<Packet> packet, const NetlinkSocketAddress &addres
       tag.SetAddress (address);
       packet->AddByteTag (tag);
       m_dataReceiveQueue.push (packet);
+
+      // ADDITION Matt
+      m_promiscSnifferTrace (packet);
+
       m_rxAvailable += packet->GetSize ();
       NotifyDataRecv ();
     }

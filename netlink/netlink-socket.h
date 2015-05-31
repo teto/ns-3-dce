@@ -227,6 +227,8 @@ private:
   uint32_t m_Pid;
   uint32_t m_Groups;
   Callback<void, Ipv4Address,uint8_t,uint8_t,uint8_t,uint32_t> m_icmpCallback;
+
+  TracedCallback<Ptr<const Packet> > m_promiscSnifferTrace;
 };
 
 } //namespace ns3
