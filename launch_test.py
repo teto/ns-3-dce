@@ -33,6 +33,9 @@ NS_LOG += ":Ns3SocketFdFactory"
 NS_LOG += ":DceNetlinkSocket:DceNetlinkSocketFactory"
 NS_LOG += ":NetlinkMessage"
 NS_LOG += ":UnixFd"
+NS_LOG += ":PcapFile"
+#NS_LOG += ":PcapFileHeader"
+#NS_LOG += ":PcapFileWriter"
 
 #NS_LOG = "*"
 # to see the GetWallTime()
