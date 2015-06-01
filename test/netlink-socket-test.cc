@@ -569,7 +569,9 @@ NetlinkSocketTestCase::DoRun (void)
 //    }
 
   Ptr<PcapFileWrapper> file = pcapHelper.CreateFile (filename, std::ios::out,
-                                                     PcapHelper::DLT_NETLINK);
+                                                     PcapHelper::DLT_NETLINK
+//                                                     PcapHelper::DLT_LINUX_SSL
+                                                     );
   // for now we test only one socket
   pcapHelper.HookDefaultSink<NetlinkSocket> (DynamicCast<NetlinkSocket>(m_cmdSock), "PromiscSniffer", file);
 

@@ -12,10 +12,24 @@ EMF - Unbelievable
 You can use rtmon to 
 
 pcap-file.h
+
+ARPHRD_NETLINK	824
+
+PcapFile
+
+
+DCE utilise PcapFile::Write (uint32_t tsSec, uint32_t tsUsec, Ptr<const Packet> p)
+car le log indique:
+PcapFile:Write(0x1747b00, 8, 0, 0x17477f0)
+
+PcapHelper dans TraceF
 WritePacketHeader
 PcapFileHeader
 PcapFileWrapper
 http://www.tcpdump.org/linktypes/LINKTYPE_LINUX_SLL.html
+
+Pour voir les headers des pcap
+http://www.kroosec.com/2012/10/a-look-at-pcap-file-format.html
 
 http://www.kroosec.com/2012/10/a-look-at-pcap-file-format.html
 Le pcap header a une longeur de 24 octets, les 4 derniers octets représentant le link layer type
