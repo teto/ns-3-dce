@@ -132,6 +132,7 @@ Ns3SocketFdFactory::CreateSocket (int domain, int type, int protocol)
             NS_ASSERT_MSG (factory, "InternetStackHelper (v6) is not installed. "
                            "Install it before using Ns3SocketFdFactory.");
             sock = factory->CreateSocket ();
+
             socket = new UnixStreamSocketFd (sock);
           } break;
         default:
@@ -148,6 +149,8 @@ Ns3SocketFdFactory::CreateSocket (int domain, int type, int protocol)
           {
             NS_LOG_INFO ("Requesting for PF_NETLINK");
             sock = m_netlink->CreateSocket ();
+
+            // Addition by matt
             socket = new UnixDatagramSocketFd (sock);
           } break;
         default:
