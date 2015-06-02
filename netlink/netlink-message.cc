@@ -458,7 +458,7 @@ NetlinkMessage::Print (std::ostream &os) const
 
   if (type == NETLINK_MSG_DONE)
     {
-      os << "multipart message ends here";
+      os << "\nmultipart message ends here";
     }
   else if (type == NETLINK_MSG_ERROR)
     {

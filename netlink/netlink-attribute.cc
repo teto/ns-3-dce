@@ -416,7 +416,7 @@ NetlinkAttribute::Print (std::ostream &os) const
      << "type: " << m_type << " "
      << "payload:[";
   m_payload.Print (os);
-  os << "]";
+  os << "]\n";
 }
 
 uint32_t

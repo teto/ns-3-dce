@@ -24,7 +24,11 @@
 #include "ns3/node.h"
 #include "ns3/log.h"
 
+#include "ns3/trace-helper.h"
+#include <sstream>
 
+//#include "ns3/pcap-file-wrapper.h"
+//#include "netlink/netlink-socket.h"
 NS_LOG_COMPONENT_DEFINE ("DceNetlinkSocketFactory");
 
 namespace ns3 {
@@ -51,6 +55,19 @@ Ptr<Socket> NetlinkSocketFactory::CreateSocket (void)
   Ptr<Node> node = GetObject<Node> ();
   Ptr<NetlinkSocket> socket = CreateObject<NetlinkSocket> ();
   socket->SetNode (node);
+
+            static int id = 0;
+
+              PcapHelper pcapHelper;
+
+//              std::to_string (id); // only valid in C++11
+              std::ostringstream filename;
+              filename << "netlink" << node->GetId() << "-" << id++ << ".pcap";
+    NS_LOG_UNCOND("Creating socket [" << filename.str() << "]");
+              Ptr<PcapFileWrapper> file = pcapHelper.CreateFile (filename.str(), std::ios::out,PcapHelper::DLT_NETLINK);
+              // for now we test only one socket
+              pcapHelper.HookDefaultSink<NetlinkSocket> ( socket, "PromiscSniffer", file);
+
   return socket;
 }
 } // namespace ns3

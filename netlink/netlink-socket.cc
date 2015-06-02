@@ -364,6 +364,10 @@ NetlinkSocket::Recv (uint32_t maxSize, uint32_t flags)
   Ptr<Packet> p = m_dataReceiveQueue.front ();
   if (p->GetSize () <= maxSize)
     {
+      // Addition by matt
+      NS_LOG_UNCOND("Netlink rcv");
+      m_promiscSnifferTrace (p);
+
       m_dataReceiveQueue.pop ();
       m_rxAvailable -= p->GetSize ();
     }
