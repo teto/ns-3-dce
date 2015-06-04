@@ -52,13 +52,22 @@ NTP_PeerSet a l'air intéressant
 
  TB_Step() and TB_Adjust()
 
-=== NTP ===
+
+=== OPENNTPD portable ===
+
+git@github.com:openntpd-portable/openntpd-portable.git
+$ ./autogen.sh
+CFLAGS="-fPIC -U_FORTIFY_SOURCE -ggdb" LDFLAGS="-pie -rdynamic" ./configure
+
+
+
+=== NTPd ===
 
 A un moment donné j'avais ce problème dans gdb: "which has no line number information"
 J'ai remplacé -g par -ggdb dans les CFLAGS et cela a résolu le pb
 
 Lancer le configure comme:
-$ CFLAGS="-fPIC -U_FORTIFY_SOURCE -ggdb" LDFLAGS="-pie -rdynamic" ./configure --enable-debugging  --enable-getifaddrs --enable-thread-support=no
+$ CFLAGS="-fPIC -U_FORTIFY_SOURCE -ggdb" LDFLAGS="-pie -rdynamic" ./configure --enable-debugging  --enable-getifaddrs --enable-thread-support=no --without-sntp
 
 If you set --enable-getifaddrs=no then you resort to ioctl (SIOCGIFCONF) which seems broken on linux
 

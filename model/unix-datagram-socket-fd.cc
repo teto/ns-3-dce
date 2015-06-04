@@ -186,6 +186,9 @@ UnixDatagramSocketFd::DoRecvmsg (struct msghdr *msg, int flags)
 
   uint32_t count = msg->msg_iov[0].iov_len;
   uint8_t *buf = (uint8_t *)msg->msg_iov[0].iov_base;
+
+  // TODO use Cmsg earlier
+  NS_LOG_DEBUG("====== count=" << count);
   // we ignore the secondary items of the iovec buffers.
   // because we implement a datagram-only socket for now.
   Address from;
@@ -200,6 +203,7 @@ UnixDatagramSocketFd::DoRecvmsg (struct msghdr *msg, int flags)
     }
   if ((PacketSocketAddress::IsMatchingType (from)))
     {
+      NS_LOG_DEBUG("Packet address matches 'from' address");
       if (msg->msg_namelen < sizeof (sockaddr_ll))
         {
           NS_LOG_WARN("Problem with msg length");
@@ -244,11 +248,13 @@ UnixDatagramSocketFd::DoRecvmsg (struct msghdr *msg, int flags)
     }
   else
     {
+      NS_LOG_DEBUG("Packet didn't match 'from' address");
       Ns3AddressToPosixAddress (from, (struct sockaddr*)msg->msg_name, &msg->msg_namelen);
 
+      Cmsg cmsg = Cmsg (msg);
       if (msg->msg_controllen > 0)
         {
-          Cmsg cmsg = Cmsg (msg);
+//          Cmsg cmsg = Cmsg (msg);
           if (m_socket->IsRecvPktInfo ())
             {
               NS_LOG_DEBUG ("RecvPktInfo requested");

@@ -268,7 +268,7 @@ netlink_request (struct netlink_handle *h, int type)
   struct
   {
     struct nlmsghdr nlh;  //!< Netlink header
-    struct rtgenmsg g;  //!<
+    struct rtgenmsg g;    //!<
   } req;
 
   memset (&snl, 0, sizeof snl);
@@ -307,10 +307,13 @@ netlink_request (struct netlink_handle *h, int type)
     {
       struct msghdr msg =
       {
-        (void *) &nladdr, sizeof (nladdr),
-        &iov, 1,
-        NULL, 0,
-        0
+        (void *) &nladdr, //msg_name
+        sizeof (nladdr),  //addr length
+        &iov,   //vector of data to send/receive into
+        1,  //nb of elements in vector
+        NULL, // ancillary
+        0,  // ancillary data len
+        0   // msg_flags
       };
 
       read_len = dce_recvmsg (h->fd, &msg, 0);
@@ -322,6 +325,7 @@ netlink_request (struct netlink_handle *h, int type)
 
       if (nladdr.nl_pid != 0)
         {
+          NS_LOG_WARN("nl_pid != 0 => skip this loop");
           continue;
         }
 
@@ -337,9 +341,11 @@ netlink_request (struct netlink_handle *h, int type)
            NLMSG_OK (nlmh, remaining_len);
            nlmh = (struct nlmsghdr *) NLMSG_NEXT (nlmh, remaining_len))
         {
+          NS_LOG_DEBUG("handling netlink msg [" << nlmh << "]");
           if ((pid_t) nlmh->nlmsg_pid != h->pid
               || nlmh->nlmsg_seq != h->seq)
             {
+              NS_LOG_DEBUG("NLMSG_DONE");
               continue;
             }
 
@@ -371,6 +377,7 @@ netlink_request (struct netlink_handle *h, int type)
          there is no point to record it.  */
       if (count == 0)
         {
+          NS_LOG_WARN("No data in the packet. It is strange ");
           continue;
         }
 
