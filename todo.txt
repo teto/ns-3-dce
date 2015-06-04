@@ -18,6 +18,54 @@ ARPHRD_NETLINK	824
 PcapFile
 
 
+=== Partie sur wireshark ===
+hfi_netlink_hdr_type
+
+Matt: getifaddr attempt #0
+alarming: initializing TRUE
+Matt: getifaddr failed with errorno=22
+
+1.6s 1 ProcessUtils:UtilsDoSignal(): [DEBUG] deliver signal=14
+1.6s 1 SimuFd:dce_write(0x1f5be10, 1, 1, 0x7f944c63e035, 28)
+1.6s 1 UnixFileFd:Write(0x1ef66e0, 0x1f5be10, 0x7f944c63e035, 28)
+1.6s 1 DceNetlinkSocket:RecvFrom(0x2002b10, 4096, 0, 00-00-00)
+1.6s 1 DceNetlinkSocket:Recv(0x2002b10, 4096, 0)
+1.6s 1 UnixDatagramSocketFd:DoRecvmsg(): [ERROR] Empty packet
+1.6s 1 DceNetlinkSocket:GetErrno()
+1.6s 1 DceNetdb:netlink_request(): [WARN ] read_len=-1 < 0
+1.6s 1 DceNetdb:dce_getifaddrs(): [WARN ] Could not RTM_GETLINK.
+
+
+Pb c que la paquet recu est vide
+  if (m_dataReceiveQueue.empty ())
+
+findexistingpeer_addr(127.127.1.0:123, NULL, 3, 0x1)
+newpeer(127.127.1.0): local interface currently not bound
+key_expire: at 0 associd 16467
+peer_clear: at 0 next 1 associd 16467 refid INIT
+event at 0 LOCAL(0) 8011 81 mobilize assoc 16467
+newpeer: <null>->127.127.1.0 mode 3 vers 4 poll 6 6 flags 0x9 0x1 ttl 0 key 00000000
+
+
+Stack now 0 54 207
+Cleanup: popping token $end ()
+Cleanup: popping nterm configuration ()
+ 1 Jan 00:00:01 ntpd[2022]: ./../lib/isc/unix/ifiter_getifaddrs.c:99: unexpected error:
+ 1 Jan 00:00:01 ntpd[2022]: getting interface addresses: getifaddrs: Invalid argument
+ 1 Jan 00:00:01 ntp_intres[2022]: receive_blocking_req_internal: pipe read No such file or directory
+
+Apparemment NTP appelle plusieurs fois getifaddr
+
+getifaddr genere un paquet de type RTM_GETLINK envoie un paquet de type:
+netlink-route.nltype == 18
+Le type 16 correspond à la réponse ("Create network interface").
+Apparemment les adresses renvoyées par netlink ont pas l'air correct et quand tu regards
+
+Pour de la doc sur les messages
+http://www.infradead.org/~tgr/libnl/doc/route.html
+
+"All netlink link messages share a common header (struct ifinfomsg) which is appended after the netlink header (struct nlmsghdr)"
+
 DCE utilise PcapFile::Write (uint32_t tsSec, uint32_t tsUsec, Ptr<const Packet> p)
 car le log indique:
 PcapFile:Write(0x1747b00, 8, 0, 0x17477f0)

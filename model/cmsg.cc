@@ -1,21 +1,29 @@
 #include "cmsg.h"
+#include "ns3/log.h"
 #include <sys/socket.h>
 #include <string.h>
 
 namespace ns3 {
+
+NS_LOG_COMPONENT_DEFINE ("DceCmsg");
 
 Cmsg::Cmsg (struct msghdr *msg)
   : m_msg (msg),
     m_current ((uint8_t *)msg->msg_control),
     m_len (msg->msg_controllen)
 {
+  NS_LOG_FUNCTION(m_msg <<  m_current << m_len);
+  NS_ASSERT(msg);
 }
+
 void
 Cmsg::Add (int level, int type, int len, const uint8_t *buffer)
 {
+  NS_LOG_DEBUG(level << type << len << buffer);
   int cmsglen = CMSG_SPACE (len);
   if (m_len < cmsglen)
     {
+      NS_LOG_WARN("Can't append message: not enough space");
       m_msg->msg_flags |= MSG_CTRUNC;
       return;
     }
@@ -60,8 +68,22 @@ Cmsg::GetNext (int *level, int *type, int *len, uint8_t **buffer)
 void
 Cmsg::Finish (void)
 {
+  NS_LOG_DEBUG("Updating msg_controllen from [" << m_msg->msg_controllen << "]to " << (m_msg->msg_controllen - m_len) << "\n");
   m_msg->msg_controllen -= m_len;
 }
 
+
+void
+Cmsg::Print (std::ostream &os) const
+{
+    //!
+    os << "#ElementsInVector=" << m_msg-> << "";
+}
+
+std::ostream& operator<< (std::ostream& os, const Cmsg & address)
+{
+    //!
+    address->Print(os);
+}
 
 } // namespace ns3

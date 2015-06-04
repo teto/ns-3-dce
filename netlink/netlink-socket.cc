@@ -358,6 +358,7 @@ NetlinkSocket::Recv (uint32_t maxSize, uint32_t flags)
   NS_LOG_FUNCTION (this << maxSize << flags);
   if (m_dataReceiveQueue.empty ())
     {
+      NS_LOG_WARN("Data receive queue empty");
       return 0;
     }
 
@@ -373,6 +374,7 @@ NetlinkSocket::Recv (uint32_t maxSize, uint32_t flags)
     }
   else
     {
+      NS_LOG_UNCOND("Packet is too big !!!");
       p = 0;
     }
   return p;
@@ -385,6 +387,7 @@ NetlinkSocket::RecvFrom (uint32_t maxSize, uint32_t flags, Address &fromAddress)
   Ptr<Packet> packet = Recv (maxSize, flags);
   if (packet != 0)
     {
+      NS_LOG_DEBUG("Packet received");
       SocketAddressTag tag;
       bool found;
       found = packet->FindFirstMatchingByteTag (tag);
@@ -435,6 +438,9 @@ NetlinkSocket::SendTo (Ptr<Packet> p, uint32_t flags, const Address &toAddress)
 
   packet_len = p->GetSize ();
   remain_len = packet_len;
+
+  // addition matt
+  m_promiscSnifferTrace (p);
 
   while (remain_len > NetlinkMessageHeader::GetHeaderSize ())
     {
@@ -686,7 +692,7 @@ NetlinkSocket::DumpNetlinkRouteMessage (const NetlinkMessage &nlmsg, uint16_t ty
 {
   NS_LOG_FUNCTION (this << type << (int)family);
   // TODO
-  NS_LOG_INFO(NetlinkRtmTypeToStr(type) << "family ");
+  NS_LOG_INFO(NetlinkRtmTypeToStr(type) << " family ");
 
   NS_ASSERT (type == NETLINK_RTM_GETADDR || type == NETLINK_RTM_GETROUTE || type == NETLINK_RTM_GETLINK);
 
