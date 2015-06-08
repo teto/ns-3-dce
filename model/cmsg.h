@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <sys/socket.h>
+#include <iostream>
 
 namespace ns3 {
 
@@ -21,11 +22,14 @@ public:
    *
    * Generate the cmsghdr accordingly
    * TODO this should return a bool otherwise one doesn't know if it failed or not
+   * \return True if there is enough space to add ancillary data
    */
-  void Add (int level, int type, int len, const uint8_t *buffer);
+  bool Add (int level, int type, int len, const uint8_t *buffer);
 
   /**
    * Get next control message
+   *
+   * \return <0 in case of failure, 0 if successful
    */
   int GetNext (int *level, int *type, int *len, uint8_t **buffer);
 
