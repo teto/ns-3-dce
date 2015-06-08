@@ -1,5 +1,6 @@
 #include "cmsg.h"
 #include "ns3/log.h"
+#include "ns3/assert.h"
 #include <sys/socket.h>
 #include <string.h>
 
@@ -16,7 +17,7 @@ Cmsg::Cmsg (struct msghdr *msg)
   NS_ASSERT(msg);
 }
 
-void
+bool
 Cmsg::Add (int level, int type, int len, const uint8_t *buffer)
 {
   NS_LOG_DEBUG(level << type << len << buffer);
@@ -25,7 +26,7 @@ Cmsg::Add (int level, int type, int len, const uint8_t *buffer)
     {
       NS_LOG_WARN("Can't append message: not enough space");
       m_msg->msg_flags |= MSG_CTRUNC;
-      return;
+      return false;
     }
   struct cmsghdr msghdr;
   msghdr.cmsg_len = cmsglen;
@@ -35,6 +36,7 @@ Cmsg::Add (int level, int type, int len, const uint8_t *buffer)
   memcpy (CMSG_DATA ((struct cmsghdr*)m_current), buffer, cmsglen - sizeof (struct cmsghdr));
   m_current += cmsglen;
   m_len -= cmsglen;
+  return true;
 }
 
 
@@ -77,13 +79,14 @@ void
 Cmsg::Print (std::ostream &os) const
 {
     //!
-    os << "#ElementsInVector=" << m_msg-> << "";
+    os << "#ElementsInVector=" << m_msg->msg_iovlen << ".";
 }
 
 std::ostream& operator<< (std::ostream& os, const Cmsg & address)
 {
     //!
-    address->Print(os);
+    address.Print(os);
+    return os;
 }
 
 } // namespace ns3

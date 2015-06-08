@@ -2,6 +2,28 @@
 CHAUSSEE DE BRUXELLES 159
 1410 WATERLOO
 
+
+
+
+This week has delivered the following:
+
+  - Generation of MPTCP token/initial sequence data number based on libgcrypt when available or an ns3 implementation not compliant with the standard). waf configure seems to detect correctly libgcrypt but it does not seem to pass on the -DENABLE_CRYPTO flag. This is something I have to look into [0]
+  - Associated testsuite
+
+The implementation of these message can found on the repository[1].For more details check wiki[2]. During next week, while waiting for a clearer schedule over the mptcp work I plan to:
+
+  - Add the pending mptcp crypto testsuite (depends on the discussion)
+  - Continue the work I've started in background over netlink export
+
+from DCE. This is something I've started long ago but it proves quite difficult, since wireshark can't dissect raw netlink, it expects it to be contained within a "cooked linux" header that libpcap generates but not DCE (yet). Current DCE netlink implementation does not work with NTPd, that's why I look into it. (Netlink is the linux communication protocol between kernel and userspace).
+
+  - Send some patches to DCE to support ntpd
+
+[1] https://github.com/teto/ns-3-dev-git/tree/libcrypto
+[2] https://www.nsnam.org/wiki/GSOC2015MpTcpImplementation#Expected_deliverables 
+
+
+
 NodeContainer::GetGlobal ();
 EnablePcapInternal doit etre implémenté par les Device, par exemple regarder à FdNetDevice
 PcapHelper::HookDefaultSink
