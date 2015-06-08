@@ -383,7 +383,7 @@ NetlinkSocket::Recv (uint32_t maxSize, uint32_t flags)
 Ptr<Packet>
 NetlinkSocket::RecvFrom (uint32_t maxSize, uint32_t flags, Address &fromAddress)
 {
-  NS_LOG_FUNCTION (this << maxSize << flags << fromAddress);
+  NS_LOG_FUNCTION (this << "maxsize=" << maxSize << "flags=" << flags << fromAddress);
   Ptr<Packet> packet = Recv (maxSize, flags);
   if (packet != 0)
     {
@@ -408,7 +408,7 @@ NetlinkSocket::Send (Ptr<Packet> p, uint32_t flags)
 int
 NetlinkSocket::SendTo (Ptr<Packet> p, uint32_t flags, const Address &toAddress)
 {
-  NS_LOG_FUNCTION (this << p << flags << toAddress);
+  NS_LOG_FUNCTION (this << p << "flags=" << flags << toAddress);
   NetlinkSocketAddress ad;
 
   if (!NetlinkSocketAddress::IsMatchingType (toAddress))

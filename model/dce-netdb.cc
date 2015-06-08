@@ -303,6 +303,8 @@ netlink_request (struct netlink_handle *h, int type)
     buf, buf_size
   };
 
+  // we read(=empty) the message buffer one by one
+
   while (!done)
     {
       struct msghdr msg =
@@ -325,7 +327,7 @@ netlink_request (struct netlink_handle *h, int type)
 
       if (nladdr.nl_pid != 0)
         {
-          NS_LOG_WARN("nl_pid != 0 => skip this loop");
+          NS_LOG_WARN("nl_pid=" << nladdr.nl_pid << "!= 0 => skip this loop");
           continue;
         }
 
@@ -335,8 +337,14 @@ netlink_request (struct netlink_handle *h, int type)
           goto out_fail;
         }
 
+
+
       size_t count = 0;
       size_t remaining_len = read_len;
+      NS_LOG_DEBUG("Start parsing netlink msg [" << nlmh << "]");
+
+      /* Walk through all entries we got from the kernel and look, which
+         message type they contain */
       for (nlmh = (struct nlmsghdr *) buf;
            NLMSG_OK (nlmh, remaining_len);
            nlmh = (struct nlmsghdr *) NLMSG_NEXT (nlmh, remaining_len))
@@ -345,7 +353,9 @@ netlink_request (struct netlink_handle *h, int type)
           if ((pid_t) nlmh->nlmsg_pid != h->pid
               || nlmh->nlmsg_seq != h->seq)
             {
-              NS_LOG_DEBUG("NLMSG_DONE");
+              NS_LOG_DEBUG("Pid " << nlmh->nlmsg_pid << " != " << h->pid << " or seq "
+                           << nlmh->nlmsg_seq << "!=" << h->seq
+                           );
               continue;
             }
 
@@ -353,13 +363,13 @@ netlink_request (struct netlink_handle *h, int type)
           if (nlmh->nlmsg_type == NLMSG_DONE)
             {
               /* We found the end, leave the loop.  */
-              NS_LOG_DEBUG("NLMSG_DONE");
+              NS_LOG_DEBUG("message type NLMSG_DONE: end of messages, leave the loop");
               done = true;
               break;
             }
           if (nlmh->nlmsg_type == NLMSG_ERROR)
             {
-              NS_LOG_WARN("NLMSG_ERROR");
+              NS_LOG_WARN("message of type NLMSG_ERROR");
               struct nlmsgerr *nlerr = (struct nlmsgerr *) NLMSG_DATA (nlmh);
               if (nlmh->nlmsg_len < NLMSG_LENGTH (sizeof (struct nlmsgerr)))
                 {
@@ -371,7 +381,8 @@ netlink_request (struct netlink_handle *h, int type)
                 }
               goto out_fail;
             }
-        }
+        } // end of for
+      NS_LOG_DEBUG("End of parsing ");
 
       /* If there was nothing with the expected nlmsg_pid and nlmsg_seq,
          there is no point to record it.  */
@@ -566,6 +577,7 @@ TODO I could check the type of
 //    return dce_getifaddrs_ns3(node, ifap);
 //  }
 
+  /* */
   struct netlink_handle nh =
   {
     0, 0, 0, NULL, NULL

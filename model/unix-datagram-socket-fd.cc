@@ -144,6 +144,7 @@ UnixDatagramSocketFd::DoRecvmsg (struct msghdr *msg, int flags)
   NS_LOG_FUNCTION ("this=" << this << "current=" << current << "flags=" << flags);
   NS_ASSERT (current != 0);
 
+  Cmsg cmsg = Cmsg (msg);
   if (flags & MSG_ERRQUEUE)
     {
       NS_LOG_WARN("MSG_ERRQUEUE flagged");
@@ -156,7 +157,7 @@ UnixDatagramSocketFd::DoRecvmsg (struct msghdr *msg, int flags)
           return -1;
         }
 
-      Cmsg cmsg = Cmsg (msg);
+
       if (IsRecvErr ())
         {
           NS_LOG_WARN("Dunno what's going on");

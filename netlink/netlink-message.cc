@@ -129,6 +129,7 @@ NetlinkMessageHeader::GetInstanceTypeId (void) const
 void
 NetlinkMessageHeader::Print (std::ostream &os) const
 {
+  // TODO convert integers into string
   os << "NetlinkMessageHeader "
      << "len: " << m_nlmsgLen << " "
      << "flags: " << m_nlmsgFlags << " "

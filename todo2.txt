@@ -10,6 +10,12 @@ NTP utilise UDP, port 123
 "hstr" program
 
 
+
+=== WIRESHARK ===
+Run wireshark from directory
+WIRESHARK_RUN_FROM_BUILD_DIRECTORY=1 ./wireshark
+
+
 === NS3Off ===
 Pour voir la config actuelle de ns3, regarder dans build/c4che
 ./waf configure --prefix=install
