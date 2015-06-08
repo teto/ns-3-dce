@@ -221,7 +221,7 @@ GeneralMessage::PrintAttribute (std::ostream &os) const
 {
   for (uint32_t i = 0; i < m_attributes.size (); i++)
     {
-      os << " ----Attribute (" << i << "):";
+      os << "-- Attribute (" << i << "):";
       m_attributes[i].Print (os);
     }
 }

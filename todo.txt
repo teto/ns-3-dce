@@ -3,25 +3,57 @@ CHAUSSEE DE BRUXELLES 159
 1410 WATERLOO
 
 
-
-
-This week has delivered the following:
-
-  - Generation of MPTCP token/initial sequence data number based on libgcrypt when available or an ns3 implementation not compliant with the standard). waf configure seems to detect correctly libgcrypt but it does not seem to pass on the -DENABLE_CRYPTO flag. This is something I have to look into [0]
-  - Associated testsuite
-
-The implementation of these message can found on the repository[1].For more details check wiki[2]. During next week, while waiting for a clearer schedule over the mptcp work I plan to:
-
-  - Add the pending mptcp crypto testsuite (depends on the discussion)
-  - Continue the work I've started in background over netlink export
-
-from DCE. This is something I've started long ago but it proves quite difficult, since wireshark can't dissect raw netlink, it expects it to be contained within a "cooked linux" header that libpcap generates but not DCE (yet). Current DCE netlink implementation does not work with NTPd, that's why I look into it. (Netlink is the linux communication protocol between kernel and userspace).
-
-  - Send some patches to DCE to support ntpd
-
-[1] https://github.com/teto/ns-3-dev-git/tree/libcrypto
-[2] https://www.nsnam.org/wiki/GSOC2015MpTcpImplementation#Expected_deliverables 
-
+0.600022s 1 NetlinkMessage:Serialize(0x1588788)
+0.600022s 1 DceNetlinkSocket:ForwardUp(0x1584300, 0x14de6b0, pid: 0, group: 0)
+0.600022s 1 PcapFile:Write(0x1584ab0, 0, 600021, 0x14de6b0)
+0.600022s 1 PcapFile:GetDataLinkType(0x1584ab0)
+0.600022s 1 PcapFile:Write(): [INFO ] Prepend a SSL header
+0.600022s 1 PcapFile:WritePacketHeader(0x1584ab0, 0, 600021, 296)
+0.600022s 1 SimuFd:dce_recvmsg(0x14de4f0, nodeId=, 1,  fd=, 4,  msg=, 0x7f0404141160,  flags=, 0)
+0.600022s 1 UnixDatagramSocketFd:DoRecvmsg(this=, 0x1582ef0, current=, 0x14de4f0, flags=, 0)
+0.600022s 1 DceCmsg:Cmsg(0x7f0404141160)
+0.600022s 1 UnixDatagramSocketFd:DoRecvmsg(): [DEBUG] Not in MSG_ERRQUEUE
+0.600022s 1 DceNetlinkSocket:GetRxAvailable()
+0.600022s 1 DceNetlinkSocket:GetRxAvailable()
+0.600022s 1 UnixDatagramSocketFd:DoRecvmsg(): [DEBUG] ====== count=4096
+0.600022s 1 DceNetlinkSocket:RecvFrom(0x1584300, 4096, 0, 00-00-00)
+0.600022s 1 DceNetlinkSocket:Recv(0x1584300, 4096, 0)
+Netlink rcv
+0.600022s 1 PcapFile:Write(0x1584ab0, 0, 600021, 0x14de6b0)
+0.600022s 1 PcapFile:GetDataLinkType(0x1584ab0)
+0.600022s 1 PcapFile:Write(): [INFO ] Prepend a SSL header
+0.600022s 1 PcapFile:WritePacketHeader(0x1584ab0, 0, 600021, 296)
+0.600022s 1 DceNetlinkSocket:RecvFrom(): [DEBUG] Packet received
+0.600022s 1 UnixDatagramSocketFd:DoRecvmsg(): [DEBUG] Packet didn't match 'from' address
+0.600022s 1 DceCmsg:Cmsg(0x7f0404141160)
+0.600022s 1 UnixDatagramSocketFd:DoRecvmsg(): [WARN ] msg_controllen < 0 , is that a problem ?
+0.600022s 1 DceNetdb:netlink_request(): [DEBUG] handling netlink msg [0x7f040417efe8]
+0.600022s 1 DceNetdb:netlink_request(): [DEBUG] Pid 0 != 2022 or seq 0!=1
+0.600022s 1 DceNetdb:netlink_request(): [DEBUG] handling netlink msg [0x7f040417f040]
+0.600022s 1 DceNetdb:netlink_request(): [DEBUG] Pid 0 != 2022 or seq 0!=1
+0.600022s 1 DceNetdb:netlink_request(): [DEBUG] handling netlink msg [0x7f040417f098]
+0.600022s 1 DceNetdb:netlink_request(): [DEBUG] Pid 0 != 2022 or seq 0!=1
+0.600022s 1 DceNetdb:netlink_request(): [DEBUG] handling netlink msg [0x7f040417f0f0]
+0.600022s 1 DceNetdb:netlink_request(): [DEBUG] Pid 0 != 2022 or seq 1!=1
+0.600022s 1 DceNetdb:netlink_request(): [WARN ] No data in the packet. It is strange 
+0.600022s 1 SimuFd:dce_recvmsg(0x14de4f0, nodeId=, 1,  fd=, 4,  msg=, 0x7f0404141160,  flags=, 0)
+0.600022s 1 UnixDatagramSocketFd:DoRecvmsg(this=, 0x1582ef0, current=, 0x14de4f0, flags=, 0)
+0.600022s 1 DceCmsg:Cmsg(0x7f0404141160)
+0.600022s 1 UnixDatagramSocketFd:DoRecvmsg(): [DEBUG] Not in MSG_ERRQUEUE
+0.600022s 1 DceNetlinkSocket:GetRxAvailable()
+1.6s 1 ProcessUtils:UtilsDoSignal(): [DEBUG] deliver signal=14
+1.6s 1 SimuFd:dce_write(0x14de4f0, 1, 1, 0x7f03fb77f035, 28)
+1.6s 1 UnixFileFd:Write(0x1479310, 0x14de4f0, 0x7f03fb77f035, 28)
+1.6s 1 UnixDatagramSocketFd:DoRecvmsg(): [DEBUG] ====== count=4096
+1.6s 1 DceNetlinkSocket:RecvFrom(0x1584300, 4096, 0, 00-00-00)
+1.6s 1 DceNetlinkSocket:Recv(0x1584300, 4096, 0)
+1.6s 1 DceNetlinkSocket:Recv(): [WARN ] Data receive queue empty
+1.6s 1 UnixDatagramSocketFd:DoRecvmsg(): [ERROR] Empty packet
+1.6s 1 DceNetlinkSocket:GetErrno()
+1.6s 1 DceNetdb:netlink_request(): [WARN ] read_len=-1 < 0
+1.6s 1 DceNetdb:dce_getifaddrs(): [WARN ] Could not RTM_GETLINK.
+1.6s 1 SimuFd:dce_close(0x14de4f0, 1, 4)
+1.6s 1 DceNetlinkSocket:Close()
 
 
 NodeContainer::GetGlobal ();
@@ -38,7 +70,7 @@ pcap-file.h
 ARPHRD_NETLINK	824
 
 PcapFile
-
+0x12 => 18 => RTM_GETLINK
 
 === Partie sur wireshark ===
 hfi_netlink_hdr_type

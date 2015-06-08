@@ -13,7 +13,8 @@ Cmsg::Cmsg (struct msghdr *msg)
     m_current ((uint8_t *)msg->msg_control),
     m_len (msg->msg_controllen)
 {
-  NS_LOG_FUNCTION(m_msg <<  m_current << m_len);
+  NS_LOG_FUNCTION(msg);
+  //m_msg <<  m_current << m_len
   NS_ASSERT(msg);
 }
 

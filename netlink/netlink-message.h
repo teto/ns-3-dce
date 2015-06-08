@@ -102,10 +102,11 @@ public:
   NetlinkMessageHeader ();
 
   /**
-   * \param type NETLINK_RTM_NEWADDR or NETLINK_RTM_NEWLINK or ...
+   * \todo
+   * \param type Should be of type NetlinkMessageType
    * \param flags
-   * \param seq
-   * \param pid
+   * \param seq Sequence number
+   * \param pid Processus id
    */
   NetlinkMessageHeader (uint16_t type, uint16_t flags, uint32_t seq, uint32_t pid);
 
@@ -136,7 +137,12 @@ private:
   uint16_t m_nlmsgType; /* Message content */
   uint16_t m_nlmsgFlags;        /* Additional flags */
   uint32_t m_nlmsgSeq;  /* Sequence number */
-  uint32_t m_nlmsgPid;  /* Sending process PID */
+  uint32_t m_nlmsgPid;  /* Sending process PID
+Netlink assigns different port-ID values to identify several socket channels opened by the
+same user-space process. The default value for the first socket is the Process IDentifier
+(PID).
+PID == 0 means the message was sent from the kernel
+*/
 };
 
 /**
@@ -167,6 +173,10 @@ private:
 };
 
 
+/**
+       Netlink messages consist of a byte stream with one or multiple nlmsghdr
+       headers  and  associated  payload.
+*/
 class NetlinkMessage : public ObjectBase
 {
 public:
@@ -242,7 +252,11 @@ private:
 };
 
 /**
- *
+ * Excerpt of manpage:
+ In  multipart  messages  (multiple  nlmsghdr  headers  with  associated
+       payload in one byte stream) the first and all  following  headers  have
+       the NLM_F_MULTI flag set, except for the last header which has the type
+       NLMSG_DONE.
  */
 class MultipartNetlinkMessage : public Header
 {
@@ -256,9 +270,18 @@ public:
   virtual void Serialize (Buffer::Iterator start) const;
   virtual uint32_t Deserialize (Buffer::Iterator start);
 
+  /**
+  */
   void AppendMessage (NetlinkMessage nlmsg);
+
   void Clear ();
+
+  /**
+  */
   uint32_t GetNMessages (void) const;
+  /**
+  *
+  */
   NetlinkMessage GetMessage (uint32_t index) const;
 
 private:
