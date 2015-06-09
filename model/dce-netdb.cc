@@ -255,6 +255,7 @@ static int
 netlink_request (struct netlink_handle *h, int type)
 {
   NS_LOG_FUNCTION(type);
+  NS_LOG_FUNCTION(NetlinkRtmTypeToStr(type));
   // TODO we should be able to convert type to some known value
   // 18 = GETLINK
   int ret;
