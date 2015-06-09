@@ -204,7 +204,7 @@ void dce_herror (const char *string)
 }
 
 // Copy from glibc source
-// eglibc-2.11.1/sysdeps/unix/sysv/linux/ifaddr.c
+// eglibc-2.11.1/sysdeps/unix/sysv/linux/ifaddrs.c
 // we may be able to include glibc/sysdeps/unix/sysv/linux/netlinkaccess.h
 struct netlink_res
 {
@@ -255,7 +255,7 @@ static int
 netlink_request (struct netlink_handle *h, int type)
 {
   NS_LOG_FUNCTION(type);
-  NS_LOG_FUNCTION(NetlinkRtmTypeToStr(type));
+//  NS_LOG_FUNCTION(NetlinkRtmTypeToStr(type));
   // TODO we should be able to convert type to some known value
   // 18 = GETLINK
   int ret;
@@ -395,6 +395,8 @@ netlink_request (struct netlink_handle *h, int type)
               goto out_fail;
             }
         } // end of for
+
+
       NS_LOG_DEBUG("End of parsing ");
 
       /* If there was nothing with the expected nlmsg_pid and nlmsg_seq,
@@ -434,6 +436,10 @@ out_fail:
   return -1;
 }
 
+
+/**
+Explain what it does here
+*/
 static int
 map_newlink (int index, struct ifaddrs_storage *ifas, int *map, int max)
 {
@@ -596,7 +602,7 @@ TODO I could check the type of
     0, 0, 0, NULL, NULL   // fd/pid/seq
   };
   struct sockaddr_nl src_addr;
-  struct netlink_res *nlp;
+  struct netlink_res *nlp;  //! answers
   struct ifaddrs_storage *ifas;
   unsigned int i, newlink, newaddr, newaddr_idx;
   int *map_newlink_data;
@@ -658,6 +664,8 @@ TODO I could check the type of
 //  NS_LOG_WARN("==== SUCCESSFUL HIPHIP HOURRA !!");
   newlink = newaddr = 0;
   // nlp = netlink_result
+  /* Count all RTM_NEWLINK and RTM_NEWADDR entries to allocate↲
+       enough memory.  */
   for (nlp = nh.nlm_list; nlp; nlp = nlp->next)
     {
       struct nlmsghdr *nlh;
@@ -665,6 +673,7 @@ TODO I could check the type of
 
       if (nlp->nlh == NULL)
         {
+          NS_LOG_WARN("no header !!");
           continue;
         }
 
@@ -675,14 +684,15 @@ TODO I could check the type of
           /* Check if the message is what we want.  */
           if ((pid_t) nlh->nlmsg_pid != nh.pid || nlh->nlmsg_seq != nlp->seq)
             {
+              NS_LOG_WARN("abort because of pid/seq problems");
               continue;
             }
 
           if (nlh->nlmsg_type == NLMSG_DONE)
             {
               break;            /* ok */
-
             }
+
           if (nlh->nlmsg_type == RTM_NEWLINK)
             {
               /* A RTM_NEWLINK message can have IFLA_STATS data. We need to
@@ -712,8 +722,10 @@ TODO I could check the type of
             {
               ++newaddr;
             }
-        }
+        } // end of loop that inspect messages
     }
+
+    NS_LOG_DEBUG("#newlink=" << newlink << " and #newaddr=" << newaddr);
 
   /* Return if no interface is up.  */
   if ((newlink + newaddr) == 0)
@@ -729,6 +741,7 @@ TODO I could check the type of
                                             + ifa_data_size);
   if (ifas == NULL)
     {
+      NS_LOG_ERROR("Failed to allocate the memory");
       result = -1;
       goto exit_free;
     }
@@ -762,16 +775,20 @@ TODO I could check the type of
           /* Check if the message is the one we want */
           if ((pid_t) nlh->nlmsg_pid != nh.pid || nlh->nlmsg_seq != nlp->seq)
             {
+              NS_LOG_WARN("abort because of pid/seq problems");
               continue;
             }
 
           if (nlh->nlmsg_type == NLMSG_DONE)
             {
+              NS_LOG_DEBUG("Abort because NLMSG_DONE");
               break;            /* ok */
-
             }
+
           if (nlh->nlmsg_type == RTM_NEWLINK)
             {
+              NS_LOG_DEBUG("New interface found");
+
               /* We found a new interface. Now extract everything from the
                  interface data we got and need.  */
               struct ifinfomsg *ifim = (struct ifinfomsg *) NLMSG_DATA (nlh);
@@ -858,6 +875,7 @@ TODO I could check the type of
             }
           else if (nlh->nlmsg_type == RTM_NEWADDR)
             {
+              NS_LOG_DEBUG("New addr found");
               struct ifaddrmsg *ifam = (struct ifaddrmsg *) NLMSG_DATA (nlh);
               struct rtattr *rta = IFA_RTA (ifam);
               size_t rtasize = IFA_PAYLOAD (nlh);
@@ -1074,9 +1092,12 @@ TODO I could check the type of
                  address, use the name from the interface entry.  */
               if (ifas[ifa_index].ifa.ifa_name == NULL)
                 {
+                  NS_LOG_DEBUG("No interface name was set");
                   ifas[ifa_index].ifa.ifa_name
                     = ifas[map_newlink (ifam->ifa_index - 1, ifas,
                                         map_newlink_data, newlink)].ifa.ifa_name;
+
+                  NS_LOG_DEBUG("Name set to " << "TODO" ) ; //ifas[ifa_index].ifa.ifa_name);
                 }
 
               /* Calculate the netmask.  */
@@ -1130,7 +1151,7 @@ TODO I could check the type of
                       *cp = c;
                     }
                 }
-            }
+            } // end of if(RTM_NEWADDR...
         }
     }
 

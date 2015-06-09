@@ -107,6 +107,7 @@ public:
    * stack. What it does is simply dumping on the wire the current
    * interface info with or without UP & RUNNING flags.
    *
+   * \note Seq number sent in this case is wront
    */
   int32_t NotifyIfLinkMessage (uint32_t interface_num);
 
@@ -183,25 +184,28 @@ private:
   DumpNetlinkRouteMessage (const NetlinkMessage &nlmsg,
                            uint16_t type, uint8_t family);
 
+  /**
+   * \param received seq
+   */
   MultipartNetlinkMessage
-  BuildInterfaceAddressDumpMessages ();
+  BuildInterfaceAddressDumpMessages (uint32_t received_seq);
 
   /**
    * \brief Build an InterfaceInfo message corresponding to n-th interface
    * \param interface_id
    */
   NetlinkMessage
-  BuildInterfaceInfoDumpMessage (uint32_t interface_id);
+  BuildInterfaceInfoDumpMessage (uint32_t interface_id, uint32_t seq);
 
   /**
    * \brief Build a multipart netlink message consisting of several
    * (possibly zero) InterfaceInfo dump messages
    */
   MultipartNetlinkMessage
-  BuildInterfaceInfoDumpMessages ();
+  BuildInterfaceInfoDumpMessages (uint32_t seq);
 
   MultipartNetlinkMessage
-  BuildRouteDumpMessages ();
+  BuildRouteDumpMessages (uint32_t seq);
 
   /**
   * \returns 0 if doing operation(ADD/DEL/GET) is OK, < 0 for an error.

@@ -707,19 +707,20 @@ NetlinkSocket::DumpNetlinkRouteMessage (const NetlinkMessage &nlmsg, uint16_t ty
 
   MultipartNetlinkMessage nlmsg_dump;
   NetlinkMessageHeader nhr = nlmsg.GetHeader ();
+  uint32_t seq = nhr.GetMsgSeq();
   int32_t err;
 
   if (type == NETLINK_RTM_GETADDR)
     {
-      nlmsg_dump = BuildInterfaceAddressDumpMessages ();
+      nlmsg_dump = BuildInterfaceAddressDumpMessages (seq);
     }
   else if (type == NETLINK_RTM_GETLINK)
     {
-      nlmsg_dump = BuildInterfaceInfoDumpMessages ();
+      nlmsg_dump = BuildInterfaceInfoDumpMessages (seq);
     }
   else if (type == NETLINK_RTM_GETROUTE)
     {
-      nlmsg_dump = BuildRouteDumpMessages ();
+      nlmsg_dump = BuildRouteDumpMessages (seq);
     }
   else
     {
@@ -771,7 +772,7 @@ NetlinkSocket::DoNetlinkRouteMessage (const NetlinkMessage &nlmsg, uint16_t type
 }
 
 MultipartNetlinkMessage
-NetlinkSocket::BuildInterfaceAddressDumpMessages ()
+NetlinkSocket::BuildInterfaceAddressDumpMessages (uint32_t received_seq)
 {
   NS_LOG_FUNCTION (this);
   MultipartNetlinkMessage nlmsg_dump;
@@ -801,7 +802,11 @@ NetlinkSocket::BuildInterfaceAddressDumpMessages ()
 
       //next fill the message body
       NetlinkMessage nlmsg_ifa;
-      NetlinkMessageHeader nhr = NetlinkMessageHeader (NETLINK_RTM_NEWADDR, NETLINK_MSG_F_MULTI, 0, m_kernelPid);
+      NetlinkMessageHeader nhr = NetlinkMessageHeader (NETLINK_RTM_NEWADDR, NETLINK_MSG_F_MULTI,
+                                received_seq,
+//                                m_kernelPid
+                                m_Pid
+                                );
       InterfaceAddressMessage ifamsg;
 
       ifamsg.SetInterfaceIndex (i);
@@ -880,7 +885,7 @@ NetlinkSocket::BuildInterfaceAddressDumpMessages ()
 }
 
 NetlinkMessage
-NetlinkSocket::BuildInterfaceInfoDumpMessage (uint32_t interface_num)
+NetlinkSocket::BuildInterfaceInfoDumpMessage (uint32_t interface_num, uint32_t seq)
 {
   NS_LOG_FUNCTION (this << "interface_num=" << interface_num);
 
@@ -919,7 +924,7 @@ NetlinkSocket::BuildInterfaceInfoDumpMessage (uint32_t interface_num)
   NetlinkMessage nlmsg_ifinfo;
   NetlinkMessageHeader nhr = NetlinkMessageHeader (NETLINK_RTM_NEWLINK,
 //    NETLINK_MSG_F_MULTI, 0, m_kernelPid);
-    NETLINK_MSG_F_MULTI, 0, m_Pid);
+    NETLINK_MSG_F_MULTI, seq, m_Pid);
   InterfaceInfoMessage ifinfomsg;
 
   ifinfomsg.SetFamily (0);      // AF_UNSPEC
@@ -954,18 +959,20 @@ NetlinkSocket::BuildInterfaceInfoDumpMessage (uint32_t interface_num)
 }
 
 MultipartNetlinkMessage
-NetlinkSocket::BuildInterfaceInfoDumpMessages ()
+NetlinkSocket::BuildInterfaceInfoDumpMessages (uint32_t seq)
 {
   NS_LOG_FUNCTION (this << "MATT");
   MultipartNetlinkMessage nlmsg_dump;
   for (uint32_t i = 0; i < m_node->GetNDevices (); i++)
     {
-      nlmsg_dump.AppendMessage (BuildInterfaceInfoDumpMessage (i));
+      NetlinkMessage msg = BuildInterfaceInfoDumpMessage (i, seq);
+//      msg.GetHeader().SetMsgSeq(seq);
+      nlmsg_dump.AppendMessage (msg);
     }
   return nlmsg_dump;
 }
 MultipartNetlinkMessage
-NetlinkSocket::BuildRouteDumpMessages ()
+NetlinkSocket::BuildRouteDumpMessages (uint32_t seq)
 {
   NS_LOG_FUNCTION (this);
   MultipartNetlinkMessage nlmsg_dump;
@@ -981,7 +988,8 @@ NetlinkSocket::BuildRouteDumpMessages ()
   for (uint32_t i = 0; i < m_ipv4Routing->GetNRoutes (); i++)
     {
       NetlinkMessage nlmsg_rt;
-      NetlinkMessageHeader nhr = NetlinkMessageHeader (NETLINK_RTM_NEWROUTE, NETLINK_MSG_F_MULTI, 0, m_kernelPid);
+      NetlinkMessageHeader nhr = NetlinkMessageHeader (NETLINK_RTM_NEWROUTE, NETLINK_MSG_F_MULTI,
+                            seq, m_Pid);
       RouteMessage rtmsg;
       Ipv4RoutingTableEntry route = m_ipv4Routing->GetRoute (i);
 
@@ -1623,13 +1631,18 @@ NetlinkSocket::NotifyIfLinkMessage (uint32_t interface_num)
 {
   if (m_ipv4Routing == 0)
     {
+      NS_LOG_ERROR("No Ipv4 routing set");
       return -1;                     //should be some nicer error code
-
     }
+
   NS_LOG_FUNCTION (this << interface_num);
 
+  /////////////////////////////////////////////////////////
+  //// WARNING: SEQUENCE NUMBER IS WRONG HERE !!!!
+  /////////////////////////////////////////////////////////
+  NS_LOG_ERROR("Sequence number should be wrong here");
   MultipartNetlinkMessage nlmsg_multi;
-  nlmsg_multi.AppendMessage (BuildInterfaceInfoDumpMessage (interface_num));
+  nlmsg_multi.AppendMessage (BuildInterfaceInfoDumpMessage (interface_num, 0));
 
   //then append netlink message with type NLMSG_DONE
   NetlinkMessage nlmsg_done;
