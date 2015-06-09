@@ -137,11 +137,17 @@ private:
   uint16_t m_nlmsgType; /* Message content */
   uint16_t m_nlmsgFlags;        /* Additional flags */
   uint32_t m_nlmsgSeq;  /* Sequence number */
-  uint32_t m_nlmsgPid;  /* Sending process PID
-Netlink assigns different port-ID values to identify several socket channels opened by the
-same user-space process. The default value for the first socket is the Process IDentifier
-(PID).
-PID == 0 means the message was sent from the kernel
+  uint32_t m_nlmsgPid;  /* Portd ID (PID)*/
+// FALSE ?
+//Netlink assigns different port-ID values to identify several socket channels opened by the
+//same user-space process. The default value for the first socket is the Process IDentifier
+//(PID).
+//PID == 0 means the message was sent from the kernel
+
+/*
+TRUE
+The port number specifies the peer to which the message should be delivered to. If not specified, the message will be delivered to the first matching kernel side socket of the same protocol family.
+\see http://www.infradead.org/~tgr/libnl/doc/core.html#core_addressing
 */
 };
 

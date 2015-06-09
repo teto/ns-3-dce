@@ -258,7 +258,7 @@ netlink_request (struct netlink_handle *h, int type)
   // TODO we should be able to convert type to some known value
   // 18 = GETLINK
   int ret;
-  struct sockaddr_nl snl;
+  struct sockaddr_nl dst_addr;
   struct netlink_res *nlm_next;
   struct sockaddr_nl nladdr;
   struct nlmsghdr *nlmh;
@@ -268,22 +268,34 @@ netlink_request (struct netlink_handle *h, int type)
   struct
   {
     struct nlmsghdr nlh;  //!< Netlink header
-    struct rtgenmsg g;    //!<
+    struct rtgenmsg g;    //!< Routing message
   } req;
 
-  memset (&snl, 0, sizeof snl);
-  snl.nl_family = AF_NETLINK;
+  memset (&dst_addr, 0, sizeof dst_addr);
+  dst_addr.nl_family = AF_NETLINK;
 
+// Matt: inspired by libc
+//  if (h->seq == 0)↲
+//      h->seq = time (NULL);
+//
   memset (&req, 0, sizeof req);
   req.nlh.nlmsg_len = sizeof req;
   req.nlh.nlmsg_type = type;
   req.nlh.nlmsg_flags = NLM_F_ROOT | NLM_F_MATCH | NLM_F_REQUEST;
-  req.nlh.nlmsg_pid = h->pid;
-  req.nlh.nlmsg_seq = ++h->seq;
+  // Matt: inspired by libc
+  // original code
+//  req.nlh.nlmsg_pid = h->pid;
+  req.nlh.nlmsg_pid = 0;
+  // le ++ n'est pas dans le libc
+  req.nlh.nlmsg_seq = h->seq;
   req.g.rtgen_family = AF_UNSPEC;
 
+  // in libc "__netlink_request" calls "__netlink_sendreq"
+  // which calls socket/sendto.c
+  // 0 => flags
+  NS_LOG_DEBUG("Sending from pid " << req.nlh.nlmsg_pid << " to pid " << dst_addr.nl_pid);
   ret = dce_sendto (h->fd, (void *) &req, sizeof req, 0,
-                    (struct sockaddr *) &snl, sizeof snl);
+                    (struct sockaddr *) &dst_addr, sizeof dst_addr);
   if (ret < 0)
     {
       NS_LOG_WARN("sendto failed");
@@ -353,7 +365,7 @@ netlink_request (struct netlink_handle *h, int type)
           if ((pid_t) nlmh->nlmsg_pid != h->pid
               || nlmh->nlmsg_seq != h->seq)
             {
-              NS_LOG_DEBUG("Pid " << nlmh->nlmsg_pid << " != " << h->pid << " or seq "
+              NS_LOG_DEBUG("Sender pid " << nlmh->nlmsg_pid << " != " << h->pid << " or seq "
                            << nlmh->nlmsg_seq << "!=" << h->seq
                            );
               continue;
@@ -580,9 +592,9 @@ TODO I could check the type of
   /* */
   struct netlink_handle nh =
   {
-    0, 0, 0, NULL, NULL
+    0, 0, 0, NULL, NULL   // fd/pid/seq
   };
-  struct sockaddr_nl nladdr;
+  struct sockaddr_nl src_addr;
   struct netlink_res *nlp;
   struct ifaddrs_storage *ifas;
   unsigned int i, newlink, newaddr, newaddr_idx;
@@ -600,24 +612,27 @@ TODO I could check the type of
       return -1;
     }
 
-  memset (&nladdr, 0, sizeof (nladdr));
-  nladdr.nl_family = AF_NETLINK;
-  if (dce_bind (nh.fd, (struct sockaddr *) &nladdr, sizeof (nladdr)) < 0)
+  memset (&src_addr, 0, sizeof (src_addr));
+  src_addr.nl_family = AF_NETLINK;
+  if (dce_bind (nh.fd, (struct sockaddr *) &src_addr, sizeof (src_addr)) < 0)
     {
       NS_LOG_WARN("Could not bind netlink handle");
       dce_close (nh.fd);
       Current ()->err = EINVAL;
       return -1;
     }
-  socklen_t addr_len = sizeof (nladdr);
-  if (dce_getsockname (nh.fd, (struct sockaddr *) &nladdr, &addr_len) < 0)
+
+  /* determine the ID the kernel assigned for this netlink connection */
+  socklen_t addr_len = sizeof (src_addr);
+  if (dce_getsockname (nh.fd, (struct sockaddr *) &src_addr, &addr_len) < 0)
     {
       NS_LOG_WARN("Could not get sockname.");
       dce_close (nh.fd);
       Current ()->err = EINVAL;
       return -1;
     }
-  nh.pid = nladdr.nl_pid;
+  NS_LOG_DEBUG("Bound to address with pid [" << src_addr.nl_pid << "]");
+  nh.pid = src_addr.nl_pid;
 
   // MATT: c la que ca foire
   if (netlink_request (&nh, RTM_GETLINK) < 0)
@@ -628,6 +643,7 @@ TODO I could check the type of
       return -1;
     }
 
+  /** now ask the kernel to dump the descriptions of the interfaces */
   ++nh.seq;
   if (netlink_request (&nh, RTM_GETADDR) < 0)
     {
@@ -638,8 +654,9 @@ TODO I could check the type of
     }
 
 
-
+//  NS_LOG_WARN("==== SUCCESSFUL HIPHIP HOURRA !!");
   newlink = newaddr = 0;
+  // nlp = netlink_result
   for (nlp = nh.nlm_list; nlp; nlp = nlp->next)
     {
       struct nlmsghdr *nlh;
