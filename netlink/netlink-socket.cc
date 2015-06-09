@@ -19,6 +19,13 @@
  *         Hajime Tazaki <tazaki@sfc.wide.ad.jp>
  */
 
+ #undef NS_LOG_APPEND_CONTEXT
+
+#define NS_LOG_APPEND_CONTEXT \
+    std::clog << Simulator::Now ().GetSeconds () << " [pid " << m_Pid << "] ";
+//  if (m_node) { std::clog << Simulator::Now ().GetSeconds () << " [pid " << m_Pid << "] "; }
+
+
 #include "netlink-socket.h"
 #include "netlink-socket-address.h"
 #include "netlink-message.h"
@@ -240,6 +247,7 @@ NetlinkSocket::Bind (const Address &address)
   NetlinkSocketAddress ad = NetlinkSocketAddress::ConvertFrom (address);
   return DoBind (ad);
 }
+
 int
 NetlinkSocket::DoBind (const NetlinkSocketAddress &address)
 {
@@ -507,10 +515,11 @@ NetlinkSocket::GetAllowBroadcast () const
 }
 
 
+// is it a from_ or to address ?
 void
 NetlinkSocket::ForwardUp (Ptr<Packet> packet, const NetlinkSocketAddress &address)
 {
-  NS_LOG_FUNCTION (this << packet << address);
+  NS_LOG_FUNCTION (this << packet << "from_address" << address);
 
   if (m_shutdownRecv)
     {
@@ -558,7 +567,7 @@ NetlinkSocket::SendMessageBroadcast (const MultipartNetlinkMessage &nlmsg,
                                      uint32_t group,
                                      Ptr<Node> node)
 {
-  NS_LOG_FUNCTION ("SendMessageBroadcast" << group);
+//  NS_LOG_FUNCTION ("SendMessageBroadcast" << group);
   //fisrt find the dest netlink socket through group value, then attach this nlmsg to its recv-queue
   for (uint32_t i = 0; i < GroupSockets::GetNSockets (); i++)
     {
@@ -568,7 +577,7 @@ NetlinkSocket::SendMessageBroadcast (const MultipartNetlinkMessage &nlmsg,
           && (nlsock->GetPid () != m_kernelPid)
           && node == nlsock->GetNode ())
         {
-          NS_LOG_DEBUG ("SendMessageBroadcast to pid " << nlsock->GetPid ());
+//          NS_LOG_DEBUG ("SendMessageBroadcast to pid " << nlsock->GetPid ());
 
           //here we send message instantly
           Ptr<Packet> p = Create<Packet> ();
@@ -690,9 +699,9 @@ NetlinkSocket::HandleNetlinkRouteMessage (const NetlinkMessage &nlmsg)
 int32_t
 NetlinkSocket::DumpNetlinkRouteMessage (const NetlinkMessage &nlmsg, uint16_t type, uint8_t family)
 {
-  NS_LOG_FUNCTION (this << type << (int)family);
+  NS_LOG_FUNCTION (this << "type=" << type << "family=" << NetlinkRtmTypeToStr(type));
   // TODO
-  NS_LOG_INFO(NetlinkRtmTypeToStr(type) << " family ");
+//  NS_LOG_INFO(NetlinkRtmTypeToStr(type) << " family ");
 
   NS_ASSERT (type == NETLINK_RTM_GETADDR || type == NETLINK_RTM_GETROUTE || type == NETLINK_RTM_GETLINK);
 
@@ -714,6 +723,7 @@ NetlinkSocket::DumpNetlinkRouteMessage (const NetlinkMessage &nlmsg, uint16_t ty
     }
   else
     {
+      NS_LOG_ERROR("Unknown type " << type);
       m_errno = ERROR_INVAL;
       return -1;
     }
@@ -721,7 +731,8 @@ NetlinkSocket::DumpNetlinkRouteMessage (const NetlinkMessage &nlmsg, uint16_t ty
   //then append netlink message with type NLMSG_DONE
   NetlinkMessage nlmsg_done;
   NetlinkMessageHeader nhr2 = NetlinkMessageHeader (NETLINK_MSG_DONE, NETLINK_MSG_F_MULTI,
-                                                    nhr.GetMsgSeq (), m_kernelPid);
+                                                    nhr.GetMsgSeq (), m_Pid);
+                                          //m_kernelPid
   nlmsg_done.SetHeader (nhr2);
   //kernel append nlmsg_dump size to it, here we omit it
   nlmsg_dump.AppendMessage (nlmsg_done);
@@ -906,7 +917,9 @@ NetlinkSocket::BuildInterfaceInfoDumpMessage (uint32_t interface_num)
     }
 
   NetlinkMessage nlmsg_ifinfo;
-  NetlinkMessageHeader nhr = NetlinkMessageHeader (NETLINK_RTM_NEWLINK, NETLINK_MSG_F_MULTI, 0, m_kernelPid);
+  NetlinkMessageHeader nhr = NetlinkMessageHeader (NETLINK_RTM_NEWLINK,
+//    NETLINK_MSG_F_MULTI, 0, m_kernelPid);
+    NETLINK_MSG_F_MULTI, 0, m_Pid);
   InterfaceInfoMessage ifinfomsg;
 
   ifinfomsg.SetFamily (0);      // AF_UNSPEC

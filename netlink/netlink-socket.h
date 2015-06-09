@@ -119,6 +119,10 @@ public:
   //  int32_t NotifyRouteMessage(Ojbect route, uint16_t type, uint8_t family);
 
 private:
+  /**
+   * DoBind should assign a port id equal to the processus id, except if that processus
+   * opens several sockets in which case it should be increased
+   **/
   int DoBind (const NetlinkSocketAddress &address);
   virtual void DoDispose (void);
   void ForwardUp (Ptr<Packet> p, const NetlinkSocketAddress &address);
@@ -170,8 +174,11 @@ private:
   int32_t HandleNetlinkRouteMessage (const NetlinkMessage &nlmsg);
 
   /**
-  * \returns 0 if dumping operation is OK, < 0 for an error.
-  */
+   * \todo see below
+   * \param type Should be of type NetlinkRtmType_e
+   * \param family
+   * \returns 0 if dumping operation is OK, < 0 for an error.
+   */
   int32_t
   DumpNetlinkRouteMessage (const NetlinkMessage &nlmsg,
                            uint16_t type, uint8_t family);
@@ -181,9 +188,10 @@ private:
 
   /**
    * \brief Build an InterfaceInfo message corresponding to n-th interface
+   * \param interface_id
    */
   NetlinkMessage
-  BuildInterfaceInfoDumpMessage (uint32_t interface_num);
+  BuildInterfaceInfoDumpMessage (uint32_t interface_id);
 
   /**
    * \brief Build a multipart netlink message consisting of several
@@ -224,7 +232,7 @@ private:
   // Socket options (attributes)
   uint32_t m_rcvBufSize;
 
-  uint32_t m_Pid;
+  uint32_t m_Pid;     /**< port id of the socket */
   uint32_t m_Groups;
   Callback<void, Ipv4Address,uint8_t,uint8_t,uint8_t,uint32_t> m_icmpCallback;
 
