@@ -175,7 +175,7 @@ int main (int argc, char *argv[])
 #endif
 
   // Launch ntp server on node 1
-  dce.SetBinary ("/home/teto/ntp/ntpd/ntpd");
+  dce.SetBinary ("ntpd");
   dce.ResetArguments ();
   dce.ResetEnvironment ();
 
