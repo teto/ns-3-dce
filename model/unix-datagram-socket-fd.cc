@@ -296,7 +296,7 @@ UnixDatagramSocketFd::DoRecvmsg (struct msghdr *msg, int flags)
           cmsg.Finish ();
         }
         else {
-            NS_LOG_WARN("msg_controllen < 0 , is that a problem ?");
+//            NS_LOG_WARN("msg_controllen < 0 , is that a problem ?");
         }
 
       // XXX: we ignore MSG_TRUNC for the return value.

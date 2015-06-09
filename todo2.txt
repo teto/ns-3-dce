@@ -89,6 +89,10 @@ You may need to add --with-openssl-libdir=/usr/lib/x86_64-linux-gnu
 Dans measure_tick_fuzz, ntp essaye de voir quelle est la précision max de l'horlge en mesurant rapidement 
 // 20e-9	== minimum clock increment (s)
 
+To add debug statements in "isc" folder, use "isc_log_write"
+To add debug statements in "ntpd" folder, use "msyslog" I think
+
+
 
 in ntpsim=.c:get_systime on a:
     /*
