@@ -675,12 +675,17 @@ int dce_fchdir (int fd)
   current->process->cwd =  UtilsGetVirtualFilePath (std::string (p, base.length () - 1));
   return 0;
 }
+
+
 unsigned dce_if_nametoindex (const char *ifname)
 {
+  NS_LOG_FUNCTION(ifname);
+
   Thread *current = Current ();
   Ptr<SocketFdFactory> factory = 0;
   factory = current->process->manager->GetObject<SocketFdFactory> ();
 
+  // if linux kernel
   if (factory->GetInstanceTypeId () == TypeId::LookupByName ("ns3::LinuxSocketFdFactory"))
     {
       struct ifreq ifr;
@@ -698,6 +703,7 @@ unsigned dce_if_nametoindex (const char *ifname)
         }
       return ifr.ifr_ifindex;
     }
+  // if ns3 kernel
   else
     {
       int index = 0;

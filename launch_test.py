@@ -16,6 +16,7 @@ NS_LOG += "*=error|warn|prefix_node|prefix_func"
 """
 DCE logs
 """
+NS_LOG += ":TypeId"
 NS_LOG += ":DceCmsg"
 NS_LOG += ":DceManager"
 NS_LOG += ":DceExecUtils"
