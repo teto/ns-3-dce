@@ -373,10 +373,6 @@ NetlinkSocket::Recv (uint32_t maxSize, uint32_t flags)
   Ptr<Packet> p = m_dataReceiveQueue.front ();
   if (p->GetSize () <= maxSize)
     {
-      // Addition by matt
-      NS_LOG_UNCOND("Netlink rcv");
-      m_promiscSnifferTrace (p);
-
       m_dataReceiveQueue.pop ();
       m_rxAvailable -= p->GetSize ();
     }
@@ -815,7 +811,10 @@ NetlinkSocket::BuildInterfaceAddressDumpMessages (uint32_t received_seq)
       ifamsg.SetFlags (0);
       ifamsg.SetScope (RouteMessage::RT_SCOPE_UNIVERSE);
 
-      ifamsg.AppendAttribute (NetlinkAttribute (InterfaceAddressMessage::IF_A_LOCAL,    ADDRESS, addri));
+      std::stringstream ss;
+      ss <<  "ns3-device" << i;
+
+      ifamsg.AppendAttribute (NetlinkAttribute (InterfaceInfoMessage::IFL_A_IFNAME,    STRING,  ss.str ()));      ifamsg.AppendAttribute (NetlinkAttribute (InterfaceAddressMessage::IF_A_LOCAL,    ADDRESS, addri));
       ifamsg.AppendAttribute (NetlinkAttribute (InterfaceAddressMessage::IF_A_ADDRESS,  ADDRESS, addri));
       ifamsg.AppendAttribute (NetlinkAttribute (InterfaceAddressMessage::IF_A_BROADCAST,ADDRESS, bcast));
       //      ifamsg.AppendAttribute (NetlinkAttribute (InterfaceAddressMessage::IF_A_LABEL,    STRING,  "ns3-ifaddr"));//not used in ns3
@@ -853,7 +852,8 @@ NetlinkSocket::BuildInterfaceAddressDumpMessages (uint32_t received_seq)
 
           //next fill the message body
           NetlinkMessage nlmsg_ifa;
-          NetlinkMessageHeader nhr = NetlinkMessageHeader (NETLINK_RTM_NEWADDR, NETLINK_MSG_F_MULTI, 0, m_kernelPid);
+          NetlinkMessageHeader nhr = NetlinkMessageHeader (
+            NETLINK_RTM_NEWADDR, NETLINK_MSG_F_MULTI, received_seq, m_Pid);
           InterfaceAddressMessage ifamsg;
 
           ifamsg.SetInterfaceIndex (i);
@@ -870,8 +870,10 @@ NetlinkSocket::BuildInterfaceAddressDumpMessages (uint32_t received_seq)
               ifamsg.SetLength (mask_len);
               ifamsg.SetScope (RouteMessage::RT_SCOPE_UNIVERSE);
             }
+          std::stringstream ss;
+          ss <<  "ns3-device" << i;
 
-
+          ifamsg.AppendAttribute (NetlinkAttribute (InterfaceInfoMessage::IFL_A_IFNAME,    STRING,  ss.str ()));      ifamsg.AppendAttribute (NetlinkAttribute (InterfaceAddressMessage::IF_A_LOCAL,    ADDRESS, addri));
           ifamsg.AppendAttribute (NetlinkAttribute (InterfaceAddressMessage::IF_A_LOCAL,    ADDRESS, addri));
           ifamsg.AppendAttribute (NetlinkAttribute (InterfaceAddressMessage::IF_A_ADDRESS,  ADDRESS, addri));
           //XXXother attributes not used by ns3
