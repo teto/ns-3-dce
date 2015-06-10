@@ -2,6 +2,13 @@
 CHAUSSEE DE BRUXELLES 159
 1410 WATERLOO
 
+ b dce-netdb.cc:1095
+ info breakpoints
+ delete breakpoint <id>
+
+Avec la 1.12, netlinkok.pcap n'est pas correctement disséqué; il manque pas mal d'attributs
+
+A un moment wireshark écrit inteface (manque le R)
 
 /* */
 isc_interfaceiter_create

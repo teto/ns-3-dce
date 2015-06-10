@@ -436,9 +436,18 @@ out_fail:
   return -1;
 }
 
+/* We know the number of RTM_NEWLINK entries, so we reserve the first↲
+   # of entries for this type. All RTM_NEWADDR entries have an index↲
+   pointer to the RTM_NEWLINK entry.  To find the entry, create↲
+   a table to map kernel index entries to our index numbers.↲
+   Since we get at first all RTM_NEWLINK entries, it can never happen↲
+   that a RTM_NEWADDR index is not known to this map.  */
 
 /**
 Explain what it does here
+\param max maximum number of elements that will be stored
+\param ifaddrs_storage
+\param map should already exist, it can be modified
 */
 static int
 map_newlink (int index, struct ifaddrs_storage *ifas, int *map, int max)
@@ -447,8 +456,10 @@ map_newlink (int index, struct ifaddrs_storage *ifas, int *map, int max)
 
   for (i = 0; i < max; i++)
     {
+      // if the element is free
       if (map[i] == -1)
         {
+          // we assign this index to it
           map[i] = index;
           if (i > 0)
             {
@@ -802,6 +813,7 @@ TODO I could check the type of
                                        map_newlink_data, newlink);
               ifas[ifa_index].ifa.ifa_flags = ifim->ifi_flags;
 
+              /* check size boundaries */
               while (RTA_OK (rta, rtasize))
                 {
                   char *rta_data = (char *)RTA_DATA (rta);
@@ -843,11 +855,14 @@ TODO I could check the type of
                       break;
 
                     case IFLA_IFNAME:   /* Name of Interface */
+                      NS_LOG_DEBUG("Received ifa_name for if#" << ifa_index);
                       if ((rta_payload + 1) <= sizeof (ifas[ifa_index].name))
                         {
+                          NS_LOG_DEBUG("Processing ifa_name...");
                           ifas[ifa_index].ifa.ifa_name = ifas[ifa_index].name;
                           *(char *) __mempcpy (ifas[ifa_index].name, rta_data,
                                                rta_payload) = '\0';
+                          NS_LOG_DEBUG("Name set to " << ifas[ifa_index].ifa.ifa_name );
                         }
                       break;
 
@@ -1092,7 +1107,7 @@ TODO I could check the type of
                  address, use the name from the interface entry.  */
               if (ifas[ifa_index].ifa.ifa_name == NULL)
                 {
-                  NS_LOG_DEBUG("No interface name was set");
+                  NS_LOG_DEBUG("No interface name was set for ifa_index=" << ifa_index);
                   ifas[ifa_index].ifa.ifa_name
                     = ifas[map_newlink (ifam->ifa_index - 1, ifas,
                                         map_newlink_data, newlink)].ifa.ifa_name;
