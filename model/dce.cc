@@ -686,7 +686,9 @@ unsigned dce_if_nametoindex (const char *ifname)
   factory = current->process->manager->GetObject<SocketFdFactory> ();
 
   // if linux kernel
-  if (factory->GetInstanceTypeId () == TypeId::LookupByName ("ns3::LinuxSocketFdFactory"))
+  TypeId result;
+  if (TypeId::LookupByNameFailSafe ("ns3::LinuxSocketFdFactory", &result)
+      && factory->GetInstanceTypeId () == result)
     {
       struct ifreq ifr;
       int fd = dce_socket (AF_INET, SOCK_DGRAM, 0);
