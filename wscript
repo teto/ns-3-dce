@@ -567,7 +567,7 @@ def build(bld):
         kernel_source = [
             'model/kernel-socket-fd-factory.cc',
             'model/kernel-socket-fd.cc',
-            # 'model/linux-socket-fd-factory.cc', # moved by matt in global
+             'model/linux-socket-fd-factory.cc',
             'model/freebsd-socket-fd-factory.cc',
             'model/linux/linux-socket-impl.cc',
             ]
@@ -614,7 +614,6 @@ def build(bld):
         'model/dce-stat.cc',
         'model/dce-syslog.cc',
         'model/dce-global-variables.cc',
-        'model/linux-socket-fd-factory.cc',
         'model/cmsg.cc',
         'model/waiter.cc',
         'model/kingsley-alloc.cc',

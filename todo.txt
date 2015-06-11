@@ -10,34 +10,9 @@ Avec la 1.12, netlinkok.pcap n'est pas correctement disséqué; il manque pas ma
 
 A un moment wireshark écrit inteface (manque le R)
 
+stub mlockall; not really implemented
 
-56	../nptl/sysdeps/unix/sysv/linux/raise.c: Aucun fichier ou dossier de ce type.
-(gdb) bt
-#0  0x00007fffee3cde37 in __GI_raise (sig=sig@entry=6) at ../nptl/sysdeps/unix/sysv/linux/raise.c:56
-#1  0x00007fffee3cf528 in __GI_abort () at abort.c:89
-#2  0x00007fffeebf105d in __gnu_cxx::__verbose_terminate_handler() ()
-   from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
-#3  0x00007fffeebeeed6 in ?? () from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
-#4  0x00007fffeebeef21 in std::terminate() () from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
-#5  0x00007ffff73cd32b in ns3::TypeId::LookupByName (name="ns3::LinuxSocketFdFactory")
-    at ../src/core/model/type-id.cc:560
-#6  0x00007ffff7a7a8b1 in dce_if_nametoindex (ifname=0x7ffff7fc62c8 "ns3-device1")
-    at ../model/dce.cc:684
-#7  0x00007fffea372330 in if_nametoindex () at ../model/libc-ns3.h:501
-#8  0x00007fffe91a2936 in internal_current (iter=0x7ffff7fc6298)
-    at ./../lib/isc/unix/ifiter_getifaddrs.c:237
-#9  0x00007fffe91a2f22 in isc_interfaceiter_first (iter=0x7ffff7fc6298)
-    at ./../lib/isc/unix/interfaceiter.c:282
-#10 0x00007fffe91281fc in update_interfaces (port=123, receiver=0x0, data=0x0) at ntp_io.c:1781
-#11 0x00007fffe9128ac6 in create_sockets (port=123) at ntp_io.c:2068
-#12 0x00007fffe9125745 in io_open_sockets () at ntp_io.c:493
-#13 0x00007fffe91247ae in config_ntpd (ptree=0x7ffff7fed5e8, input_from_files=1) at ntp_config.c:4314
-#14 0x00007fffe9124c96 in save_and_apply_config_tree (input_from_file=1) at ntp_config.c:4546
-#15 0x00007fffe9124ab7 in getconfig (argc=0, argv=0x695d60) at ntp_config.c:4482
-#16 0x00007fffe9132e6f in ntpdmain (argc=0, argv=0x695d60) at ntpd.c:792
-#17 0x00007fffe91323d7 in main (argc=4, argv=0x695d40) at ntpd.c:289
-#18 0x00007ffff7a5180d in ns3::DceManager::DoStartProcess (context=0x695f30)
-    at ../model/dce-manager.cc:283
+
 
 
 
