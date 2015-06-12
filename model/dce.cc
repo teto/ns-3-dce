@@ -709,19 +709,26 @@ unsigned dce_if_nametoindex (const char *ifname)
   else
     {
       int index = 0;
-      Ptr<Node> node = Current ()->process->manager->GetObject<Node> ();
-      Ptr<Ipv4> ipv4 = node->GetObject<Ipv4> ();
-
-      for (uint32_t i = 0; i < node->GetNDevices (); ++i)
-        {
-          Ptr<NetDevice> dev = node->GetDevice (i);
-          if (ifname == Names::FindName (dev))
-            {
-              NS_LOG_INFO("Match found");
-              index = ipv4->GetInterfaceForDevice (dev);
-              return index;
-            }
-        }
+      std::string temp;
+      std::istringstream iss(ifname);
+      iss >> temp;
+      iss >> index;
+      NS_LOG_UNCOND("Extracted [" << temp << "] and index=" << index);
+      return index;
+//
+//      Ptr<Node> node = Current ()->process->manager->GetObject<Node> ();
+//      Ptr<Ipv4> ipv4 = node->GetObject<Ipv4> ();
+//
+//      for (uint32_t i = 0; i < node->GetNDevices (); ++i)
+//        {
+//          Ptr<NetDevice> dev = node->GetDevice (i);
+//          if (ifname == Names::FindName (dev))
+//            {
+//              NS_LOG_INFO("Match found");
+//              index = ipv4->GetInterfaceForDevice (dev);
+//              return index;
+//            }
+//        }
       // TODO it should return an error
       NS_FATAL_ERROR("Could not find the index for if [" << ifname << "]");
       return 0;

@@ -65,6 +65,11 @@ NS_LOG_COMPONENT_DEFINE ("DceNetlinkSocket");
 
 namespace ns3 {
 
+
+
+
+
+
 // GroupSockets store the netlinksocket with noero group value
 // it was due to the mulitcast netlink messages.
 class GroupSockets
@@ -813,14 +818,13 @@ NetlinkSocket::BuildInterfaceAddressDumpMessages (uint32_t received_seq)
       ifamsg.SetScope (RouteMessage::RT_SCOPE_UNIVERSE);
 
       // Look for the name of the device
-      Ptr<NetDevice> device = ipv4->GetNetDevice (i);
-      std::string name = Names::FindName( device );
-      NS_LOG_INFO("NAME=" << name);
+//      Ptr<NetDevice> device = ipv4->GetNetDevice (i);
+//      std::string name = Names::FindName( device );
 
-      std::stringstream ss;
-      ss <<  "ns3-device" << i;
-
-      ifamsg.AppendAttribute (NetlinkAttribute (InterfaceInfoMessage::IFL_A_IFNAME,    STRING,  ss.str ()));      ifamsg.AppendAttribute (NetlinkAttribute (InterfaceAddressMessage::IF_A_LOCAL,    ADDRESS, addri));
+//      NS_LOG_INFO("NAME=" << name);
+      std::string name = UtilsGenerateIfNameFromIndex( i );
+      ifamsg.AppendAttribute (NetlinkAttribute (InterfaceInfoMessage::IFL_A_IFNAME,    STRING, name ));
+      ifamsg.AppendAttribute (NetlinkAttribute (InterfaceAddressMessage::IF_A_LOCAL,    ADDRESS, addri));
       ifamsg.AppendAttribute (NetlinkAttribute (InterfaceAddressMessage::IF_A_ADDRESS,  ADDRESS, addri));
       ifamsg.AppendAttribute (NetlinkAttribute (InterfaceAddressMessage::IF_A_BROADCAST,ADDRESS, bcast));
       //      ifamsg.AppendAttribute (NetlinkAttribute (InterfaceAddressMessage::IF_A_LABEL,    STRING,  "ns3-ifaddr"));//not used in ns3
@@ -876,10 +880,11 @@ NetlinkSocket::BuildInterfaceAddressDumpMessages (uint32_t received_seq)
               ifamsg.SetLength (mask_len);
               ifamsg.SetScope (RouteMessage::RT_SCOPE_UNIVERSE);
             }
-          std::stringstream ss;
-          ss <<  "ns3-device" << i;
 
-          ifamsg.AppendAttribute (NetlinkAttribute (InterfaceInfoMessage::IFL_A_IFNAME,    STRING,  ss.str ()));      ifamsg.AppendAttribute (NetlinkAttribute (InterfaceAddressMessage::IF_A_LOCAL,    ADDRESS, addri));
+          std::string name = UtilsGenerateIfNameFromIndex( i );
+
+          ifamsg.AppendAttribute (NetlinkAttribute (InterfaceInfoMessage::IFL_A_IFNAME,    STRING,  name));
+          ifamsg.AppendAttribute (NetlinkAttribute (InterfaceAddressMessage::IF_A_LOCAL,    ADDRESS, addri));
           ifamsg.AppendAttribute (NetlinkAttribute (InterfaceAddressMessage::IF_A_LOCAL,    ADDRESS, addri));
           ifamsg.AppendAttribute (NetlinkAttribute (InterfaceAddressMessage::IF_A_ADDRESS,  ADDRESS, addri));
           //XXXother attributes not used by ns3
