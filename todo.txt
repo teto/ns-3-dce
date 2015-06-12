@@ -6,7 +6,8 @@ CHAUSSEE DE BRUXELLES 159
  info breakpoints
  delete breakpoint <id>
 
-
+PcapFileW
+NetDevice::PacketType
 Given a pointer to an object, look to see if that object has a name associated with it and, if so, return the name of the object otherwise return an empty string.
 
 An object can be referred to in two ways. Either you can talk about it using its fully qualified path name, for example, "/Names/client/eth0" or you can refer to it by its name, in this case "eth0".
@@ -20,34 +21,96 @@ A un moment wireshark écrit inteface (manque le R)
 
 stub mlockall; not really implemented
 
+last_ttl = 0
+addr_refid = 0202010a
+num_mcast = 0
+received = 0
+sent = 0
+notsent = 0
+ifindex = 2
+peercnt = 0
+phase = 1
+updating interface #2: fd=7, bfd=-1, name=ns3-device 2, flags=0x9, ifindex=2, sin=10.1.2.2, bcast=10.1.2.3, mask=255.255.255.252, Enabled: new - created
+Dumping interface: 0x7fbe6d2cb5b8
+fd = 7
+bfd = -1
+sin = 10.1.2.2,
+0200007b 0a010202 00000000 00000000 00000000 00000000 00000000 
+bcast = 10.1.2.3,
+0200007b 0a010203 00000000 00000000 00000000 00000000 00000000 
+mask = 255.255.255.252,
+0200007b fffffffc 00000000 00000000 00000000 00000000 00000000 
+name = ns3-device 2
+flags = 0x00000009
+last_ttl = 0
+addr_refid = 0202010a
+num_mcast = 0
+received = 0
+sent = 0
+notsent = 0
+ifindex = 2
+peercnt = 0
+phase = 1
+setting SO_REUSEADDR on ns3-device 1@10.1.1.2 to off
+setting SO_REUSEADDR on ns3-device 2@10.1.2.2 to off
+create_sockets: Total interfaces = 3
+ 1 Jan 00:00:00 ntpd[2022]: Listening on routing socket on fd #8 for interface updates
+io_open_sockets: maxactivefd 8
+findexistingpeer_addr(127.127.1.0:123, NULL, 3, 0x1)
+newpeer(127.127.1.0): local interface currently not bound
+key_expire: at 0 associd 16467
+peer_clear: at 0 next 1 associd 16467 refid INIT
+event at 0 LOCAL(0) 8011 81 mobilize assoc 16467
+newpeer: <null>->127.127.1.0 mode 3 vers 4 poll 6 6 flags 0x9 0x1 ttl 0 key 00000000
+getnetnum given 127.127.1.0, got 127.127.1.0
+findexistingpeer_addr(127.127.1.0:123, NULL, -1, 0x0)
+127.127.1.0:123 127.127.1.0:123 -1 3 0x0 0x1 found.
+loop_config: item 1 freq 0.000000
+event at 0 0.0.0.0 c01d 0d kern kernel time sync enabled
+blocking_getaddrinfo given node ntp.ubuntu.com serv ntp fam 0 flags 0
+event at 0 0.0.0.0 c012 02 freq_set kernel 0.000 PPM
+local_clock: mu 0 state 1 poll 3 count 0
+event at 0 0.0.0.0 c011 01 freq_not_set
+event at 0 0.0.0.0 c016 06 restart
+alarming: normal
+alarming: overflow
+alarming: overflow
+alarming: overflow
+alarming: overflow
+alarming: overflow
+alarming: overflow
+alarming: overflow
+alarming: overflow
 
-56	../nptl/sysdeps/unix/sysv/linux/raise.c: Aucun fichier ou dossier de ce type.
-(gdb) bt
-#0  0x00007fffee3cde37 in __GI_raise (sig=sig@entry=6) at ../nptl/sysdeps/unix/sysv/linux/raise.c:56
-#1  0x00007fffee3cf528 in __GI_abort () at abort.c:89
-#2  0x00007fffeebf105d in __gnu_cxx::__verbose_terminate_handler() ()
-   from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
-#3  0x00007fffeebeeed6 in ?? () from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
-#4  0x00007fffeebeef21 in std::terminate() () from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
-#5  0x00007ffff73cd32b in ns3::TypeId::LookupByName (name="ns3::LinuxSocketFdFactory")
-    at ../src/core/model/type-id.cc:560
-#6  0x00007ffff7a7a8b1 in dce_if_nametoindex (ifname=0x7ffff7fc62c8 "ns3-device1")
-    at ../model/dce.cc:684
-#7  0x00007fffea372330 in if_nametoindex () at ../model/libc-ns3.h:501
-#8  0x00007fffe91a2936 in internal_current (iter=0x7ffff7fc6298)
-    at ./../lib/isc/unix/ifiter_getifaddrs.c:237
-#9  0x00007fffe91a2f22 in isc_interfaceiter_first (iter=0x7ffff7fc6298)
-    at ./../lib/isc/unix/interfaceiter.c:282
-#10 0x00007fffe91281fc in update_interfaces (port=123, receiver=0x0, data=0x0) at ntp_io.c:1781
-#11 0x00007fffe9128ac6 in create_sockets (port=123) at ntp_io.c:2068
-#12 0x00007fffe9125745 in io_open_sockets () at ntp_io.c:493
-#13 0x00007fffe91247ae in config_ntpd (ptree=0x7ffff7fed5e8, input_from_files=1) at ntp_config.c:4314
-#14 0x00007fffe9124c96 in save_and_apply_config_tree (input_from_file=1) at ntp_config.c:4546
-#15 0x00007fffe9124ab7 in getconfig (argc=0, argv=0x695d60) at ntp_config.c:4482
-#16 0x00007fffe9132e6f in ntpdmain (argc=0, argv=0x695d60) at ntpd.c:792
-#17 0x00007fffe91323d7 in main (argc=4, argv=0x695d40) at ntpd.c:289
-#18 0x00007ffff7a5180d in ns3::DceManager::DoStartProcess (context=0x695f30)
-    at ../model/dce-manager.cc:283
+
+
+create_sockets: Total interfaces = 3
+ 1 Jan 00:00:00 ntpd[2022]: Listening on routing socket on fd #8 for interface updates
+io_open_sockets: maxactivefd 8
+findexistingpeer_addr(127.127.1.0:123, NULL, 3, 0x1)
+newpeer(127.127.1.0): local interface currently not bound
+key_expire: at 0 associd 16467
+peer_clear: at 0 next 1 associd 16467 refid INIT
+event at 0 LOCAL(0) 8011 81 mobilize assoc 16467
+newpeer: <null>->127.127.1.0 mode 3 vers 4 poll 6 6 flags 0x9 0x1 ttl 0 key 00000000
+getnetnum given 127.127.1.0, got 127.127.1.0
+findexistingpeer_addr(127.127.1.0:123, NULL, -1, 0x0)
+127.127.1.0:123 127.127.1.0:123 -1 3 0x0 0x1 found.
+loop_config: item 1 freq 0.000000
+event at 0 0.0.0.0 c01d 0d kern kernel time sync enabled
+blocking_getaddrinfo given node ntp.ubuntu.com serv ntp fam 0 flags 0
+event at 0 0.0.0.0 c012 02 freq_set kernel 0.000 PPM
+local_clock: mu 0 state 1 poll 3 count 0
+event at 0 0.0.0.0 c011 01 freq_not_set
+event at 0 0.0.0.0 c016 06 restart
+alarming: normal
+alarming: overflow
+alarming: overflow
+alarming: overflow
+alarming: overflow
+alarming: overflow
+alarming: overflow
+alarming: overflow
 
 
 
