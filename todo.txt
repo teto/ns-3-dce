@@ -113,6 +113,7 @@ alarming: overflow
 alarming: overflow
 
 
+/home/teto/dce/build/bin/dce-ntimed: relocation error: elf-cache/0/ntpd: symbol sqrt, version GLIBC_2.2.5 not defined in file 0004.so.6 with link time reference
 
 
 
