@@ -67,7 +67,7 @@ int main (int argc, char *argv[])
 
   NetDeviceContainer devices, devices2;
   devices = pointToPoint.Install (nodes);
-  devices2 = pointToPoint.Install (nodes);
+//  devices2 = pointToPoint.Install (nodes);
 
   DceManagerHelper dceManager;
   Ipv4DceRoutingHelper ipv4RoutingHelper;
@@ -114,8 +114,9 @@ int main (int argc, char *argv[])
   Ipv4AddressHelper address;
   address.SetBase ("10.1.1.0", "255.255.255.252");
   Ipv4InterfaceContainer interfaces = address.Assign (devices);
-  address.SetBase ("10.1.2.0", "255.255.255.252");
-  interfaces = address.Assign (devices2);
+// For now let's stay monohomed
+//  address.SetBase ("10.1.2.0", "255.255.255.252");
+//  interfaces = address.Assign (devices2);
 
   // setup ip routes
   Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
@@ -188,7 +189,7 @@ int main (int argc, char *argv[])
   dce.AddArgument ("/tmp/ntp.conf");
   if(useDebug) {
     // -dddd to increase log level
-    dce.AddArgument("-ddddd");
+    dce.AddArgument("-dddd");
   }
 //  dce.AddArgument ("/home/teto/dce/myscripts/ntp.conf");
 

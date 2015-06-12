@@ -905,6 +905,7 @@ NetlinkSocket::BuildInterfaceInfoDumpMessage (uint32_t interface_num, uint32_t s
   Ptr<Ipv4> ipv4 = m_node->GetObject<Ipv4> ();
   Ptr<NetDevice> dev = m_node->GetDevice (interface_num);
 
+  NS_LOG_UNCOND("dev" << dev->GetInstanceTypeId().GetName() << "#" << dev->GetIfIndex());
   int32_t ipv4_link = ipv4->GetInterfaceForDevice (dev);
   NS_ASSERT (ipv4_link >= 0);
 
