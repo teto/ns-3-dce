@@ -38,6 +38,7 @@
 #include "ns3/simple-net-device.h"
 #include "ns3/uinteger.h"
 #include "ns3/trace-source-accessor.h"
+#include "ns3/names.h"
 #include <iostream>
 #include <sstream>
 #include "ns3/ipv6-address.h"
@@ -810,6 +811,11 @@ NetlinkSocket::BuildInterfaceAddressDumpMessages (uint32_t received_seq)
       ifamsg.SetLength (mask_len);
       ifamsg.SetFlags (0);
       ifamsg.SetScope (RouteMessage::RT_SCOPE_UNIVERSE);
+
+      // Look for the name of the device
+      Ptr<NetDevice> device = ipv4->GetNetDevice (i);
+      std::string name = Names::FindName( device );
+      NS_LOG_INFO("NAME=" << name);
 
       std::stringstream ss;
       ss <<  "ns3-device" << i;

@@ -717,10 +717,13 @@ unsigned dce_if_nametoindex (const char *ifname)
           Ptr<NetDevice> dev = node->GetDevice (i);
           if (ifname == Names::FindName (dev))
             {
+              NS_LOG_INFO("Match found");
               index = ipv4->GetInterfaceForDevice (dev);
               return index;
             }
         }
+      // TODO it should return an error
+      NS_FATAL_ERROR("Could not find the index for if [" << ifname << "]");
       return 0;
     }
 }
