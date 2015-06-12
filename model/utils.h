@@ -91,6 +91,10 @@ bool CheckShellScript (std::string fileName,
 char * seek_env (const char *name, char **array);
 std::string UtilsGetCurrentDirName (void);
 
+
+// MATT: temporary solution while waiting for an ns3 decision
+std::string UtilsGenerateIfNameFromIndex(uint32_t i);
+
 #define MAX_FDS 1024
 
 /* there must be a 'fd' variable in the outer scope */

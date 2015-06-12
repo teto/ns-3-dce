@@ -56,18 +56,20 @@ Ptr<Socket> NetlinkSocketFactory::CreateSocket (void)
   Ptr<NetlinkSocket> socket = CreateObject<NetlinkSocket> ();
   socket->SetNode (node);
 
-            static int id = 0;
+static int id = 0;
 
-              PcapHelper pcapHelper;
+  PcapHelper pcapHelper;
 
 //              std::to_string (id); // only valid in C++11
-              std::ostringstream filename;
-              filename << "netlink" << node->GetId() << "-" << id++ << ".pcap";
-    NS_LOG_UNCOND("Creating socket [" << filename.str() << "]");
-              Ptr<PcapFileWrapper> file = pcapHelper.CreateFile (filename.str(), std::ios::out,PcapHelper::DLT_NETLINK);
-              // for now we test only one socket
-              pcapHelper.HookDefaultSink<NetlinkSocket> ( socket, "PromiscSniffer", file);
-
+  std::ostringstream filename;
+  filename << "netlink" << node->GetId() << "-" << id++ << ".pcap";
+NS_LOG_UNCOND("Creating socket [" << filename.str() << "]");
+  Ptr<PcapFileWrapper> file = pcapHelper.CreateFile (filename.str(), std::ios::out,PcapHelper::DLT_NETLINK);
+  // for now we test only one socket
+  pcapHelper.HookDefaultSink<NetlinkSocket> ( socket, "PromiscSniffer", file);
+// bool result =
+//    socket->TraceConnectWithoutContext (tracename.c_str (), MakeBoundCallback (&DefaultSink, file));
+//  NS_ASSERT_MSG (result == true, "PcapHelper::HookDefaultSink():  Unable to hook \"" << tracename << "\"");
   return socket;
 }
 } // namespace ns3

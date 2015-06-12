@@ -161,9 +161,29 @@ struct timespec UtilsTimeToTimespec (Time time)
   return tv;
 }
 
+
+/**
+
+**/
+std::string
+UtilsGenerateIfNameFromIndex(uint32_t i) {
+    std::stringstream ss;
+    ss <<  "ns3-device " << i;
+    return ss.str();
+}
+
+//std::string
+//UtilsGetIndexFromIfName(uint32_t i) {
+////    std::stringstream ss;
+////ss <<  "ns3-device" << i;
+////return ss.str()
+//}
+
 Ptr<Node>
 UtilsGetNode()
 {
+    // this is how dce does it normally; update this
+//    Ptr<Node> node = Current ()->process->manager->GetObject<Node> ()
   return UtilsGetNode(UtilsGetNodeId());
 }
 
