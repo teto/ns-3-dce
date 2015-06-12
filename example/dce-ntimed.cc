@@ -12,7 +12,8 @@
 //#include "../model/ipv4-dce-routing.h"
 #include "../helper/ipv4-dce-routing-helper.h"
 
-
+#define ENABLE_NTPD 1
+#define ENABLE_NTIMED
 
 using namespace ns3;
 NS_LOG_COMPONENT_DEFINE ("DceNtimed");
@@ -43,6 +44,10 @@ int main (int argc, char *argv[])
   bool useDebug = true;
   std::string bandWidth = "1m";
   Time simDuration = Seconds(10);
+
+
+  std::string time_server_binary = "ntpd";
+//  std::string time_server_binary = "chronyd";
 
   CommandLine cmd;
   cmd.AddValue ("stack", "Name of IP stack: ns3/linux/freebsd.", stack);
@@ -149,7 +154,7 @@ int main (int argc, char *argv[])
   dce.SetStackSize (1 << 20);
 
   // Launch ntp client on node 0
-#if 0
+#ifdef ENABLE_NTIMED
   dce.SetBinary ("/home/teto/ntimed/ntimed-client");
 
   // TODO install a defective clock on that node
@@ -176,17 +181,26 @@ int main (int argc, char *argv[])
 #endif
 
   // Launch ntp server on node 1
+  #ifdef ENABLE_NTPD
   dce.SetBinary ("ntpd");
   dce.ResetArguments ();
   dce.ResetEnvironment ();
+  dce.AddArgument ("-c");
+  dce.AddArgument ("/tmp/ntp.conf");
+  #else
+  dce.SetBinary ("chronyd");
+  dce.ResetArguments ();
+  dce.ResetEnvironment ();
+  dce.AddArgument ("-f");
+  dce.AddArgument ("/tmp/chrony.conf");
 
-  //
+
+  #endif
+
   uid_t root_uid = 0;
   dce.SetEuid(root_uid);
   dce.SetUid(root_uid);
-  dce.AddArgument ("-c");
-//  dce.AddArgument ("/home/teto/dce/myscripts/ntp/ntp.conf");
-  dce.AddArgument ("/tmp/ntp.conf");
+
   if(useDebug) {
     // -dddd to increase log level
     dce.AddArgument("-dddd");

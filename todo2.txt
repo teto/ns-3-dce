@@ -66,6 +66,8 @@ $ ./autogen.sh
 CFLAGS="-fPIC -U_FORTIFY_SOURCE -ggdb" LDFLAGS="-pie -rdynamic" ./configure
 
 
+=== Chrony ===
+
 
 === NTPd ===
 

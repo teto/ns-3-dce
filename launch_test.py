@@ -124,6 +124,7 @@ os.environ['DCE_PATH'] = ''
 # we first need to copy the file
 os.makedirs("files-1/tmp", exist_ok=True)
 shutil.copyfile("/home/teto/dce/ntp.conf", "files-1/tmp/ntp.conf")
+shutil.copyfile("/home/teto/dce/chrony.conf", "files-1/tmp/chrony.conf")
 
 try:
     #os.system("echo DCE_ROOT=$DCE_ROOT")
