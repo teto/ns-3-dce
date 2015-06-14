@@ -5,7 +5,7 @@ import argparse
 import subprocess
 
 available_suites = [
-    "dce-ntimed",
+    "dce-ntpd",
 ]
 # WITH_GDB=0
 NS_LOG = ""
@@ -120,16 +120,27 @@ os.environ['DCE_ROOT'] = '/'
 os.environ['DCE_PATH'] = ''
 
 
+# first we erase previous folders to ease debugging
+#rm -Rf files-0 files-1
+#mkdir -p files-0 files-1
 
 # we first need to copy the file
-os.makedirs("files-1/tmp", exist_ok=True)
-shutil.copyfile("/home/teto/dce/ntp.conf", "files-1/tmp/ntp.conf")
-shutil.copyfile("/home/teto/dce/chrony.conf", "files-1/tmp/chrony.conf")
-
+#os.makedirs("files-1/tmp", exist_ok=True)
+#shutil.copyfile("/home/teto/dce/ntpserver.conf", "files-1/tmp/ntp.conf")
+#shutil.copyfile("/home/teto/dce/ntpclient.conf", "files-0/tmp/ntp.conf")
+#shutil.copyfile("/home/teto/dce/chrony.conf", "files-1/tmp/chrony.conf")
+dce_root="/home/teto/dce"
 try:
     #os.system("echo DCE_ROOT=$DCE_ROOT")
     #ret = True
-    ret = subprocess.call(cmd, shell=True, timeout=timeout if timeout else None)
+    with subprocess.Popen(dce_root+"/myscripts/ntp/run-ntp.sh", cwd=dce_root+"/myscripts/ntp") as proc:
+        print("Script laucnhed")
+
+    with subprocess.Popen(cmd, shell=True) as proc:
+        print("test")
+        proc.wait(timeout=timeout if timeout else None)
+        ret = proc.returncode
+
 except subprocess.TimeoutExpired:
     print("Timeout expired. try setting a longer timeout")
 finally:
@@ -156,4 +167,4 @@ if args.graph:
     print_result("~/dce/files-0/var/log/*")
 
     print("\n\n=== Outputs of node 1 (server) ===")
-    print_result("~/dce/files-1/var/log/2022")
+    print_result("~/dce/files-1/var/log/*")

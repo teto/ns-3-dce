@@ -19,7 +19,7 @@ using namespace ns3;
 NS_LOG_COMPONENT_DEFINE ("DceNtimed");
 // ===========================================================================
 //
-//         node 0                 node 1
+//     node 0 (client)       node 1 (server)
 //   +----------------+    +----------------+
 //   |                |    |                |
 //   +----------------+    +----------------+
@@ -31,12 +31,12 @@ NS_LOG_COMPONENT_DEFINE ("DceNtimed");
 //           +---------------------+
 //                5 Mbps, 2 ms
 //
-// 2 nodes : iperf client en iperf server ....
+// 2 nodes : NTP client (node 0) en NTP server (node 1)
+// Client may run NTIMED
 //
-// Note : Tested with iperf 2.0.5, you need to modify iperf source in order to
-//        allow DCE to have a chance to end an endless loop in iperf as follow:
-//        in source named Thread.c at line 412 in method named thread_rest
-//        you must add a sleep (1); to break the infinite loop....
+// Server may run NTPD (tested) or openntpd or chronyd (untested yet)
+//Before launching this program, I advise you to create symlinks in dce/build/bin towards the
+//different binaires
 // ===========================================================================
 int main (int argc, char *argv[])
 {
@@ -155,7 +155,7 @@ int main (int argc, char *argv[])
 
   // Launch ntp client on node 0
 #ifdef ENABLE_NTIMED
-  dce.SetBinary ("/home/teto/ntimed/ntimed-client");
+  dce.SetBinary ("ntimed-client");
 
   // TODO install a defective clock on that node
 

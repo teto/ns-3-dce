@@ -67,6 +67,8 @@ CFLAGS="-fPIC -U_FORTIFY_SOURCE -ggdb" LDFLAGS="-pie -rdynamic" ./configure
 
 
 === Chrony ===
+Configuration commands listed here:
+http://chrony.tuxfamily.org/manual.html#Configuration-file
 
 
 === NTPd ===
@@ -95,6 +97,18 @@ To add debug statements in "isc" folder, use "isc_log_write"
 To add debug statements in "ntpd" folder, use "msyslog" I think
 
 
+=== NTP debugging guide ===
+First start ntpd locally
+sudo ntpd -c ~/dotfiles/ntp.conf -l ntp.log -p ntp.pid -f ntp.drift -n -D 1
+ntpq --numeric --peers
+ntpq -p will display the offsets for each reachable server in milliseconds (ntpdc -p uses seconds instead)
+
+
+./ntimed-client -t ntimed.log 127.0.0.1
+
+
+sudo chrony/chronyd -f ~/dce/chrony.conf -d -4 
+
 
 in ntpsim=.c:get_systime on a:
     /*
@@ -109,6 +123,26 @@ in ntpsim=.c:get_systime on a:
 mon NTP utilise ca
 http://linux.die.net/man/3/clock_gettime
 rc = clock_gettime(CLOCK_REALTIME, tsp);
+
+
+alarming: normal
+alarming: overflow
+alarming: overflow
+alarming: overflow
+alarming: overflow
+alarming: overflow
+alarming: overflow
+alarming: overflow
+alarming: overflow
+It means we got a SIGALARM and the code hasn't had a chance to deal with that yet but another SIGALARM has arrived
+
+
+
+
+
+
+
+
 
 addto_syslog appelle dce_time
 

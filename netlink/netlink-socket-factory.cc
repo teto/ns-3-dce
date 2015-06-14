@@ -64,7 +64,7 @@ static int id = 0;
   std::ostringstream filename;
   filename << "netlink" << node->GetId() << "-" << id++ << ".pcap";
 NS_LOG_UNCOND("Creating socket [" << filename.str() << "]");
-  Ptr<PcapFileWrapper> file = pcapHelper.CreateFile (filename.str(), std::ios::out,PcapHelper::DLT_NETLINK);
+  Ptr<PcapFileWrapper> file = pcapHelper.CreateFile (filename.str(), std::ios::out, PcapHelper::DLT_NETLINK);
   // for now we test only one socket
   pcapHelper.HookDefaultSink<NetlinkSocket> ( socket, "PromiscSniffer", file);
 // bool result =
