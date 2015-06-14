@@ -633,6 +633,7 @@ NATIVE (log)
 NATIVE (log10)
 NATIVE (exp)
 NATIVE (lround)
+NATIVE (sqrt)
 
 #undef DCE
 #undef DCET

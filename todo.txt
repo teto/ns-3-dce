@@ -112,6 +112,17 @@ alarming: overflow
 alarming: overflow
 alarming: overflow
 
+Output sur la machien hôte
+create_sockets: Total interfaces = 6
+13 Jun 00:23:10 ntpd[16938]: Listening on routing socket on fd #22 for interface updates
+io_open_sockets: maxactivefd 22
+event at 0 0.0.0.0 c016 06 restart
+loop_config: item 2 freq 1000000000.000000
+event at 0 0.0.0.0 c012 02 freq_set kernel 0.000 PPM
+local_clock: mu 0 state 1 poll 3 count 0
+event at 0 0.0.0.0 c011 01 freq_not_set
+auth_agekeys: at 1 keys 0 expired 0
+
 
 /home/teto/dce/build/bin/dce-ntimed: relocation error: elf-cache/0/ntpd: symbol sqrt, version GLIBC_2.2.5 not defined in file 0004.so.6 with link time reference
 
