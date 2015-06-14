@@ -69,7 +69,6 @@ NS_LOG_UNCOND("Creating socket [" << filename.str() << "]");
   pcapHelper.HookDefaultSink<NetlinkSocket> ( socket, "PromiscSniffer", file);
 // bool result =
 //    socket->TraceConnectWithoutContext (tracename.c_str (), MakeBoundCallback (&DefaultSink, file));
-//  NS_ASSERT_MSG (result == true, "PcapHelper::HookDefaultSink():  Unable to hook \"" << tracename << "\"");
   return socket;
 }
 } // namespace ns3
