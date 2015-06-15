@@ -91,8 +91,6 @@
 		<Unit filename="example/dce-mptcp-handoff-v6.cc" />
 		<Unit filename="example/dce-mptcp-lte-wifi-v6.cc" />
 		<Unit filename="example/dce-mptcp-lte-wifi.cc" />
-		<Unit filename="example/dce-ntimed.cc" />
-		<Unit filename="example/dce-ntpd.cc" />
 		<Unit filename="example/dce-sctp-simple.cc" />
 		<Unit filename="example/dce-tcp-ns3-nsc-comparison.cc" />
 		<Unit filename="example/dce-tcp-simple.cc" />

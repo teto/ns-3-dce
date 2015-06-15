@@ -7,16 +7,15 @@
 #include "ns3/netanim-module.h"
 #include "ns3/constant-position-mobility-model.h"
 #include "ns3/clock-perfect.h"
-#include "ccnx/misc-tools.h"
 
 //#include "../model/ipv4-dce-routing.h"
-#include "../helper/ipv4-dce-routing-helper.h"
+#include "ns3/ipv4-dce-routing-helper.h"
 
 #define ENABLE_NTPD 1
 #define ENABLE_NTIMED
 
 using namespace ns3;
-NS_LOG_COMPONENT_DEFINE ("DceNtimed");
+NS_LOG_COMPONENT_DEFINE ("DceNtpd");
 // ===========================================================================
 //
 //     node 0 (client)       node 1 (server)

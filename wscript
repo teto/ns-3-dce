@@ -512,19 +512,21 @@ def add_myscripts(bld):
     # submodule parse should be the first
     submodules = []
     scratches = []
-
     for dir in os.listdir('myscripts'):
         if dir.startswith('.') or dir == 'CVS':
             continue
         if os.path.isdir(os.path.join('myscripts', dir)):
             if dir.startswith('ns-3-dce-'):
                 submodules.append(dir)
+            else:
+                scratches.append(dir)
         else:
             scratches.append(dir)
 
     for dir in submodules:
         bld.add_subdirs(os.path.join('myscripts', dir))
 
+	print("scratches", scratches)
     for dir in scratches:
         if os.path.isdir(os.path.join('myscripts', dir)):
             bld.add_subdirs(os.path.join('myscripts', dir))
@@ -723,7 +725,6 @@ def build(bld):
                                   includes=kernel_includes,
                                   lib=['dl'])
 #                                  lib=['dl','efence'])
-
     # make sure submodules built before building examples (that depend submodules)
     bld.build_a_script = types.MethodType(build_a_script, bld)
     add_myscripts(bld)
