@@ -26,6 +26,7 @@ int dce_getopt_long (int argc, char * const argv[], const char *optstring,
                      const struct option *longopts, int *longindex);
 uid_t dce_getuid (void);
 uid_t dce_geteuid (void);
+int dce_setsid ();
 int dce_setuid (uid_t uid);
 int dce_setgid (gid_t gid);
 int dce_seteuid (uid_t euid);

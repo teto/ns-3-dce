@@ -4,9 +4,16 @@ import os
 import argparse
 import subprocess
 
-available_suites = [
-    "dce-ntpd",
-]
+#available_suites = [
+    #"dce-ntpd",
+#]
+
+
+
+available_suites = {
+    "ntpd": "dce-ntpd --server=ntpd",
+    "chronyd": "dce-ntpd --server=chronyd",
+}
 # WITH_GDB=0
 NS_LOG = ""
 # NS_LOG += "***"
@@ -25,6 +32,7 @@ NS_LOG += ":DceApplication"
 NS_LOG += ":SimuSignal"
 NS_LOG += ":SimuFd"
 NS_LOG += ":Dce"
+NS_LOG += ":DceNtpd"
 NS_LOG += ":ProcessUtils"
 NS_LOG += ":DceNetdb"
 NS_LOG += ":DceTime"
@@ -82,7 +90,7 @@ NS_LOG += ":PcapFile"
 # type=argparse.FileType('w'),
 parser = argparse.ArgumentParser(description="Helper to debug mptcp")
 
-parser.add_argument("suite", choices=available_suites, help="Launch gdb")
+parser.add_argument("suite", choices=available_suites.keys(), help="Launch gdb")
 parser.add_argument("--debug", '-d', action="store_true", help="Launch gdb")
 parser.add_argument("--out", "-o", default="", nargs='?', help="redirect ns3 results output to a file")
 parser.add_argument("--verbose", "-v", action="store_const", default="", const="--verbose", help="to enable more output")
@@ -106,7 +114,7 @@ tofile = " > %s 2>&1" % args.out if args.out else ""
 # tofile = " > xp.txt 2>&1"
 
 cmd = cmd.format(
-    suite=args.suite,
+    suite=available_suites[args.suite],
     verbose=args.verbose,
     # out=
     tofile=tofile,
@@ -157,9 +165,6 @@ if ret:
 
 
 def print_result(folder):
-    #os.system("echo '========= STDOUT' && cat %s/stdout" % (folder))
-    #os.system("echo '========= STDERR' && cat %s/stderr" % (folder))
-    #os.system("echo '========= SYSLOG' && cat %s/syslog" % (folder))
     os.system("./dump_folder.sh %s" % (folder,))
 
 if args.graph:

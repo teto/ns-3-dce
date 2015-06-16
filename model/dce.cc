@@ -182,6 +182,13 @@ int dce_setegid (gid_t egid)
   GET_CURRENT (egid);
   return dce_setresgid (-1, egid, -1);
 }
+
+int dce_setsid ()
+{
+    GET_CURRENT_NOLOG();
+    current->err = ENOSYS;
+    return -1;
+}
 int dce_setuid (uid_t uid)
 {
   GET_CURRENT (uid);

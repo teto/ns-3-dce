@@ -1,13 +1,16 @@
-#!/bin/sh
+#!/bin/bash
 if [ $# -lt 1 ]; then
-	echo "Use $0 <folder>"
+	echo "Use $0 <0 or 1>"
 	exit 1
 fi
 
 
-folder="$1"
-cat 
-echo '========= STDOUT' && cat $folder/stdout
-echo '========= STDERR' && cat $folder/stderr
-echo '========= SYSLOG' && cat $folder/syslog
+folder="files-$1/var/log/*/"
+
+cli=""
+for i in $(ls $folder); do
+	cli="$cli <( echo '==== $i' ) $folder$i"
+done 
+
+eval "cat $cli | less"
 

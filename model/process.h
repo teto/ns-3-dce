@@ -124,10 +124,12 @@ struct ProcessActivity
   std::string cmdLine;
 };
 
+/**
+*/
 struct Process
 {
-  uid_t euid;
-  uid_t ruid;
+  uid_t euid; /* effective */
+  uid_t ruid; /* */
   uid_t suid;
   gid_t egid;
   gid_t rgid;

@@ -16,6 +16,39 @@
 
 using namespace ns3;
 NS_LOG_COMPONENT_DEFINE ("DceNtpd");
+
+
+enum NtpServerType {
+SERVER_NTPD,
+SERVER_CHRONYD,
+SERVER_PTPD,
+SERVER_OPENNTPD,    //!
+};
+
+NtpServerType serverType = SERVER_NTPD;
+
+bool SetServerType(std::string type) {
+
+    NS_LOG_FUNCTION(type);
+    if(type== "ntpd") {
+        serverType = SERVER_NTPD;
+    }
+    else if(type == "chronyd") {
+        serverType = SERVER_CHRONYD;
+    }
+    else if(type == "ptpd") {
+        serverType = SERVER_PTPD;
+    }
+    else if(type == "openntpd") {
+        serverType = SERVER_OPENNTPD;
+    }
+    else {
+        return false;
+    }
+
+    return true;
+}
+
 // ===========================================================================
 //
 //     node 0 (client)       node 1 (server)
@@ -42,16 +75,16 @@ int main (int argc, char *argv[])
   std::string stack = "ns3";
   bool useDebug = true;
   std::string bandWidth = "1m";
+
   Time simDuration = Seconds(1000);
 
-
-  std::string time_server_binary = "ntpd";
-//  std::string time_server_binary = "chronyd";
-
   CommandLine cmd;
+  NS_LOG_INFO("Parsing");
   cmd.AddValue ("stack", "Name of IP stack: ns3/linux/freebsd.", stack);
   cmd.AddValue ("debug", "Debug. Default true (0)", useDebug);
-  cmd.AddValue ("bw", "BandWidth. Default 1m.", bandWidth);
+  cmd.AddValue ("server", "Debug. Default true (0)", MakeCallback(SetServerType));
+//  cmd.AddValue ("bw", "BandWidth. Default 1m.", bandWidth);
+NS_LOG_INFO(argc << argv[1]);
   cmd.Parse (argc, argv);
 
   NodeContainer nodes;
@@ -158,6 +191,7 @@ int main (int argc, char *argv[])
   ///////////////////////////////////////
   // Launch ntp client on node 0
 #ifdef ENABLE_NTIMED
+  NS_LOG_INFO("Selected ntimed");
   dce.SetBinary ("ntimed-client");
 
   // TODO install a defective clock on that node
@@ -199,30 +233,47 @@ int main (int argc, char *argv[])
   /// Server configuration
   ///////////////////////////////////////
   // Launch ntp server on node 1
-  #ifdef ENABLE_NTPD
-  dce.SetBinary ("ntpd");
-  dce.ResetArguments ();
-  dce.ResetEnvironment ();
-  dce.AddArgument ("-c");
-  dce.AddArgument ("ntpserver.conf");
-  dce.AddArgument ("-n");   // don't fork
-  #else
-  dce.SetBinary ("chronyd");
-  dce.ResetArguments ();
-  dce.ResetEnvironment ();
-  dce.AddArgument ("-f");
-  dce.AddArgument ("/tmp/chrony.conf");
-
-
-  #endif
+//  #ifdef ENABLE_NTPD
 
   dce.SetEuid(root_uid);
   dce.SetUid(root_uid);
 
-  if(useDebug) {
-    dce.AddArgument("-D"); // Alternatively -dddd
-    dce.AddArgument("5");
-  }
+  switch(serverType) {
+
+    case SERVER_CHRONYD:
+        NS_LOG_INFO("Setup chronyd");
+          dce.SetBinary ("chronyd");
+          dce.ResetArguments ();
+          dce.ResetEnvironment ();
+
+          dce.AddArgument ("-f");
+          dce.AddArgument ("chrony.conf");
+          dce.AddArgument ("-4"); //accept only v4
+          if(useDebug) {
+            dce.AddArgument("-d"); // First to prevent fork
+            dce.AddArgument("-d"); // 2nd to enable display message
+          }
+        break;
+
+    case SERVER_OPENNTPD:
+    case SERVER_PTPD:
+
+    case SERVER_NTPD:
+        NS_LOG_INFO("Setup ntpd");
+          dce.SetBinary ("ntpd");
+          dce.ResetArguments ();
+          dce.ResetEnvironment ();
+          dce.AddArgument ("-c");
+          dce.AddArgument ("ntpserver.conf");
+          dce.AddArgument ("-n");   // don't fork
+
+          if(useDebug) {
+            dce.AddArgument("-D"); // Alternatively -dddd
+            dce.AddArgument("5");
+          }
+  };
+
+
 //  dce.AddArgument ("/home/teto/dce/myscripts/ntp.conf");
 
   // will block the server, don't uncomment

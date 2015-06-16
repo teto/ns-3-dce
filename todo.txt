@@ -12,6 +12,42 @@ aller voir ce qui doit etre créé:
 Le systeme genere bcp de ce signal
 teto@sirius:~/dce$ kill -l 14 ALRM
 
+sys_linux.c:320:(get_version_specific_details) Fatal error : Cannot read information from uname, sorry
+
+Uname renvoie un mauvais resultat. uname est membre de DceNodeContext qui est initialisé dans DceManagerHelper::Install par AggregateObject (CreateObject<DceNodeContext> ());
+ 
+
+     @ams | matt1: sorry, setsid was removed from glibc in 2013 .. not sure why.
+    @ams | matt1: it was part of the libbsd-compat stuff ..
+    @ams | * The _BSD_SOURCE feature test macro no longer enables BSD interfaces that conflict with POSIX.  The libbsd-compat library (which was a dummy library that did nothing) has also been removed.
+    @ams | in version 2.19
+  @jsm28 | No, setsid was not removed.
+  @jsm28 | It's defined via sysdeps/unix/syscalls.list and make-syscalls.sh.
+metallic | https://www.gnu.org/software/libc/manual/html_node/Table-of-Input-Conversions.html#Table-of-Input-Conversions
+metallic | Certainly %[ is a format conversion on its own
+metallic | thanks pasky and ams :)
+metallic | I thought that [ was a flag
+    @ams | jsm28: ah, there it is hiding.
+       * | ams finds a beer, and gives up for the day.
+    @ams | cheers.
+
+In kernel/include/linux/syscalls.h, I find asmlinkage long sys_setsid(void) and for the x86-64 	architecture I find "112→common→ setsid→ →   →   sys_setsid". I suppose I need to use the 112 as a key to find the actual implementation, any hint please ?
+Ici on a le code généré par le script de la libc 
+http://pastie.org/10244032#
+
+matt1: that's a pretty complex subject, but if you
+want to find the kernel implementation, typically a
+good strategy is grepping for sys_callname, e.g.
+sys_setsid
+vmlinuz (~vmlinuz@unaffiliated/vmlinuz) a quitté
+(Quit: WeeChat 0.4.3)
+...or SYSCALL.*setsid ;-)
+http://repo.or.cz/w/linux-2.6-linus.git/blob/0f57d867
+87d8b1076ea8f9cbdddda2a46d534a27:/kernel/sys.c#l1066
+
+
+
+sysdeps/unix/sysv/linux/x86_64/syscall.S
 
 sudo ~/ntpoff/ntpd/ntpd -c /home/teto/dce/myscripts/ntp/ntpserver.conf -l ntp.log -n -D 4 > test.txt
 echo "=======" |tee -a - - - - |cat files-0/var/log/26481/*|less
