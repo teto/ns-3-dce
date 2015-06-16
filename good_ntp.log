@@ -1,0 +1,348 @@
+ sudo ntpd -c ~/dotfiles/ntp.conf -l ntp.log -p ntp.pid -f ntp.drift -n -D 4                    23:58:48   clock_support 
+ntpd 4.2.6p5@1.2349-o Mon Apr 13 13:39:46 UTC 2015 (1)
+15 Jun 23:58:52 ntpd[9162]: logging to file ntp.log
+filegen_register(peerstats, 0x7fe5ccff26a0)
+filegen_register(loopstats, 0x7fe5ccff2660)
+filegen_register(clockstats, 0x7fe5ccff2620)
+filegen_register(rawstats, 0x7fe5ccff25e0)
+filegen_register(sysstats, 0x7fe5ccff25a0)
+filegen_register(protostats, 0x7fe5ccff2560)
+filegen_register(cryptostats, 0x7fe5ccff26e0)
+15 Jun 23:58:52 ntpd[9162]: set_process_priority: Leave priority alone: priority_done is <2>
+15 Jun 23:58:52 ntpd[9162]: proto: precision = 0.111 usec
+loop_config: item 1 freq 0.000000
+event at 0 0.0.0.0 c01d 0d kern kernel time sync enabled
+	<end of command>
+	<end of command>
+yylex: lexeme 'driftfile' -> T_Driftfile
+yylex: lexeme '/var/lib/ntp/ntp.drift' -> T_String
+	<end of command>
+	<end of command>
+	<end of command>
+	<end of command>
+	<end of command>
+	<end of command>
+yylex: lexeme 'statistics' -> T_Statistics
+yylex: lexeme 'loopstats' -> T_Loopstats
+yylex: lexeme 'peerstats' -> T_Peerstats
+yylex: lexeme 'clockstats' -> T_Clockstats
+	<end of command>
+yylex: lexeme 'filegen' -> T_Filegen
+yylex: lexeme 'loopstats' -> T_Loopstats
+yylex: lexeme 'file' -> T_File
+yylex: lexeme 'loopstats' -> T_String
+yylex: lexeme 'type' -> T_Type
+yylex: lexeme 'day' -> T_Day
+yylex: lexeme 'enable' -> T_Enable
+	<end of command>
+yylex: lexeme 'filegen' -> T_Filegen
+yylex: lexeme 'peerstats' -> T_Peerstats
+yylex: lexeme 'file' -> T_File
+yylex: lexeme 'peerstats' -> T_String
+yylex: lexeme 'type' -> T_Type
+yylex: lexeme 'day' -> T_Day
+yylex: lexeme 'enable' -> T_Enable
+	<end of command>
+yylex: lexeme 'filegen' -> T_Filegen
+yylex: lexeme 'clockstats' -> T_Clockstats
+yylex: lexeme 'file' -> T_File
+yylex: lexeme 'clockstats' -> T_String
+yylex: lexeme 'type' -> T_Type
+yylex: lexeme 'day' -> T_Day
+yylex: lexeme 'enable' -> T_Enable
+	<end of command>
+	<end of command>
+	<end of command>
+yylex: lexeme 'server' -> T_Server
+yylex: lexeme '127.127.1.0' -> T_String
+	<end of command>
+yylex: lexeme 'fudge' -> T_Fudge
+yylex: lexeme '127.127.1.0' -> T_String
+yylex: lexeme 'stratum' -> T_Stratum
+yylex: lexeme '10' -> T_Integer
+	<end of command>
+	<end of command>
+	<end of command>
+	<end of command>
+	<end of command>
+	<end of command>
+	<end of command>
+	<end of command>
+	<end of command>
+	<end of command>
+	<end of command>
+	<end of command>
+	<end of command>
+	<end of command>
+yylex: lexeme 'restrict' -> T_Restrict
+yylex: lexeme '-4' -> T_Ipv4_flag
+yylex: lexeme 'default' -> T_Default
+yylex: lexeme 'kod' -> T_Kod
+yylex: lexeme 'notrap' -> T_Notrap
+yylex: lexeme 'nomodify' -> T_Nomodify
+yylex: lexeme 'nopeer' -> T_Nopeer
+yylex: lexeme 'noquery' -> T_Noquery
+	<end of command>
+yylex: lexeme 'restrict' -> T_Restrict
+yylex: lexeme '-6' -> T_Ipv6_flag
+yylex: lexeme 'default' -> T_Default
+yylex: lexeme 'kod' -> T_Kod
+yylex: lexeme 'notrap' -> T_Notrap
+yylex: lexeme 'nomodify' -> T_Nomodify
+yylex: lexeme 'nopeer' -> T_Nopeer
+yylex: lexeme 'noquery' -> T_Noquery
+	<end of command>
+	<end of command>
+	<end of command>
+yylex: lexeme 'restrict' -> T_Restrict
+yylex: lexeme '127.0.0.1' -> T_String
+	<end of command>
+yylex: lexeme 'restrict' -> T_Restrict
+yylex: lexeme '::1' -> T_String
+	<end of command>
+	<end of command>
+	<end of command>
+	<end of command>
+	<end of command>
+	<end of command>
+	<end of command>
+	<end of command>
+	<end of command>
+	<end of command>
+	<end of command>
+	<end of command>
+Finished Parsing!!
+create_sockets(123)
+interface_action: wildcard 0.0.0.0 default wildcard drop
+15 Jun 23:58:52 ntpd[9162]: ntp_io: estimated max descriptors: 1024, initial socket boundary: 16
+setsockopt SO_TIMESTAMP enabled on fd 16 address 0.0.0.0
+bind(16) AF_INET, addr 0.0.0.0%0#123, flags 0x89
+flags for fd 16: 0x802
+Searching for addr 0.0.0.0 in list of addresses - NOT FOUND
+Added addr 0.0.0.0 to list of addresses
+15 Jun 23:58:52 ntpd[9162]: Listen and drop on 0 v4wildcard 0.0.0.0 UDP 123
+created interface #0: fd=16, bfd=-1, name=v4wildcard, flags=0x89, ifindex=0, sin=0.0.0.0, bcast=0.0.0.0, mask=255.255.255.255, Disabled:
+interface_action: wildcard :: default wildcard drop
+setsockopt SO_TIMESTAMP enabled on fd 17 address ::
+bind(17) AF_INET6, addr ::%0#123, flags 0x81
+flags for fd 17: 0x802
+Searching for addr :: in list of addresses - NOT FOUND
+Added addr :: to list of addresses
+15 Jun 23:58:52 ntpd[9162]: Listen and drop on 1 v6wildcard :: UDP 123
+created interface #1: fd=17, bfd=-1, name=v6wildcard, flags=0x81, ifindex=0, sin=::, Disabled:
+update_interfaces(123)
+interface_action: lo 127.0.0.1 IPv4 loopback - listen
+examining interface #0: fd=-1, bfd=-1, name=lo, flags=0x5, ifindex=0, sin=127.0.0.1, mask=255.0.0.0, Enabled:
+Searching for addr 127.0.0.1 in list of addresses - NOT FOUND
+create_interface(127.0.0.1#123)
+set SO_REUSEADDR to on on 0.0.0.0
+set SO_REUSEADDR to off on 0.0.0.0
+setsockopt SO_TIMESTAMP enabled on fd 18 address 127.0.0.1
+bind(18) AF_INET, addr 127.0.0.1%0#123, flags 0x5
+flags for fd 18: 0x802
+15 Jun 23:58:52 ntpd[9162]: Listen normally on 2 lo 127.0.0.1 UDP 123
+restrict: op 1 addr 127.0.0.1 mask 255.255.255.255 mflags 00003000 flags 00000001
+Searching for addr 127.0.0.1 in list of addresses - NOT FOUND
+Added addr 127.0.0.1 to list of addresses
+created interface #2: fd=18, bfd=-1, name=lo, flags=0x5, ifindex=0, sin=127.0.0.1, mask=255.0.0.0, Enabled:
+refreshing peers due to new addr 127.0.0.1
+updating interface #2: fd=18, bfd=-1, name=lo, flags=0x5, ifindex=0, sin=127.0.0.1, mask=255.0.0.0, Enabled: new - created
+interface_action: eth0 192.168.1.231 default listen
+examining interface #0: fd=-1, bfd=-1, name=eth0, flags=0x19, ifindex=0, sin=192.168.1.231, bcast=192.168.1.255, mask=255.255.255.0, Enabled:
+Searching for addr 192.168.1.231 in list of addresses - NOT FOUND
+create_interface(192.168.1.231#123)
+set SO_REUSEADDR to on on 0.0.0.0
+set SO_REUSEADDR to off on 0.0.0.0
+setsockopt SO_TIMESTAMP enabled on fd 19 address 192.168.1.231
+bind(19) AF_INET, addr 192.168.1.231%0#123, flags 0x19
+flags for fd 19: 0x802
+15 Jun 23:58:52 ntpd[9162]: Listen normally on 3 eth0 192.168.1.231 UDP 123
+restrict: op 1 addr 192.168.1.231 mask 255.255.255.255 mflags 00003000 flags 00000001
+Searching for addr 192.168.1.231 in list of addresses - NOT FOUND
+Added addr 192.168.1.231 to list of addresses
+add_interface mcast-capable 192.168.1.231
+added 192.168.1.231 to head of IPv4 multicast-capable unicast local address list
+created interface #3: fd=19, bfd=-1, name=eth0, flags=0x19, ifindex=0, sin=192.168.1.231, bcast=192.168.1.255, mask=255.255.255.0, Enabled:
+refreshing peers due to new addr 192.168.1.231
+updating interface #3: fd=19, bfd=-1, name=eth0, flags=0x19, ifindex=0, sin=192.168.1.231, bcast=192.168.1.255, mask=255.255.255.0, Enabled: new - created
+interface_action: lo ::1 default loopback listen
+examining interface #0: fd=-1, bfd=-1, name=lo, flags=0x5, ifindex=1, sin=::1, Enabled:
+Searching for addr ::1 in list of addresses - NOT FOUND
+create_interface(::1#123)
+set SO_REUSEADDR to on on ::
+set SO_REUSEADDR to off on ::
+setsockopt SO_TIMESTAMP enabled on fd 20 address ::1
+bind(20) AF_INET6, addr ::1%0#123, flags 0x5
+flags for fd 20: 0x802
+15 Jun 23:58:52 ntpd[9162]: Listen normally on 4 lo ::1 UDP 123
+restrict: op 1 addr ::1 mask ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff mflags 00003000 flags 00000001
+Searching for addr ::1 in list of addresses - NOT FOUND
+Added addr ::1 to list of addresses
+created interface #4: fd=20, bfd=-1, name=lo, flags=0x5, ifindex=1, sin=::1, Enabled:
+refreshing peers due to new addr ::1
+updating interface #4: fd=20, bfd=-1, name=lo, flags=0x5, ifindex=1, sin=::1, Enabled: new - created
+interface_action: eth0 fe80::ae9e:17ff:fe83:50e9 default listen
+examining interface #0: fd=-1, bfd=-1, name=eth0, flags=0x11, ifindex=2, sin=fe80::ae9e:17ff:fe83:50e9, Enabled:
+Searching for addr fe80::ae9e:17ff:fe83:50e9 in list of addresses - NOT FOUND
+create_interface(fe80::ae9e:17ff:fe83:50e9#123)
+set SO_REUSEADDR to on on ::
+set SO_REUSEADDR to off on ::
+setsockopt SO_TIMESTAMP enabled on fd 21 address fe80::ae9e:17ff:fe83:50e9
+bind(21) AF_INET6, addr fe80::ae9e:17ff:fe83:50e9%2#123, flags 0x11
+flags for fd 21: 0x802
+15 Jun 23:58:52 ntpd[9162]: Listen normally on 5 eth0 fe80::ae9e:17ff:fe83:50e9 UDP 123
+restrict: op 1 addr fe80::ae9e:17ff:fe83:50e9 mask ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff mflags 00003000 flags 00000001
+Searching for addr fe80::ae9e:17ff:fe83:50e9 in list of addresses - NOT FOUND
+Added addr fe80::ae9e:17ff:fe83:50e9 to list of addresses
+add_interface mcast-capable fe80::ae9e:17ff:fe83:50e9 link/scope-local univ-IID
+added fe80::ae9e:17ff:fe83:50e9 to tail of IPv6 multicast-capable unicast local address list
+created interface #5: fd=21, bfd=-1, name=eth0, flags=0x11, ifindex=2, sin=fe80::ae9e:17ff:fe83:50e9, Enabled:
+refreshing peers due to new addr fe80::ae9e:17ff:fe83:50e9
+updating interface #5: fd=21, bfd=-1, name=eth0, flags=0x11, ifindex=2, sin=fe80::ae9e:17ff:fe83:50e9, Enabled: new - created
+15 Jun 23:58:52 ntpd[9162]: peers refreshed
+setting SO_REUSEADDR on eth0@fe80::ae9e:17ff:fe83:50e9 to off
+setting SO_REUSEADDR on lo@::1 to off
+setting SO_REUSEADDR on eth0@192.168.1.231 to off
+setting SO_REUSEADDR on lo@127.0.0.1 to off
+create_sockets: Total interfaces = 6
+15 Jun 23:58:52 ntpd[9162]: Listening on routing socket on fd #22 for interface updates
+io_open_sockets: maxactivefd 22
+filegen_get(loopstats) = 0x7fe5ccff2660
+enabling filegen for loopstats statistics '/var/NTP/loopstats'
+filegen_get(peerstats) = 0x7fe5ccff26a0
+enabling filegen for peerstats statistics '/var/NTP/peerstats'
+filegen_get(clockstats) = 0x7fe5ccff2620
+enabling filegen for clockstats statistics '/var/NTP/clockstats'
+filegen_get(loopstats) = 0x7fe5ccff2660
+filegen_get(peerstats) = 0x7fe5ccff26a0
+filegen_get(clockstats) = 0x7fe5ccff2620
+auth_setkey: key 65535 type 4 len 16 19197c689430d3469ece48a43a8ab555
+getaddrinfo v4 0.0.0.0
+getnetnum given 0.0.0.0, got 0.0.0.0
+getaddrinfo v4 0.0.0.0
+getnetnum given 0.0.0.0, got 0.0.0.0
+restrict: op 1 addr 0.0.0.0 mask 0.0.0.0 mflags 00000000 flags 000005d0
+getaddrinfo v6 ::
+getnetnum given ::, got ::
+getaddrinfo v6 ::
+getnetnum given ::, got ::
+restrict: op 1 addr :: mask :: mflags 00000000 flags 000005d0
+getaddrinfo v4 127.0.0.1
+getnetnum given 127.0.0.1, got 127.0.0.1
+restrict: op 1 addr 127.0.0.1 mask 255.255.255.255 mflags 00000000 flags 00000000
+getaddrinfo v6 ::1
+getnetnum given ::1, got ::1
+restrict: op 1 addr ::1 mask ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff mflags 00000000 flags 00000000
+getaddrinfo v4 127.127.1.0
+newpeer: cast flags: 0x1 for address: 127.127.1.0
+newpeer: using fd 18 and our addr 127.0.0.1
+key_expire: at 0 associd 45199
+peer_clear: at 0 next 1 associd 45199 refid INIT
+event at 0 LOCAL(0) 8011 81 mobilize assoc 45199
+newpeer: 127.0.0.1->127.127.1.0 mode 3 vers 4 poll 6 6 flags 0x9 0x1 ttl 0 key 00000000
+getaddrinfo v4 127.127.1.0
+getnetnum given 127.127.1.0, got 127.127.1.0
+event at 0 0.0.0.0 c016 06 restart
+loop_config: item 2 freq 1000000000.000000
+event at 0 0.0.0.0 c012 02 freq_set kernel 0.000 PPM
+local_clock: mu 0 state 1 poll 3 count 0
+event at 0 0.0.0.0 c011 01 freq_not_set
+refclock_transmit: at 1 127.127.1.0
+refclock_receive: at 1 127.127.1.0
+event at 1 LOCAL(0) 8024 84 reachable
+refclock_sample: n 1 offset 0.000000 disp 0.010000 jitter 0.000000
+filegen  2 3643394333 0 3643315200
+opening filegen (type=2/id=3643315200) "/var/NTP/peerstats.20150615"
+clock_filter: n 1 off 0.000000 del 0.000000 dsp 7.937500 jit 0.000000
+select: survivor 127.127.1.0 0.000000
+select: combine offset 0.000000000 jitter 0.000000000
+event at 1 LOCAL(0) 903a 8a sys_peer
+poll_update: at 1 127.127.1.0 poll 6 burst 0 retry 0 head 0 early 2 next 64
+clock_update: at 1 sample 1 associd 45199
+local_clock: mu 1 state 4 poll 6 count 0
+event at 1 0.0.0.0 c514 04 freq_mode
+filegen  2 3643394333 0 3643315200
+opening filegen (type=2/id=3643315200) "/var/NTP/loopstats.20150615"
+local_clock: offset 0.000000000 jit 0.000000119 freq 0.000 stab 0.000 poll 6
+poll_update: at 1 127.127.1.0 poll 6 burst 0 retry 0 head 0 early 2 next 64
+auth_agekeys: at 1 keys 1 expired 0
+timer: interface update
+update_interfaces(123)
+interface_action: lo 127.0.0.1 IPv4 loopback - listen
+examining interface #0: fd=-1, bfd=-1, name=lo, flags=0x5, ifindex=0, sin=127.0.0.1, mask=255.0.0.0, Enabled:
+Searching for addr 127.0.0.1 in list of addresses - FOUND
+updating interface #2: fd=18, bfd=-1, name=lo, flags=0x5, ifindex=0, sin=127.0.0.1, mask=255.0.0.0, Enabled: present
+interface_action: eth0 192.168.1.231 default listen
+examining interface #0: fd=-1, bfd=-1, name=eth0, flags=0x19, ifindex=0, sin=192.168.1.231, bcast=192.168.1.255, mask=255.255.255.0, Enabled:
+Searching for addr 192.168.1.231 in list of addresses - FOUND
+updating interface #3: fd=19, bfd=-1, name=eth0, flags=0x19, ifindex=0, sin=192.168.1.231, bcast=192.168.1.255, mask=255.255.255.0, Enabled: present
+interface_action: lo ::1 default loopback listen
+examining interface #0: fd=-1, bfd=-1, name=lo, flags=0x5, ifindex=1, sin=::1, Enabled:
+Searching for addr ::1 in list of addresses - FOUND
+updating interface #4: fd=20, bfd=-1, name=lo, flags=0x5, ifindex=1, sin=::1, Enabled: present
+interface_action: eth0 fe80::ae9e:17ff:fe83:50e9 default listen
+examining interface #0: fd=-1, bfd=-1, name=eth0, flags=0x11, ifindex=2, sin=fe80::ae9e:17ff:fe83:50e9, Enabled:
+Searching for addr fe80::ae9e:17ff:fe83:50e9 in list of addresses - FOUND
+updating interface #5: fd=21, bfd=-1, name=eth0, flags=0x11, ifindex=2, sin=fe80::ae9e:17ff:fe83:50e9, Enabled: present
+write_stats: wander 0.000000 thresh 0.000000, freq 0.000000
+read_network_packet: fd=18 length 48 from 127.0.0.1
+fetch_timestamp: system network time stamp: 1434405535.283922
+receive: at 2 127.0.0.1<-127.0.0.1 flags 5 restrict 000
+receive: at 2 127.0.0.1<-127.0.0.1 mode 3 len 48
+sendpkt(18, dst=127.0.0.1, src=127.0.0.1, ttl=0, len=48)
+transmit: at 2 127.0.0.1->127.0.0.1 mode 4 len 48
+read_network_packet: fd=18 length 48 from 127.0.0.1
+fetch_timestamp: system network time stamp: 1434405536.284172
+receive: at 3 127.0.0.1<-127.0.0.1 flags 5 restrict 000
+restrict: interval 1 headway 8 limit 64
+receive: at 3 127.0.0.1<-127.0.0.1 mode 3 len 48
+sendpkt(18, dst=127.0.0.1, src=127.0.0.1, ttl=0, len=48)
+transmit: at 3 127.0.0.1->127.0.0.1 mode 4 len 48
+read_network_packet: fd=18 length 48 from 127.0.0.1
+fetch_timestamp: system network time stamp: 1434405538.285541
+receive: at 5 127.0.0.1<-127.0.0.1 flags 5 restrict 000
+restrict: interval 2 headway 12 limit 64
+receive: at 5 127.0.0.1<-127.0.0.1 mode 3 len 48
+sendpkt(18, dst=127.0.0.1, src=127.0.0.1, ttl=0, len=48)
+transmit: at 5 127.0.0.1->127.0.0.1 mode 4 len 48
+read_network_packet: fd=18 length 48 from 127.0.0.1
+fetch_timestamp: system network time stamp: 1434405542.288899
+receive: at 9 127.0.0.1<-127.0.0.1 flags 5 restrict 000
+restrict: interval 4 headway 14 limit 64
+receive: at 9 127.0.0.1<-127.0.0.1 mode 3 len 48
+sendpkt(18, dst=127.0.0.1, src=127.0.0.1, ttl=0, len=48)
+transmit: at 9 127.0.0.1->127.0.0.1 mode 4 len 48
+refclock_transmit: at 65 127.127.1.0
+refclock_receive: at 65 127.127.1.0
+refclock_sample: n 1 offset 0.000000 disp 0.010000 jitter 0.000000
+filegen  2 3643394397 0 3643315200
+opening filegen (type=2/id=3643315200) "/var/NTP/peerstats.20150615"
+clock_filter: n 2 off 0.000000 del 0.000000 dsp 3.937740 jit 0.000000
+select: survivor 127.127.1.0 0.000000
+select: combine offset 0.000000000 jitter 0.000000000
+poll_update: at 65 127.127.1.0 poll 6 burst 0 retry 0 head 0 early 2 next 64
+clock_update: at 65 sample 65 associd 45199
+poll_update: at 65 127.127.1.0 poll 6 burst 0 retry 0 head 0 early 2 next 64
+refclock_transmit: at 129 127.127.1.0
+refclock_receive: at 129 127.127.1.0
+refclock_sample: n 1 offset 0.000000 disp 0.010000 jitter 0.000000
+filegen  2 3643394461 0 3643315200
+opening filegen (type=2/id=3643315200) "/var/NTP/peerstats.20150615"
+clock_filter: n 3 off 0.000000 del 0.000000 dsp 1.937980 jit 0.000000
+select: survivor 127.127.1.0 0.000000
+select: combine offset 0.000000000 jitter 0.000000000
+poll_update: at 129 127.127.1.0 poll 6 burst 0 retry 0 head 0 early 2 next 64
+clock_update: at 129 sample 129 associd 45199
+poll_update: at 129 127.127.1.0 poll 6 burst 0 retry 0 head 0 early 2 next 64
+qrefclock_transmit: at 193 127.127.1.0
+refclock_receive: at 193 127.127.1.0
+refclock_sample: n 1 offset 0.000000 disp 0.010000 jitter 0.000000
+filegen  2 3643394525 0 3643315200
+opening filegen (type=2/id=3643315200) "/var/NTP/peerstats.20150615"
+clock_filter: n 4 off 0.000000 del 0.000000 dsp 0.938160 jit 0.000000
+select: survivor 127.127.1.0 0.000000
+select: combine offset 0.000000000 jitter 0.000000000
+poll_update: at 193 127.127.1.0 poll 6 burst 0 retry 0 head 0 early 2 next 64
+clock_update: at 193 sample 193 associd 45199
+poll_update: at 193 127.127.1.0 poll 6 burst 0 retry 0 head 0 early 2 next 64
+

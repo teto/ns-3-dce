@@ -6,6 +6,31 @@ CHAUSSEE DE BRUXELLES 159
  info breakpoints
  delete breakpoint <id>
 
+
+dans ntp_filegen. filegen_open verifie si le fichier existe, le crée sinon etc...
+aller voir ce qui doit etre créé:
+Le systeme genere bcp de ce signal
+teto@sirius:~/dce$ kill -l 14 ALRM
+
+
+sudo ~/ntpoff/ntpd/ntpd -c /home/teto/dce/myscripts/ntp/ntpserver.conf -l ntp.log -n -D 4 > test.txt
+echo "=======" |tee -a - - - - |cat files-0/var/log/26481/*|less
+ 
+Le flag HAVE_TIMER_CREATE n'est pas de la partie sur ma machine
+
+struct itimerval { 
+        struct timeval it_interval;    /* timer interval */
+        struct timeval it_value;       /* current value */
+};
+
+G bcp de "alarming: overflow" , c généré dans
+
+Chercher dans le log
+	DPRINTF(4, ("opening filegen (type=%d/stamp=%u) \"%s\"\n",
+		    gen->type, stamp, fullname));
+
+Dans ntp_parser.c  YYDPRINTF ((stderr, "Entering state %d\n", yystate));
+
 PcapFileW
 NetDevice::PacketType
 Given a pointer to an object, look to see if that object has a name associated with it and, if so, return the name of the object otherwise return an empty string.
@@ -17,7 +42,75 @@ This method returns the name of the object, e.g., "eth0".
 
 Avec la 1.12, netlinkok.pcap n'est pas correctement disséqué; il manque pas mal d'attributs
 
-A un moment wireshark écrit inteface (manque le R)
+gcc -fpreprocessed -E model/libc-ns3.h | grep -E "DCE|NATIVE" | grep -Po '(?<=\().*(?=\))' 
+readelf  --syms ./libfoo.so
+
+14:08:20            matt1 | any hint on how a program to change linux clock speed (apart from ntpd). I would like to slow linux's clock down for testing                                        
+14:10:42           maroon | matt1: adjtimex                                                       
+14:11:18           mike_t | or ntptime      
+
+utils/count_syscall.sh
+README.md
+man 2 link 
+/home/teto/dce/build/myscripts/ntp/bin/dce-ntpd: relocation error: elf-cache/0/ntpd: symbol link, version GLIBC_2.2.5 not defined in file 0001.so.6 with link time reference
+
+
+newpeer: 10.1.1.1->10.1.1.2 mode 3 vers 4 poll 6 10 flags 0x1 0x1 ttl 0 key 00000000
+
+#0  0x00007ffff740810d in ns3::Object::Dispose (this=0x0) at ../src/core/model/object.cc:219
+#1  0x00007ffff6129d23 in ns3::NodeListPriv::DoDispose (this=0x65b010) at ../src/network/model/node-list.cc:166
+#2  0x00007ffff7409a07 in ns3::Object::DoDelete (this=0x65b010) at ../src/core/model/object.cc:403
+#3  0x000000000040fc60 in ns3::ObjectDeleter::Delete (object=0x65b010) at /home/teto/ns3off/install/include/ns3-dev/ns3/object.h:450
+#4  0x000000000041125c in ns3::SimpleRefCount<ns3::Object, ns3::ObjectBase, ns3::ObjectDeleter>::Unref (this=0x65b010)
+    at /home/teto/ns3off/install/include/ns3-dev/ns3/simple-ref-count.h:115
+#5  0x00007ffff612b4cb in ns3::Ptr<ns3::NodeListPriv>::~Ptr (this=0x7fffffffc880, __in_chrg=<optimized out>) at ./ns3/ptr.h:756
+#6  0x00007ffff612ae22 in ns3::NodeList::GetNode (n=1) at ../src/network/model/node-list.cc:243
+#7  0x00007ffff7a92ec0 in ns3::UtilsGetNode (nodeId=1) at ../model/utils.cc:194
+#8  0x00007ffff7a935a9 in ns3::UtilsNodeTime (nodeId=1) at ../model/utils.cc:223
+#9  0x00007ffff7ae9297 in dce_clock_gettime (c=0, tp=0x7fffffffcaf0) at ../model/dce-time.cc:73
+#10 0x00007ffff48837d2 in clock_gettime (a0=0, a1=0x7fffffffcaf0) at ../model/libc-ns3.h:345
+#11 0x00007ffff34a6786 in get_ostime (tsp=0x7fffffffcaf0) at systime.c:135
+#12 0x00007ffff34a6845 in get_systime (now=0x7fffffffcb60) at systime.c:180
+#13 0x00007ffff3476fe3 in record_proto_stats (str=0x7fffffffcc20 "0.0.0.0 c02d 0d kern kernel time sync disabled") at ntp_util.c:776
+#14 0x00007ffff3451bd6 in report_event (err=13, peer=0x0, str=0x7ffff34df360 "kernel time sync disabled") at ntp_control.c:4737
+#15 0x00007ffff345fd67 in stop_kern_loop () at ntp_loopfilter.c:1167
+#16 0x00007ffff7adc01f in dce___cxa_finalize (d=0x0) at ../model/dce-cxa.cc:43
+#17 0x00007ffff7afa28a in ns3::TaskManager::DoDispose (this=0x660960) at ../model/task-manager.cc:149
+#18 0x00007ffff7408159 in ns3::Object::Dispose (this=0x65b230) at ../src/core/model/object.cc:225
+#19 0x00007ffff6129d23 in ns3::NodeListPriv::DoDispose (this=0x65b010) at ../src/network/model/node-list.cc:166
+#20 0x00007ffff7409a07 in ns3::Object::DoDelete (this=0x65b010) at ../src/core/model/object.cc:403
+#21 0x000000000040fc60 in ns3::ObjectDeleter::Delete (object=0x65b010) at /home/teto/ns3off/install/include/ns3-dev/ns3/object.h:450
+#22 0x000000000041125c in ns3::SimpleRefCount<ns3::Object, ns3::ObjectBase, ns3::ObjectDeleter>::Unref (this=0x65b010)
+    at /home/teto/ns3off/install/include/ns3-dev/ns3/simple-ref-count.h:115
+#23 0x00007ffff612b4cb in ns3::Ptr<ns3::NodeListPriv>::~Ptr (this=0x7fffffffd020, __in_chrg=<optimized out>) at ./ns3/ptr.h:756
+#24 0x00007ffff612ae22 in ns3::NodeList::GetNode (n=0) at ../src/network/model/node-list.cc:243
+#25 0x00007ffff7a92ec0 in ns3::UtilsGetNode (nodeId=0) at ../model/utils.cc:194
+#26 0x00007ffff7a935a9 in ns3::UtilsNodeTime (nodeId=0) at ../model/utils.cc:223
+#27 0x00007ffff7ae9297 in dce_clock_gettime (c=0, tp=0x7fffffffd290) at ../model/dce-time.cc:73
+#28 0x00007ffff48837d2 in clock_gettime (a0=0, a1=0x7fffffffd290) at ../model/libc-ns3.h:345
+#29 0x00007ffff34a6786 in get_ostime (tsp=0x7fffffffd290) at systime.c:135
+#30 0x00007ffff34a6845 in get_systime (now=0x7fffffffd300) at systime.c:180
+#31 0x00007ffff3476fe3 in record_proto_stats (str=0x7fffffffd3c0 "0.0.0.0 c01d 0d kern kernel time sync disabled") at ntp_util.c:776
+#32 0x00007ffff3451bd6 in report_event (err=13, peer=0x0, str=0x7ffff34df360 "kernel time sync disabled") at ntp_control.c:4737
+#33 0x00007ffff345fd67 in stop_kern_loop () at ntp_loopfilter.c:1167
+#34 0x00007ffff7adc01f in dce___cxa_finalize (d=0x0) at ../model/dce-cxa.cc:43
+#35 0x00007ffff7afa28a in ns3::TaskManager::DoDispose (this=0x660120) at ../model/task-manager.cc:149
+#36 0x00007ffff7408159 in ns3::Object::Dispose (this=0x65af70) at ../src/core/model/object.cc:225
+#37 0x00007ffff6129d23 in ns3::NodeListPriv::DoDispose (this=0x65b010) at ../src/network/model/node-list.cc:166
+#38 0x00007ffff7409a07 in ns3::Object::DoDelete (this=0x65b010) at ../src/core/model/object.cc:403
+#39 0x000000000040fc60 in ns3::ObjectDeleter::Delete (object=0x65b010) at /home/teto/ns3off/install/include/ns3-dev/ns3/object.h:450
+#40 0x000000000041125c in ns3::SimpleRefCount<ns3::Object, ns3::ObjectBase, ns3::ObjectDeleter>::Unref (this=0x65b010)
+    at /home/teto/ns3off/install/include/ns3-dev/ns3/simple-ref-count.h:115
+#41 0x00007ffff612b5af in ns3::Ptr<ns3::NodeListPriv>::operator= (this=0x7ffff64564a8 <ns3::NodeListPriv::DoGet()::ptr>, o=...)
+    at ./ns3/ptr.h:770
+#42 0x00007ffff612976d in ns3::NodeListPriv::Delete () at ../src/network/model/node-list.cc:146
+#43 0x00007ffff73eb468 in ns3::EventFunctionImpl0::Notify (this=0x65ae60) at ../src/core/model/make-event.cc:53
+#44 0x00007ffff73deb7b in ns3::EventImpl::Invoke (this=0x65ae60) at ../src/core/model/event-impl.cc:51
+#45 0x00007ffff73e303a in ns3::DefaultSimulatorImpl::Destroy (this=0x65b050) at ../src/core/model/default-simulator-impl.cc:99
+#46 0x00007ffff73df444 in ns3::Simulator::Destroy () at ../src/core/model/simulator.cc:180
+#47 0x000000000040ed25 in main (argc=1, argv=0x7fffffffe088) at ../myscripts/ntp/dce-ntpd.cc:251
+
+
 
 stub mlockall; not really implemented
 
@@ -124,8 +217,132 @@ event at 0 0.0.0.0 c011 01 freq_not_set
 auth_agekeys: at 1 keys 0 expired 0
 
 
-/home/teto/dce/build/bin/dce-ntimed: relocation error: elf-cache/0/ntpd: symbol sqrt, version GLIBC_2.2.5 not defined in file 0004.so.6 with link time reference
 
+
+
+sudo ntpd -c ~/dotfiles/ntp.conf -l ntp.log -p ntp.pid -f ntp.drift -n -D 3                    23:57:08   clock_support 
+[sudo] password for teto: 
+ntpd 4.2.6p5@1.2349-o Mon Apr 13 13:39:46 UTC 2015 (1)
+15 Jun 23:57:27 ntpd[9126]: logging to file ntp.log
+15 Jun 23:57:27 ntpd[9126]: set_process_priority: Leave priority alone: priority_done is <2>
+15 Jun 23:57:27 ntpd[9126]: proto: precision = 0.107 usec
+loop_config: item 1 freq 0.000000
+event at 0 0.0.0.0 c01d 0d kern kernel time sync enabled
+Finished Parsing!!
+create_sockets(123)
+15 Jun 23:57:27 ntpd[9126]: ntp_io: estimated max descriptors: 1024, initial socket boundary: 16
+15 Jun 23:57:27 ntpd[9126]: Listen and drop on 0 v4wildcard 0.0.0.0 UDP 123
+created interface #0: fd=16, bfd=-1, name=v4wildcard, flags=0x89, ifindex=0, sin=0.0.0.0, bcast=0.0.0.0, mask=255.255.255.255, Disabled:
+15 Jun 23:57:27 ntpd[9126]: Listen and drop on 1 v6wildcard :: UDP 123
+created interface #1: fd=17, bfd=-1, name=v6wildcard, flags=0x81, ifindex=0, sin=::, Disabled:
+update_interfaces(123)
+create_interface(127.0.0.1#123)
+15 Jun 23:57:27 ntpd[9126]: Listen normally on 2 lo 127.0.0.1 UDP 123
+restrict: op 1 addr 127.0.0.1 mask 255.255.255.255 mflags 00003000 flags 00000001
+created interface #2: fd=18, bfd=-1, name=lo, flags=0x5, ifindex=0, sin=127.0.0.1, mask=255.0.0.0, Enabled:
+updating interface #2: fd=18, bfd=-1, name=lo, flags=0x5, ifindex=0, sin=127.0.0.1, mask=255.0.0.0, Enabled: new - created
+create_interface(192.168.1.231#123)
+15 Jun 23:57:27 ntpd[9126]: Listen normally on 3 eth0 192.168.1.231 UDP 123
+restrict: op 1 addr 192.168.1.231 mask 255.255.255.255 mflags 00003000 flags 00000001
+created interface #3: fd=19, bfd=-1, name=eth0, flags=0x19, ifindex=0, sin=192.168.1.231, bcast=192.168.1.255, mask=255.255.255.0, Enabled:
+updating interface #3: fd=19, bfd=-1, name=eth0, flags=0x19, ifindex=0, sin=192.168.1.231, bcast=192.168.1.255, mask=255.255.255.0, Enabled: new - created
+create_interface(::1#123)
+15 Jun 23:57:27 ntpd[9126]: Listen normally on 4 lo ::1 UDP 123
+restrict: op 1 addr ::1 mask ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff mflags 00003000 flags 00000001
+created interface #4: fd=20, bfd=-1, name=lo, flags=0x5, ifindex=1, sin=::1, Enabled:
+updating interface #4: fd=20, bfd=-1, name=lo, flags=0x5, ifindex=1, sin=::1, Enabled: new - created
+create_interface(fe80::ae9e:17ff:fe83:50e9#123)
+15 Jun 23:57:27 ntpd[9126]: Listen normally on 5 eth0 fe80::ae9e:17ff:fe83:50e9 UDP 123
+restrict: op 1 addr fe80::ae9e:17ff:fe83:50e9 mask ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff mflags 00003000 flags 00000001
+created interface #5: fd=21, bfd=-1, name=eth0, flags=0x11, ifindex=2, sin=fe80::ae9e:17ff:fe83:50e9, Enabled:
+updating interface #5: fd=21, bfd=-1, name=eth0, flags=0x11, ifindex=2, sin=fe80::ae9e:17ff:fe83:50e9, Enabled: new - created
+15 Jun 23:57:27 ntpd[9126]: peers refreshed
+create_sockets: Total interfaces = 6
+15 Jun 23:57:27 ntpd[9126]: Listening on routing socket on fd #22 for interface updates
+io_open_sockets: maxactivefd 22
+auth_setkey: key 65535 type 4 len 16 1cbe42b26169495f10b84b2656765df7
+getnetnum given 0.0.0.0, got 0.0.0.0
+getnetnum given 0.0.0.0, got 0.0.0.0
+restrict: op 1 addr 0.0.0.0 mask 0.0.0.0 mflags 00000000 flags 000005d0
+getnetnum given ::, got ::
+getnetnum given ::, got ::
+restrict: op 1 addr :: mask :: mflags 00000000 flags 000005d0
+getnetnum given 127.0.0.1, got 127.0.0.1
+restrict: op 1 addr 127.0.0.1 mask 255.255.255.255 mflags 00000000 flags 00000000
+getnetnum given ::1, got ::1
+restrict: op 1 addr ::1 mask ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff mflags 00000000 flags 00000000
+newpeer: cast flags: 0x1 for address: 127.127.1.0
+newpeer: using fd 18 and our addr 127.0.0.1
+key_expire: at 0 associd 32910
+peer_clear: at 0 next 1 associd 32910 refid INIT
+event at 0 LOCAL(0) 8011 81 mobilize assoc 32910
+newpeer: 127.0.0.1->127.127.1.0 mode 3 vers 4 poll 6 6 flags 0x9 0x1 ttl 0 key 00000000
+getnetnum given 127.127.1.0, got 127.127.1.0
+event at 0 0.0.0.0 c016 06 restart
+loop_config: item 2 freq 1000000000.000000
+event at 0 0.0.0.0 c012 02 freq_set kernel 0.000 PPM
+local_clock: mu 0 state 1 poll 3 count 0
+event at 0 0.0.0.0 c011 01 freq_not_set
+refclock_transmit: at 1 127.127.1.0
+refclock_receive: at 1 127.127.1.0
+event at 1 LOCAL(0) 8024 84 reachable
+refclock_sample: n 1 offset 0.000000 disp 0.010000 jitter 0.000000
+filegen  2 3643394248 0 3643315200
+clock_filter: n 1 off 0.000000 del 0.000000 dsp 7.937500 jit 0.000000
+select: survivor 127.127.1.0 0.000000
+select: combine offset 0.000000000 jitter 0.000000000
+event at 1 LOCAL(0) 903a 8a sys_peer
+poll_update: at 1 127.127.1.0 poll 6 burst 0 retry 0 head 0 early 2 next 64
+clock_update: at 1 sample 1 associd 32910
+local_clock: mu 1 state 4 poll 6 count 0
+event at 1 0.0.0.0 c514 04 freq_mode
+filegen  2 3643394248 0 3643315200
+local_clock: offset 0.000000000 jit 0.000000119 freq 0.000 stab 0.000 poll 6
+poll_update: at 1 127.127.1.0 poll 6 burst 0 retry 0 head 0 early 2 next 64
+auth_agekeys: at 1 keys 1 expired 0
+timer: interface update
+update_interfaces(123)
+write_stats: wander 0.000000 thresh 0.000000, freq 0.000000
+read_network_packet: fd=18 length 48 from 127.0.0.1
+receive: at 45 127.0.0.1<-127.0.0.1 flags 5 restrict 000
+receive: at 45 127.0.0.1<-127.0.0.1 mode 3 len 48
+sendpkt(18, dst=127.0.0.1, src=127.0.0.1, ttl=0, len=48)
+transmit: at 45 127.0.0.1->127.0.0.1 mode 4 len 48
+read_network_packet: fd=18 length 48 from 127.0.0.1
+receive: at 46 127.0.0.1<-127.0.0.1 flags 5 restrict 000
+restrict: interval 1 headway 8 limit 64
+receive: at 46 127.0.0.1<-127.0.0.1 mode 3 len 48
+sendpkt(18, dst=127.0.0.1, src=127.0.0.1, ttl=0, len=48)
+transmit: at 46 127.0.0.1->127.0.0.1 mode 4 len 48
+^[[6~read_network_packet: fd=18 length 48 from 127.0.0.1
+receive: at 48 127.0.0.1<-127.0.0.1 flags 5 restrict 000
+restrict: interval 2 headway 12 limit 64
+receive: at 48 127.0.0.1<-127.0.0.1 mode 3 len 48
+sendpkt(18, dst=127.0.0.1, src=127.0.0.1, ttl=0, len=48)
+transmit: at 48 127.0.0.1->127.0.0.1 mode 4 len 48
+read_network_packet: fd=18 length 48 from 127.0.0.1
+receive: at 52 127.0.0.1<-127.0.0.1 flags 5 restrict 000
+restrict: interval 4 headway 14 limit 64
+receive: at 52 127.0.0.1<-127.0.0.1 mode 3 len 48
+sendpkt(18, dst=127.0.0.1, src=127.0.0.1, ttl=0, len=48)
+transmit: at 52 127.0.0.1->127.0.0.1 mode 4 len 48
+
+
+
+This week has delivered the following:
+ - fixed the netlink bug described in [1] (to help me in that task, I extended wireshark's netlink dissector[0])
+ - About the libgcrypt problem, it doesn't provide pkg-config so I found a waf alternative that can check for its presence without it. Test nearly finished.
+ - Rather than sending patches dependant on one another, I've pushed the clock support code for dce [2] and ns3 [3]. This seems to launch ntpd but I've no idea if it works
+ I've not had the time to look at mptcp dce as I had (ambitiously xD) proposed 
+
+For the upcoming week:
+ - prepare the mptcp crypto code for the 20 of june review
+ - understand if clock synchronization happens or not and fix what needs to be fixed.
+
+[0] https://code.wireshark.org/review/#/c/8916/1/epan/dissectors/packet-netlink.c
+[1] https://github.com/direct-code-execution/ns-3-dce/issues/2
+[2] https://github.com/teto/ns-3-dce/commits/clock_support
+[3] https://github.com/teto/ns-3-dev-git/commits/clock_support
 
 
 /* */
@@ -207,98 +424,10 @@ http://www.infradead.org/~tgr/libnl/doc/route.html
 
 "All netlink link messages share a common header (struct ifinfomsg) which is appended after the netlink header (struct nlmsghdr)"
 
-DCE utilise PcapFile::Write (uint32_t tsSec, uint32_t tsUsec, Ptr<const Packet> p)
-car le log indique:
-PcapFile:Write(0x1747b00, 8, 0, 0x17477f0)
-
-PcapHelper dans TraceF
-WritePacketHeader
-PcapFileHeader
-PcapFileWrapper
-http://www.tcpdump.org/linktypes/LINKTYPE_LINUX_SLL.html
 
 Pour voir les headers des pcap
 http://www.kroosec.com/2012/10/a-look-at-pcap-file-format.html
 
-http://www.kroosec.com/2012/10/a-look-at-pcap-file-format.html
-Le pcap header a une longeur de 24 octets, les 4 derniers octets représentant le link layer type
-Dans le bon cas j'ai fd 00 00 00
-Dans le mauvais 71 00 00 00
-
-Maybe rely on VirtualNetDevice to capture netlink communications ?
-
-MultipartNetlinkMessage dérive de Header
-
-Dans DCE ptet s'intéresser à sockaddr_ll_max
-
-18:00:26 matt1 | I have some trouble displaying netlink packets with wireshark (picutre https://transfer.sh/1djpMO/2015-05-29-174459-1911x1057-scrot.png, left is valid, right can't be          │ Boonie_NL  
-               | dissected). Left was generated by kernel and captured by tcpdump so it works fine. The netlink messages on the right were generated by a network simulator that directly writes │ Boreeas    
-               | to a pcap. From what I gathered, the right is not dissected                                                                                                                     │ c00p3r          
-18:00:26 matt1 | because it expects this header http://www.tcpdump.org/linktypes/LINKTYPE_NETLINK.html, which the network simulator does not produce. My question is: was this header generated  │ cereal        
-               | by the kernel or tcpdump in the left pcap ? 
-
-0.600072s 1 DceNetdb:dce_getifaddrs(): [INFO ] MATT dce_getifaddr
-0.600072s 1 SimuFd:dce_socket(0xb94bf0, 1, 16, 3, 0)
-0.600072s 1 Ns3SocketFdFactory:CreateSocket(): [INFO ] Requesting for PF_NETLINK
-0.600072s 1 DceNetlinkSocketFactory:CreateSocket()
-0.600072s 1 DceNetlinkSocket:NetlinkSocket()
-0.600072s 1 DceNetlinkSocket:SetNode(0xc442d0)
-0.600072s 1 DceNetlinkSocket:SetNode(): [DEBUG] SetNode: 1
-0.600072s 1 ProcessUtils:UtilsAllocateFd(0xb94bf0)
-0.600072s 1 ProcessUtils:UtilsAllocateFd(): [DEBUG] Allocated fd=5
-0.600072s 1 SimuFd:dce_bind(0xb94bf0, 1, 5, 0x7fee5d33b360, 12)
-0.600072s 1 DceNetlinkSocket:Bind(0xc442d0, 04-08-00:00:00:00:00:00:00:00)
-0.600072s 1 DceNetlinkSocket:DoBind(0xc442d0, pid: 0, group: 0)
-0.600072s 1 SimuFd:dce_getsockname(0xb94bf0, 1, 0x7fee5d33b360, 0x7fee5d33b1ec)
-0.600072s 1 DceNetlinkSocket:GetSockName()
-0.600072s 1 DceNetlinkSocket:GetPid()
-0.600072s 1 DceNetlinkSocket:GetGroups()
-0.600072s 1 DceNetdb:netlink_request(18)
-0.600072s 1 SimuFd:dce_sendto(0xb94bf0,  fd=, 5, buf=, 0x7fee5d33b150, 20,  flags=, 0,  to=, 0x7fee5d33b120,  socklen=, 12)
-0.600072s 1 SimuFd:dce_sendmsg(0xb94bf0, nodeId=, 1, 5, 0x7fee5d33afe0, 0)
-0.600072s 1 UnixDatagramSocketFd:DoSendmsg(0xc446f0, 0xb94bf0)
-0.600072s 1 UnixDatagramSocketFd:DoSendmsg(): [DEBUG] msg->msg_iovlen=1(nb of *elements*)
-0.600072s 1 UnixDatagramSocketFd:DoSendmsg(): [DEBUG] Element #0 in iov, of length [20]
-0.600072s 1 UnixDatagramSocketFd:DoSendmsg(): [DEBUG] msg->msg_namelen != 0
-0.600072s 1 UnixDatagramSocketFd:DoSendmsg(): [DEBUG] Sending the packet
-0.600072s 1 UnixDatagramSocketFd:MainSendTo(Sending to , 04-08-00:00:00:00:00:00:00:00)
-0.600072s 1 DceNetlinkSocket:SendTo(0xc442d0, 0xc1b3e0, 0, 04-08-00:00:00:00:00:00:00:00)
-0.600072s 1 DceNetlinkSocket:SendTo(): [INFO ] send netlink message to pid = pid: 0, group: 0
-0.600072s 1 DceNetlinkSocket:SendTo(): [DEBUG] At 0.600072s sending netlink message from node 1
-0.600072s 1 DceNetlinkSocket:HandleMessage(0xc442d0)
-0.600072s 1 DceNetlinkSocket:HandleNetlinkRouteMessage(0xc442d0)
-0.600072s 1 DceNetlinkSocket:DumpNetlinkRouteMessage(0xc442d0, 18, 0)
-0.600072s 1 DceNetlinkSocket:DumpNetlinkRouteMessage(): [INFO ] SETLINKfamily 
-0.600072s 1 DceNetlinkSocket:BuildInterfaceInfoDumpMessages(0xc442d0, MATT)
-0.600072s 1 DceNetlinkSocket:BuildInterfaceInfoDumpMessage(0xc442d0, interface_num=, 0)
-0.600072s 1 DceNetlinkSocket:BuildInterfaceInfoDumpMessage(0xc442d0, interface_num=, 1)
-0.600072s 1 DceNetlinkSocket:BuildInterfaceInfoDumpMessage(0xc442d0, interface_num=, 2)
-0.600072s 1 DceNetlinkSocket:SendMessageUnicast(0xc442d0, 1)
-0.600072s 1 DceNetlinkSocket:ForwardUp(0xc442d0, 0xb94d60, pid: 0, group: 0)
-0.600072s 1 SimuFd:dce_recvmsg(0xb94bf0, nodeId=, 1,  fd=, 5,  msg=, 0x7fee5d33b170,  flags=, 0)
-0.600072s 1 UnixDatagramSocketFd:DoRecvmsg(this=, 0xc446f0, current=, 0xb94bf0, flags=, 0)
-0.600072s 1 UnixDatagramSocketFd:DoRecvmsg(): [DEBUG] Not in MSG_ERRQUEUE
-0.600072s 1 DceNetlinkSocket:GetRxAvailable()
-0.600072s 1 DceNetlinkSocket:GetRxAvailable()
-0.600072s 1 DceNetlinkSocket:RecvFrom(0xc442d0, 4096, 0, 00-00-00)
-0.600072s 1 DceNetlinkSocket:Recv(0xc442d0, 4096, 0)
-0.600072s 1 UnixDatagramSocketFd:DoRecvmsg(): [WARN ] msg_controllen < 0 , is that a problem ?
-0.600072s 1 SimuFd:dce_recvmsg(0xb94bf0, nodeId=, 1,  fd=, 5,  msg=, 0x7fee5d33b170,  flags=, 0)
-0.600072s 1 UnixDatagramSocketFd:DoRecvmsg(this=, 0xc446f0, current=, 0xb94bf0, flags=, 0)
-0.600072s 1 UnixDatagramSocketFd:DoRecvmsg(): [DEBUG] Not in MSG_ERRQUEUE
-0.600072s 1 DceNetlinkSocket:GetRxAvailable()
-1.6s 1 ProcessUtils:UtilsDoSignal(): [DEBUG] deliver signal=14
-1.6s 1 SimuFd:dce_write(0xb94bf0, 1, 1, 0x7fee4e36df0d, 28)
-1.6s 1 UnixFileFd:Write(0xb2a7c0, 0xb94bf0, 0x7fee4e36df0d, 28)
-1.6s 1 DceNetlinkSocket:RecvFrom(0xc442d0, 4096, 0, 00-00-00)
-1.6s 1 DceNetlinkSocket:Recv(0xc442d0, 4096, 0)
-1.6s 1 UnixDatagramSocketFd:DoRecvmsg(): [ERROR] Empty packet
-1.6s 1 DceNetlinkSocket:GetErrno()
-1.6s 1 DceNetdb:netlink_request(): [WARN ] read_len=-1 < 0
-1.6s 1 DceNetdb:dce_getifaddrs(): [WARN ] Could not RTM_GETLINK.
-
-https://github.com/direct-code-execution/ns-3-dce/issues/2#issuecomment-99727349
-Apparemment ns3 est censé recevoir les messages netlink. Vérifier avec netlink socket
 
 Pour dce_getifaddr on pourrait se passer de Netlink si l'on detecte qu'il s'agit d'une stack ns3 ?
 repo ntp
@@ -307,9 +436,6 @@ justement les comparer: Ns3SocketFdFactory pour ns3
 
 Le NotifyNewAggregate. est appelé quand un object vient d'être agrégé. 
 Cela pourrait être utilisé lorsque l'on agrège une horloge (pour MAJ l'offset)
-
-TypeId::LookupByName 
- Ns3SocketFdFactory:CreateSocket(): [INFO ] Requesting for PF_NETLINK
 
 Check that the netlink messages are well received
 RTM_GETLINK

@@ -42,7 +42,7 @@ int main (int argc, char *argv[])
   std::string stack = "ns3";
   bool useDebug = true;
   std::string bandWidth = "1m";
-  Time simDuration = Seconds(10);
+  Time simDuration = Seconds(1000);
 
 
   std::string time_server_binary = "ntpd";
@@ -152,6 +152,10 @@ int main (int argc, char *argv[])
 
   dce.SetStackSize (1 << 20);
 
+  uid_t root_uid = 0;
+  ///////////////////////////////////////
+  /// Client configuration
+  ///////////////////////////////////////
   // Launch ntp client on node 0
 #ifdef ENABLE_NTIMED
   dce.SetBinary ("ntimed-client");
@@ -163,29 +167,45 @@ int main (int argc, char *argv[])
   dce.AddArgument ("--poll-server");
   // address of the NTP server
   dce.AddArgument ("10.1.1.2");
-//  dce.AddArgument ("-i");
-//  dce.AddArgument ("1");
-//  dce.AddArgument ("--time");
-//  dce.AddArgument ("10");
-//  if (useDebug)
-//    {
-//      dce.AddArgument ("-u");
-//      dce.AddArgument ("-b");
-//      dce.AddArgument (bandWidth);
-//    }
 
   apps = dce.Install (nodes.Get (0));
   apps.Start (Seconds (0.7));
-  apps.Stop (Seconds (20));
+#else
+  dce.SetBinary ("ntpd");
+
+  // TODO install a defective clock on that node
+
+  dce.ResetArguments ();
+  dce.ResetEnvironment ();
+
+//  dce.AddArgument ("");
+//  dce.AddArgument ("10.1.1.2");
+  dce.AddArgument ("-c");
+  dce.AddArgument ("ntpclient.conf");
+  dce.AddArgument ("-n");   // don't fork
+  dce.SetEuid(root_uid);
+  dce.SetUid(root_uid);
+
+  if(useDebug) {
+    dce.AddArgument("-D"); // Alternatively -dddd
+    dce.AddArgument("4");
+  }
+
+  apps = dce.Install (nodes.Get (0));
+  apps.Start (Seconds (0.7));
 #endif
 
+  ///////////////////////////////////////
+  /// Server configuration
+  ///////////////////////////////////////
   // Launch ntp server on node 1
   #ifdef ENABLE_NTPD
   dce.SetBinary ("ntpd");
   dce.ResetArguments ();
   dce.ResetEnvironment ();
   dce.AddArgument ("-c");
-  dce.AddArgument ("/tmp/ntp.conf");
+  dce.AddArgument ("ntpserver.conf");
+  dce.AddArgument ("-n");   // don't fork
   #else
   dce.SetBinary ("chronyd");
   dce.ResetArguments ();
@@ -196,13 +216,12 @@ int main (int argc, char *argv[])
 
   #endif
 
-  uid_t root_uid = 0;
   dce.SetEuid(root_uid);
   dce.SetUid(root_uid);
 
   if(useDebug) {
-    // -dddd to increase log level
-    dce.AddArgument("-dddd");
+    dce.AddArgument("-D"); // Alternatively -dddd
+    dce.AddArgument("5");
   }
 //  dce.AddArgument ("/home/teto/dce/myscripts/ntp.conf");
 

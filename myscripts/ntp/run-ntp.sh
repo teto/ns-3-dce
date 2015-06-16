@@ -5,13 +5,13 @@ echo 'Can I delete files-0 and files-1 directories ? (y/n)'
 rep='y'
 if [ $rep == 'y' ]
 then
-	rm -Rf "files-0" "files-1"
+	rm -Rvf files-0 files-1
 fi
 mkdir -p "files-0" "files-1"
 #echo "copy files to node 0 (client)"
-cp -v ntpclient.conf files-0/
+cp -v myscripts/ntp/ntpclient.conf files-0/
 #echo copy server configurations to node 1
-cp -v  ntpserver.conf files-1/
+cp -v  myscripts/ntp/ntpserver.conf files-1/
 #echo run scenario dce-ntpd
 # ../../waf --run dce-ntpd
 

@@ -133,8 +133,8 @@ dce_root="/home/teto/dce"
 try:
     #os.system("echo DCE_ROOT=$DCE_ROOT")
     #ret = True
-    with subprocess.Popen(dce_root+"/myscripts/ntp/run-ntp.sh", cwd=dce_root+"/myscripts/ntp") as proc:
-        print("Script laucnhed")
+    with subprocess.Popen(dce_root+"/myscripts/ntp/run-ntp.sh", cwd=dce_root) as proc:
+        print("Script launched")
 
     with subprocess.Popen(cmd, shell=True) as proc:
         print("test")
