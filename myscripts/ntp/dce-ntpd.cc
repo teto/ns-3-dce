@@ -23,9 +23,37 @@ SERVER_NTPD,
 SERVER_CHRONYD,
 SERVER_PTPD,
 SERVER_OPENNTPD,    //!
+NTIMED
 };
 
+
 NtpServerType serverType = SERVER_NTPD;
+NtpServerType clientType = NTP_NTIMED;
+
+
+
+bool SetClientType(std::string type) {
+
+    NS_LOG_FUNCTION(type);
+    if(type== "ntpd") {
+        serverType = SERVER_NTPD;
+    }
+    else if(type == "chronyd") {
+        serverType = SERVER_CHRONYD;
+    }
+    else if(type == "ptpd") {
+        serverType = SERVER_PTPD;
+    }
+    else if(type == "openntpd") {
+        serverType = SERVER_OPENNTPD;
+    }
+    else if(type == "openntpd") {
+        return false;
+    }
+
+    return true;
+}
+
 
 bool SetServerType(std::string type) {
 
@@ -47,6 +75,66 @@ bool SetServerType(std::string type) {
     }
 
     return true;
+}
+
+void SetupProgram(DceApplicationHelper& dce, NtpServerType type, bool server, bool debug == true)
+{
+  NS_LOG_INFO("Setup program of type " << type << " as server == " << server);
+
+  uid_t root_uid = 0;
+  dce.SetEuid(root_uid);
+  dce.SetUid(root_uid);
+
+  std::string suffix = (server) ? "server" : "client";
+
+  switch(type) {
+
+    case SERVER_CHRONYD:
+        NS_LOG_INFO("Setup chronyd");
+          dce.SetBinary ("chronyd");
+          dce.ResetArguments ();
+          dce.ResetEnvironment ();
+
+          dce.AddArgument ("-f");
+          dce.AddArgument ("chrony"+suffix+".conf");
+          dce.AddArgument ("-4"); //accept only v4
+          if(useDebug) {
+            dce.AddArgument("-d"); // First to prevent fork
+            dce.AddArgument("-d"); // 2nd to enable display message
+          }
+        break;
+
+    case SERVER_OPENNTPD:
+    case SERVER_PTPD:
+
+    case SERVER_NTPD:
+          NS_LOG_INFO("Setup ntpd");
+          dce.SetBinary ("ntpd");
+          dce.ResetArguments ();
+          dce.ResetEnvironment ();
+          dce.AddArgument ("-c");
+          dce.AddArgument ("ntp"+suffix+".conf");
+          dce.AddArgument ("-n");   // don't fork
+
+          if(useDebug) {
+            dce.AddArgument("-D"); // Alternatively -dddd
+            dce.AddArgument("5");
+          }
+          break;
+      case NTP_NTIMED:
+        dce.SetBinary ("ntimed-client");
+
+        // TODO install a defective clock on that node
+
+        dce.ResetArguments ();
+        dce.ResetEnvironment ();
+        dce.AddArgument ("--poll-server"); // /!\ poll-server does not steer the clock
+        // address of the NTP server
+        dce.AddArgument ("10.1.1.2");
+        break;
+      default:
+        break;
+  };
 }
 
 // ===========================================================================
@@ -82,7 +170,8 @@ int main (int argc, char *argv[])
   NS_LOG_INFO("Parsing");
   cmd.AddValue ("stack", "Name of IP stack: ns3/linux/freebsd.", stack);
   cmd.AddValue ("debug", "Debug. Default true (0)", useDebug);
-  cmd.AddValue ("server", "Debug. Default true (0)", MakeCallback(SetServerType));
+  cmd.AddValue ("server", "Server to use", MakeCallback(SetServerType));
+  cmd.AddValue ("client", "client to use", MakeCallback(SetServerType));
 //  cmd.AddValue ("bw", "BandWidth. Default 1m.", bandWidth);
 NS_LOG_INFO(argc << argv[1]);
   cmd.Parse (argc, argv);
@@ -185,49 +274,41 @@ NS_LOG_INFO(argc << argv[1]);
 
   dce.SetStackSize (1 << 20);
 
-  uid_t root_uid = 0;
+
   ///////////////////////////////////////
   /// Client configuration
   ///////////////////////////////////////
   // Launch ntp client on node 0
-#ifdef ENABLE_NTIMED
-  NS_LOG_INFO("Selected ntimed");
-  dce.SetBinary ("ntimed-client");
-
-  // TODO install a defective clock on that node
-
-  dce.ResetArguments ();
-  dce.ResetEnvironment ();
-  dce.AddArgument ("--poll-server");
-  // address of the NTP server
-  dce.AddArgument ("10.1.1.2");
+//  switch(clientType) {
+//  NS_LOG_INFO("Selected ntimed");
+  SetupProgram(dce, clientType, false);
 
   apps = dce.Install (nodes.Get (0));
   apps.Start (Seconds (0.7));
-#else
-  dce.SetBinary ("ntpd");
+//#else
+//  dce.SetBinary ("ntpd");
+//
+//  // TODO install a defective clock on that node
+//
+//  dce.ResetArguments ();
+//  dce.ResetEnvironment ();
+//
+////  dce.AddArgument ("");
+////  dce.AddArgument ("10.1.1.2");
+//  dce.AddArgument ("-c");
+//  dce.AddArgument ("ntpclient.conf");
+//  dce.AddArgument ("-n");   // don't fork
+//  dce.SetEuid(root_uid);
+//  dce.SetUid(root_uid);
+//
+//  if(useDebug) {
+//    dce.AddArgument("-D"); // Alternatively -dddd
+//    dce.AddArgument("4");
+//  }
 
-  // TODO install a defective clock on that node
-
-  dce.ResetArguments ();
-  dce.ResetEnvironment ();
-
-//  dce.AddArgument ("");
-//  dce.AddArgument ("10.1.1.2");
-  dce.AddArgument ("-c");
-  dce.AddArgument ("ntpclient.conf");
-  dce.AddArgument ("-n");   // don't fork
-  dce.SetEuid(root_uid);
-  dce.SetUid(root_uid);
-
-  if(useDebug) {
-    dce.AddArgument("-D"); // Alternatively -dddd
-    dce.AddArgument("4");
-  }
-
-  apps = dce.Install (nodes.Get (0));
-  apps.Start (Seconds (0.7));
-#endif
+//  apps = dce.Install (nodes.Get (0));
+//  apps.Start (Seconds (0.7));
+//#endif
 
   ///////////////////////////////////////
   /// Server configuration
@@ -235,6 +316,7 @@ NS_LOG_INFO(argc << argv[1]);
   // Launch ntp server on node 1
 //  #ifdef ENABLE_NTPD
 
+#if 0
   dce.SetEuid(root_uid);
   dce.SetUid(root_uid);
 
@@ -272,7 +354,7 @@ NS_LOG_INFO(argc << argv[1]);
             dce.AddArgument("5");
           }
   };
-
+#endif
 
 //  dce.AddArgument ("/home/teto/dce/myscripts/ntp.conf");
 
@@ -284,6 +366,7 @@ NS_LOG_INFO(argc << argv[1]);
 //      dce.AddArgument ("-u");
 //    }
 
+  SetupProgram(dce, serverType, true);
   apps = dce.Install (nServer);
 
 
@@ -292,7 +375,7 @@ NS_LOG_INFO(argc << argv[1]);
 
   pointToPoint.EnablePcapAll ("ntp-" + stack, false);
 
-  apps.Start (Seconds (0.6));
+  apps.Start (Seconds (0.6)); // TODO use startup time
 
 //  setPos (nodes.Get (0), 1, 10, 0);
 //  setPos (nodes.Get (1), 50,10, 0);

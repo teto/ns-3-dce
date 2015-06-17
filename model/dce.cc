@@ -183,6 +183,7 @@ int dce_setegid (gid_t egid)
   return dce_setresgid (-1, egid, -1);
 }
 
+/* TODO look for SYSCALL_DEFINE0(setsid) in kernel/sys.c for the real implementation */
 int dce_setsid ()
 {
     GET_CURRENT_NOLOG();

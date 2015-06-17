@@ -63,13 +63,13 @@ NTP_PeerSet a l'air intéressant
 
 git@github.com:openntpd-portable/openntpd-portable.git
 $ ./autogen.sh
-CFLAGS="-fPIC -U_FORTIFY_SOURCE -ggdb" LDFLAGS="-pie -rdynamic" ./configure
+CFLAGS="-fPIC -U_FORTIFY_SOURCE -g" LDFLAGS="-pie -rdynamic" ./configure
 
 
 === Chrony ===
 Configuration commands listed here:
 http://chrony.tuxfamily.org/manual.html#Configuration-file
-
+ CFLAGS="-fPIC -U_FORTIFY_SOURCE -g" LDFLAGS="-pie -rdynamic" ./configure --disable-sechash --without-nss --without-tomcrypt --disable-ipv6 --disable-rtc --disable-linuxcaps --disable-asyncdns --disable-forcednsretry --enable-debug
 
 === NTPd ===
 

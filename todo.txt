@@ -13,6 +13,8 @@ Le systeme genere bcp de ce signal
 teto@sirius:~/dce$ kill -l 14 ALRM
 
 sys_linux.c:320:(get_version_specific_details) Fatal error : Cannot read information from uname, sorry
+ 
+sys_linux.c:360:(SYS_Linux_Initialise) adjtimex() doesn't support ADJ_SETOFFSET
 
 Uname renvoie un mauvais resultat. uname est membre de DceNodeContext qui est initialisé dans DceManagerHelper::Install par AggregateObject (CreateObject<DceNodeContext> ());
  
@@ -44,7 +46,6 @@ vmlinuz (~vmlinuz@unaffiliated/vmlinuz) a quitté
 ...or SYSCALL.*setsid ;-)
 http://repo.or.cz/w/linux-2.6-linus.git/blob/0f57d867
 87d8b1076ea8f9cbdddda2a46d534a27:/kernel/sys.c#l1066
-
 
 
 sysdeps/unix/sysv/linux/x86_64/syscall.S

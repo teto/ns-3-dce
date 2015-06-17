@@ -4,16 +4,16 @@ import os
 import argparse
 import subprocess
 
-#available_suites = [
-    #"dce-ntpd",
-#]
+available_suites = [
+    "dce-ntpd",
+]
 
 
 
-available_suites = {
-    "ntpd": "dce-ntpd --server=ntpd",
-    "chronyd": "dce-ntpd --server=chronyd",
-}
+#available_suites = {
+    #"ntpd": "dce-ntpd --server=ntpd",
+    #"chronyd": "dce-ntpd --server=chronyd",
+#}
 # WITH_GDB=0
 NS_LOG = ""
 # NS_LOG += "***"
@@ -25,7 +25,8 @@ DCE logs
 """
 #NS_LOG += ":TypeId"
 NS_LOG += ":Names"
-NS_LOG += ":DceCmsg"
+NS_LOG += ":DceMisc"
+#NS_LOG += ":DceCmsg"
 NS_LOG += ":DceManager"
 NS_LOG += ":DceExecUtils"
 NS_LOG += ":DceApplication"
@@ -90,35 +91,38 @@ NS_LOG += ":PcapFile"
 # type=argparse.FileType('w'),
 parser = argparse.ArgumentParser(description="Helper to debug mptcp")
 
-parser.add_argument("suite", choices=available_suites.keys(), help="Launch gdb")
+parser.add_argument("suite", choices=available_suites, help="Launch gdb")
 parser.add_argument("--debug", '-d', action="store_true", help="Launch gdb")
 parser.add_argument("--out", "-o", default="", nargs='?', help="redirect ns3 results output to a file")
 parser.add_argument("--verbose", "-v", action="store_const", default="", const="--verbose", help="to enable more output")
 parser.add_argument("--graph", "-g", action="store_true", help="Convert pcap to sqlite db and then plot")
 
-args = parser.parse_args()
-
+#args= parser.parse_args()
+args, extra_args = parser.parse_known_args()
+print("Extra args:", extra_args)
 timeout = None
 
 if args.debug:
     autorun = " -ex 'run  {verbose} {tofile}'"
-    cmd = "./waf --run {{suite}} --command-template=\"gdb {autorun} --args %s \" ".format(
+    cmd = "./waf --run \"{{suite}}\" --command-template=\"gdb {autorun} --args %s {{extra}}\" ".format(
             autorun="",
         )
 else:
     timeout = 200
-    cmd = "./waf --run \"{suite}  {verbose} \" {tofile}"
+    cmd = "./waf --run \"{suite} {extra} {verbose} \" {tofile}"
 
 
 tofile = " > %s 2>&1" % args.out if args.out else ""
 # tofile = " > xp.txt 2>&1"
 
 cmd = cmd.format(
-    suite=available_suites[args.suite],
+    #suite="dce-ntpd",
+    suite=args.suite,
     verbose=args.verbose,
     # out=
     tofile=tofile,
     fullness="QUICK",
+    extra=' '.join(extra_args),
 )
 
 
@@ -127,16 +131,6 @@ os.environ['NS_LOG'] = NS_LOG
 os.environ['DCE_ROOT'] = '/'
 os.environ['DCE_PATH'] = ''
 
-
-# first we erase previous folders to ease debugging
-#rm -Rf files-0 files-1
-#mkdir -p files-0 files-1
-
-# we first need to copy the file
-#os.makedirs("files-1/tmp", exist_ok=True)
-#shutil.copyfile("/home/teto/dce/ntpserver.conf", "files-1/tmp/ntp.conf")
-#shutil.copyfile("/home/teto/dce/ntpclient.conf", "files-0/tmp/ntp.conf")
-#shutil.copyfile("/home/teto/dce/chrony.conf", "files-1/tmp/chrony.conf")
 dce_root="/home/teto/dce"
 try:
     #os.system("echo DCE_ROOT=$DCE_ROOT")

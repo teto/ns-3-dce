@@ -53,8 +53,8 @@ DceNodeContext::GetInstanceTypeId (void) const
 DceNodeContext::DceNodeContext ()
 {
   m_randomCtx = CreateObject<NormalRandomVariable> ();
-  m_randomCtx->SetAttribute ("Mean", DoubleValue (0)); 
-  m_randomCtx->SetAttribute ("Variance", DoubleValue (2 ^ 32 - 1)); 
+  m_randomCtx->SetAttribute ("Mean", DoubleValue (0));
+  m_randomCtx->SetAttribute ("Variance", DoubleValue (2 ^ 32 - 1));
   m_rndBuffer = m_randomCtx->GetInteger ();
   m_rndOffset = 0;
 }
@@ -66,6 +66,7 @@ DceNodeContext::~DceNodeContext ()
 int
 DceNodeContext::UName (struct utsname *buf)
 {
+  NS_LOG_FUNCTION_NOARGS();
   if (0 == m_sysName.length ())
     {
       uint32_t nodeId = UtilsGetNodeId ();
@@ -84,8 +85,8 @@ DceNodeContext::UName (struct utsname *buf)
         }
       m_sysName = nn + "'s OS";
       m_nodeName = nn;
-      m_release = "3"; // XXX
-      m_version = "12"; // XXX
+      m_release = "3.16.0-39-generic"; // uname -r
+      m_version = "12"; // uname -v
       oss << nodeId;
       m_hardId = oss.str ();
     }
