@@ -23,7 +23,7 @@ SERVER_NTPD,
 SERVER_CHRONYD,
 SERVER_PTPD,
 SERVER_OPENNTPD,    //!
-NTIMED
+NTP_NTIMED
 };
 
 
@@ -77,7 +77,7 @@ bool SetServerType(std::string type) {
     return true;
 }
 
-void SetupProgram(DceApplicationHelper& dce, NtpServerType type, bool server, bool debug == true)
+void SetupProgram(DceApplicationHelper& dce, NtpServerType type, bool server, bool useDebug = true)
 {
   NS_LOG_INFO("Setup program of type " << type << " as server == " << server);
 
@@ -121,6 +121,7 @@ void SetupProgram(DceApplicationHelper& dce, NtpServerType type, bool server, bo
             dce.AddArgument("5");
           }
           break;
+
       case NTP_NTIMED:
         dce.SetBinary ("ntimed-client");
 
@@ -131,6 +132,10 @@ void SetupProgram(DceApplicationHelper& dce, NtpServerType type, bool server, bo
         dce.AddArgument ("--poll-server"); // /!\ poll-server does not steer the clock
         // address of the NTP server
         dce.AddArgument ("10.1.1.2");
+        dce.AddArgument ("-t"); //! export values to ntimed.traces
+        dce.AddArgument ("ntimed.traces");
+
+
         break;
       default:
         break;
@@ -164,6 +169,7 @@ int main (int argc, char *argv[])
   bool useDebug = true;
   std::string bandWidth = "1m";
 
+  Time startupTime = Seconds(0.7);
   Time simDuration = Seconds(1000);
 
   CommandLine cmd;
@@ -253,6 +259,10 @@ NS_LOG_INFO(argc << argv[1]);
     }
 #endif
 
+
+  pointToPoint.EnablePcapAll ("ntp-" + stack, true);
+
+
   /**
    Here we configure clocks:
   - TODO a defective one (either with lower or faster frequency) on the client
@@ -279,93 +289,16 @@ NS_LOG_INFO(argc << argv[1]);
   /// Client configuration
   ///////////////////////////////////////
   // Launch ntp client on node 0
-//  switch(clientType) {
-//  NS_LOG_INFO("Selected ntimed");
   SetupProgram(dce, clientType, false);
 
   apps = dce.Install (nodes.Get (0));
   apps.Start (Seconds (0.7));
-//#else
-//  dce.SetBinary ("ntpd");
-//
-//  // TODO install a defective clock on that node
-//
-//  dce.ResetArguments ();
-//  dce.ResetEnvironment ();
-//
-////  dce.AddArgument ("");
-////  dce.AddArgument ("10.1.1.2");
-//  dce.AddArgument ("-c");
-//  dce.AddArgument ("ntpclient.conf");
-//  dce.AddArgument ("-n");   // don't fork
-//  dce.SetEuid(root_uid);
-//  dce.SetUid(root_uid);
-//
-//  if(useDebug) {
-//    dce.AddArgument("-D"); // Alternatively -dddd
-//    dce.AddArgument("4");
-//  }
 
-//  apps = dce.Install (nodes.Get (0));
-//  apps.Start (Seconds (0.7));
-//#endif
 
   ///////////////////////////////////////
   /// Server configuration
   ///////////////////////////////////////
   // Launch ntp server on node 1
-//  #ifdef ENABLE_NTPD
-
-#if 0
-  dce.SetEuid(root_uid);
-  dce.SetUid(root_uid);
-
-  switch(serverType) {
-
-    case SERVER_CHRONYD:
-        NS_LOG_INFO("Setup chronyd");
-          dce.SetBinary ("chronyd");
-          dce.ResetArguments ();
-          dce.ResetEnvironment ();
-
-          dce.AddArgument ("-f");
-          dce.AddArgument ("chrony.conf");
-          dce.AddArgument ("-4"); //accept only v4
-          if(useDebug) {
-            dce.AddArgument("-d"); // First to prevent fork
-            dce.AddArgument("-d"); // 2nd to enable display message
-          }
-        break;
-
-    case SERVER_OPENNTPD:
-    case SERVER_PTPD:
-
-    case SERVER_NTPD:
-        NS_LOG_INFO("Setup ntpd");
-          dce.SetBinary ("ntpd");
-          dce.ResetArguments ();
-          dce.ResetEnvironment ();
-          dce.AddArgument ("-c");
-          dce.AddArgument ("ntpserver.conf");
-          dce.AddArgument ("-n");   // don't fork
-
-          if(useDebug) {
-            dce.AddArgument("-D"); // Alternatively -dddd
-            dce.AddArgument("5");
-          }
-  };
-#endif
-
-//  dce.AddArgument ("/home/teto/dce/myscripts/ntp.conf");
-
-  // will block the server, don't uncomment
-//  dce.AddArgument ("-n"); // -n => don't fork
-//  dce.AddArgument ("1");
-//  if (useDebug)
-//    {
-//      dce.AddArgument ("-u");
-//    }
-
   SetupProgram(dce, serverType, true);
   apps = dce.Install (nServer);
 
@@ -373,7 +306,7 @@ NS_LOG_INFO(argc << argv[1]);
 
 //  dceRoutingHelper.Create(nServer);
 
-  pointToPoint.EnablePcapAll ("ntp-" + stack, false);
+
 
   apps.Start (Seconds (0.6)); // TODO use startup time
 

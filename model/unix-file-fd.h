@@ -87,7 +87,11 @@ public:
   virtual int Close (void);
 };
 
-// Dev Random special files
+/**
+ Dev Random special files
+ simulate an opening on /dev/[s|u| ]random
+ Return the same result for
+*/
 class UnixRandomFd : public UnixFileFdBase
 {
 public:

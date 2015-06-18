@@ -167,6 +167,14 @@ void unlink_notify (std::string fullpath)
     }
 }
 
+int dce_link(const char *oldpath, const char *newpath)
+{
+  //!
+  NS_LOG_FUNCTION(oldpath << newpath);
+  DEFINE_FORWARDER_PATH(link, oldpath, newpath);
+  //! link notify ?
+}
+
 int dce_unlink (const char *pathname)
 {
   NS_LOG_FUNCTION (pathname);

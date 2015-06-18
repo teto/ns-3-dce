@@ -49,6 +49,7 @@ int dce_dup2 (int oldfd, int newfd);
 int dce_close (int fd);
 off_t dce_lseek (int fildes, off_t offset, int whence);
 off64_t dce_lseek64 (int fildes, off64_t offset, int whence);
+int dce_link(const char *oldpath, const char *newpath);
 int dce_unlink (const char *pathname);
 int dce_rmdir (const char *pathname);
 int dce_access (const char *pathname, int mode);

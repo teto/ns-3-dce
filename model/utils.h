@@ -31,10 +31,28 @@ class Node;
 // Little hack in order to have a context usable when disposing the Task Manager and the hidden goal is to flush the open FILEs.
 extern Thread *gDisposingThreadContext;
 
+/**
+Create directory
+*/
 void UtilsEnsureDirectoryExists (std::string realPath);
+
+/**
+Will create all the directories in the path successively
+*/
 void UtilsEnsureAllDirectoriesExist (std::string realPath);
+/**
+\return "files-<nodeId>/path"
+*/
 std::string UtilsGetRealFilePath (std::string path);
+
+/*
+Same as UtilsGetRealFilePath excepts that it creates files-<nodeId> if it does not exist
+*/
 std::string UtilsGetAbsRealFilePath (uint32_t node, std::string path);
+
+/**
+\return absolute path from the node point of view.
+*/
 std::string UtilsGetVirtualFilePath (std::string path);
 uint32_t UtilsGetNodeId (void);
 

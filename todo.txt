@@ -6,6 +6,17 @@ CHAUSSEE DE BRUXELLES 159
  info breakpoints
  delete breakpoint <id>
 
+Add mptcp options (issue 239530043 by mattator@gmail.com
+LOG_PREFIX_NODE
+LOG_PREFIX_TIME
+NS_LOG_APPEND_NODE_PREFIX
+NS_LOG_APPEND_TIME_PREFIX
+prefix_time
+NodeList::GetNode(nodeId)
+
+Dans les options mptcp, je devrais être capable de
+CreateMpTcpOption
+
 
 dans ntp_filegen. filegen_open verifie si le fichier existe, le crée sinon etc...
 aller voir ce qui doit etre créé:
