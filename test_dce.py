@@ -52,7 +52,7 @@ NS_LOG += ":PcapFile"
 #NS_LOG = "*"
 # to see the GetWallTime()
 #NS_LOG += ":Node"
-#NS_LOG += ":ClockPerfect=*"
+NS_LOG += ":ClockPerfect"
 
 
 # NS_LOG += ":PointToPointNetDevice"

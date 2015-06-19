@@ -6,6 +6,81 @@ CHAUSSEE DE BRUXELLES 159
  info breakpoints
  delete breakpoint <id>
 
+
+stenn@ntp.org
+
+Should be able to setup an initial time to the simu
+Correspond au 1er janvier 2050
+1a24f480 b333764f 
+selon la terminologie NTP (vérifier l'era ?),
+
+Le format de paquet NTP est décrit en page 30 dans mendeley:
+
+
+gettime of day
+           struct timeval {
+               time_t      tv_sec;     /* seconds */
+               suseconds_t tv_usec;    /* microseconds */
+           };
+
+       and gives the number of seconds and microseconds  since  the
+       Epoch (see time(2)).  The tz argument is a struct timezone:
+
+
+
+So I should investigate on how to format time as a date
+0.600012s 1 ClockPerfect:GetTime(0x12874d0)
+0.600012s  1 ClockPerfect:GetTime(): [DEBUG] Simulator time=+600011999.0ns
+0.600012s 1 ProcessUtils:UtilsNodeTime(): [INFO ] Wall time before translation=+600011999.0ns
+0.600012s 1 ProcessUtils:UtilsNodeTime(): [INFO ] Wall time after translation=+1262304000600011999.0ns
+
+quand tu regardes le pcap tu vois bien qu'il y en a un qui est 
+
+Circular dependancy, a priori faut checker si le 
+#0  0x00007ffff73e0609 in ns3::Object::Dispose (this=0x0) at ../src/core/model/object.cc:219
+#1  0x00007ffff5a4dbb9 in ns3::NodeListPriv::DoDispose (this=0x65f090)
+    at ../src/network/model/node-list.cc:166
+#2  0x00007ffff73e20cf in ns3::Object::DoDelete (this=0x65f090) at ../src/core/model/object.cc:403
+#3  0x000000000041206c in ns3::ObjectDeleter::Delete (object=0x65f090)
+    at /home/teto/ns3off/install/include/ns3-dev/ns3/object.h:450
+#4  0x00000000004138b2 in ns3::SimpleRefCount<ns3::Object, ns3::ObjectBase, ns3::ObjectDeleter>::Unref
+    (this=0x65f090) at /home/teto/ns3off/install/include/ns3-dev/ns3/simple-ref-count.h:115
+#5  0x00007ffff5a4f577 in ns3::Ptr<ns3::NodeListPriv>::~Ptr (this=0x7fffffffcee0, 
+    __in_chrg=<optimized out>) at ./ns3/ptr.h:756
+#6  0x00007ffff5a4ee24 in ns3::NodeList::GetNode (n=1) at ../src/network/model/node-list.cc:243
+#7  0x00007ffff7a828d7 in ns3::UtilsGetNode (nodeId=1) at ../model/utils.cc:194
+#8  0x00007ffff7a8301a in ns3::UtilsNodeTime (nodeId=1) at ../model/utils.cc:223
+#9  0x00007ffff7addcf7 in dce_clock_gettime (c=0, tp=0x7fffffffd190) at ../model/dce-time.cc:73
+#10 0x00007ffff418c350 in clock_gettime (a0=0, a1=0x7fffffffd190) at ../model/libc-ns3.h:347
+#11 0x00007ffff2fc06f3 in get_ostime (tsp=0x7fffffffd190) at systime.c:135
+#12 0x00007ffff2fc07c9 in get_systime (now=0x7fffffffd210) at systime.c:180
+#13 0x00007ffff2f90a95 in record_proto_stats (
+    str=0x7fffffffd2e0 "0.0.0.0 c01d 0d kern kernel time sync disabled") at ntp_util.c:776
+#14 0x00007ffff2f6aaff in report_event (err=13, peer=0x0, 
+    str=0x7ffff2ff9b00 "kernel time sync disabled") at ntp_control.c:4737
+#15 0x00007ffff2f792dd in stop_kern_loop () at ntp_loopfilter.c:1167
+#16 0x00007ffff7ad0126 in dce___cxa_finalize (d=0x0) at ../model/dce-cxa.cc:43
+#17 0x00007ffff7aefab8 in ns3::TaskManager::DoDispose (this=0x664a20) at ../model/task-manager.cc:149
+#18 0x00007ffff73e0655 in ns3::Object::Dispose (this=0x65f2f0) at ../src/core/model/object.cc:225
+#19 0x00007ffff5a4dbb9 in ns3::NodeListPriv::DoDispose (this=0x65f090)
+    at ../src/network/model/node-list.cc:166
+#20 0x00007ffff73e20cf in ns3::Object::DoDelete (this=0x65f090) at ../src/core/model/object.cc:403
+#21 0x000000000041206c in ns3::ObjectDeleter::Delete (object=0x65f090)
+    at /home/teto/ns3off/install/include/ns3-dev/ns3/object.h:450
+#22 0x00000000004138b2 in ns3::SimpleRefCount<ns3::Object, ns3::ObjectBase, ns3::ObjectDeleter>::Unref
+    (this=0x65f090) at /home/teto/ns3off/install/include/ns3-dev/ns3/simple-ref-count.h:115
+#23 0x00007ffff5a4f65b in ns3::Ptr<ns3::NodeListPriv>::operator= (
+    this=0x7ffff5d8b6a8 <ns3::NodeListPriv::DoGet()::ptr>, o=...) at ./ns3/ptr.h:770
+#24 0x00007ffff5a4d592 in ns3::NodeListPriv::Delete () at ../src/network/model/node-list.cc:146
+#25 0x00007ffff73c15d2 in ns3::EventFunctionImpl0::Notify (this=0x65eef0)
+    at ../src/core/model/make-event.cc:53
+#26 0x00007ffff73b3d13 in ns3::EventImpl::Invoke (this=0x65eef0) at ../src/core/model/event-impl.cc:51
+#27 0x00007ffff73b863e in ns3::DefaultSimulatorImpl::Destroy (this=0x65f0d0)
+    at ../src/core/model/default-simulator-impl.cc:99
+#28 0x00007ffff73b469b in ns3::Simulator::Destroy () at ../src/core/model/simulator.cc:193
+#29 0x000000000041111f in main (argc=1, argv=0x7fffffffdfd8) at ../myscripts/ntp/dce-ntpd.cc:318
+#define CREATE_MPTCP_OPTION(var_name, c_type, subtype) Ptr<>
+
 Add mptcp options (issue 239530043 by mattator@gmail.com
 LOG_PREFIX_NODE
 LOG_PREFIX_TIME
@@ -16,7 +91,7 @@ NodeList::GetNode(nodeId)
 
 Dans les options mptcp, je devrais être capable de
 CreateMpTcpOption
-
+IsKindKnown
 
 dans ntp_filegen. filegen_open verifie si le fichier existe, le crée sinon etc...
 aller voir ce qui doit etre créé:

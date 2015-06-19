@@ -44,10 +44,19 @@ Needs to enable module fd-net-device
 
 === Ntimed ===
 Pour le compiler
-$ CFLAGS="-fPIC -U_FORTIFY_SOURCE " LDFLAGS="-pie -rdynamic -ggdb" make
+$ CFLAGS="-fPIC -U_FORTIFY_SOURCE " LDFLAGS="-pie -rdynamic -g" make
 ./ntimed-client --poll-server 1.ubuntu.pool.ntp.org
 The '-t /tmp/somefile' arguments tells it to write a full blow-by-blow
 tracefile, for analysis and debugging.
+
+aller chercher le gettimeofday dans time_unix.c (kt_now)
+
+
+TB_Now est un pointeur de fonction vers la fonction qui récupère le temps
+
+NTP_Packet_Pack envoie le paquet 
+ocx = operational context
+
 
 ntpq -p ntp.lip6.fr
 osiris.lip6.fr
