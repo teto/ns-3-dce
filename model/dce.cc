@@ -299,19 +299,43 @@ int dce_pause (void)
 int dce_gettimeofday (struct timeval *tv, struct timezone *tz)
 {
   GET_CURRENT_NOLOG();
-  NS_LOG_FUNCTION (current << UtilsGetNodeId ());
+  uint32_t nodeId = UtilsGetNodeId ();
+  NS_LOG_FUNCTION (current << nodeId );
   NS_ASSERT (current != 0);
   NS_ASSERT_MSG (tz == 0, "timezone parameter deprecated");
 
   // Original code
   // *tv = UtilsTimeToTimeval (UtilsSimulationTimeToTime (Now ()));
 
-  *tv = UtilsTimeToTimeval (UtilsSimulationTimeToTime (UtilsNodeTime(UtilsGetNodeId()) ));
+//  *tv = UtilsTimeToTimeval (UtilsSimulationTimeToTime (UtilsNodeTime(nodeId ) ));
+
+  Ptr<Node> node(UtilsGetNode(nodeId));
+  if(node)
+  {
+      Time t = node->GetWallTime();
+      NS_LOG_INFO("Wall time before translation=" << t);
+      t = UtilsSimulationTimeToTime (t);
+      NS_LOG_INFO("Wall time after translation=" << t);
+      *tv = UtilsTimeToTimeval (t);
+      ;
+      NS_LOG_INFO("Formatted time:" << ctime(&tv->tv_sec));
+      dce_usleep(1); // send to sleep 1 microsec, we could sleep 200ns to imitate ntpsim
+      return 0; // successful
+  }
+//  *tv = UtilsTimeToTimeval(t);
+  //(long int)
+//  NS_LOG_INFO( "After conversion to timeval: " << tv->tv_sec << " s " << tv->tv_usec << " us");
+  NS_LOG_WARN("No node matched nodeId=" << nodeId);
+  return -1;
+}
+
+
+
   // TODO to remove later. Keep it for ntp sake and add some randomness to ns3 clock or make node sleep
 //  dce_usleep(200); // send to sleep 1 microsec, we could sleep 200ns to imitate ntpsim
   //Send node to sleep
-  return 0;
-}
+//  return 0;
+//}
 
 int dce_nanosleep (const struct timespec *req, struct timespec *rem)
 {

@@ -6,8 +6,31 @@ CHAUSSEE DE BRUXELLES 159
  info breakpoints
  delete breakpoint <id>
 
-
+Dans vim désactiver "let g:jedi#auto_vim_configuration = 0"
 stenn@ntp.org
+
+
+2050-01-01T00:00:00Z local.c:143:(calculate_sys_precision) Clock precision 0.000001000 (-20)
+2050-01-01T00:00:00Z sys_linux.c:323:(get_version_specific_details) Linux kernel major=3 minor=16 patch=0
+2050-01-01T00:00:00Z sys_linux.c:344:(get_version_specific_details) hz=100 nominal_tick=10000 max_tick_bias=1000
+2050-01-01T00:00:00Z sys_linux.c:360:(SYS_Linux_Initialise) adjtimex() doesn't support ADJ_SETOFFSET
+2050-01-01T00:00:00Z local.c:643:(lcl_RegisterSystemDrivers) Local freq=72711771200.000ppm
+2050-01-01T00:00:00Z reference.c:228:(REF_Initialise) Initial frequency 72711771200.000 ppm
+
+
+Dans SimulatorImpl, on devrait pvr etre capable de 
+ * The internal simulation clock is maintained
+ * as a 64-bit integer in a unit specified by the user
+ * through the Time::SetResolution function. 
+m_currentTs
+
+
+We need a way to print correctly a Time (as ctime)
+
+gmtime or localtime are two C standard function that do your job.
+
+struct tm *date = gmtime( your_time );
+printf( "Year = %d\n", date->tm_year );
 
 Should be able to setup an initial time to the simu
 Correspond au 1er janvier 2050
@@ -17,11 +40,7 @@ selon la terminologie NTP (vérifier l'era ?),
 Le format de paquet NTP est décrit en page 30 dans mendeley:
 
 
-gettime of day
-           struct timeval {
-               time_t      tv_sec;     /* seconds */
-               suseconds_t tv_usec;    /* microseconds */
-           };
+
 
        and gives the number of seconds and microseconds  since  the
        Epoch (see time(2)).  The tz argument is a struct timezone:

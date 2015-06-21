@@ -6,7 +6,7 @@
 #include "ns3/applications-module.h"
 #include "ns3/netanim-module.h"
 #include "ns3/constant-position-mobility-model.h"
-#include "ns3/clock-perfect.h"
+//#include "ns3/clock-perfect.h"
 
 //#include "../model/ipv4-dce-routing.h"
 #include "ns3/ipv4-dce-routing-helper.h"
@@ -274,7 +274,7 @@ NS_LOG_INFO(argc << argv[1]);
   // Pour l'instnat le client on s'en fout
 //  nClient->SetClock()
   //!
-  Ptr<ClockPerfect> serverClock = CreateObject<ClockPerfect>();
+//  Ptr<ClockPerfect> serverClock = CreateObject<ClockPerfect>();
 //  serverClock->SetMaxRandomOffset(200);
 //  serverClock->SetTime(200);
 //  nServer->SetClock( serverClock );

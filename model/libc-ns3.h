@@ -342,8 +342,11 @@ NATIVE_WITH_ALIAS2 (gmtime_r, localtime_r)
 NATIVE (mktime)
 NATIVE (strftime)
 NATIVE (strptime)
+
+//These functions are nonstandard GNU extensions that are also present on the BSDs.  Avoid their use
 NATIVE (timegm)
 NATIVE (timelocal)
+
 DCE_EXPLICIT (clock_gettime, int, clockid_t, struct timespec *)
 //DCE_EXPLICIT (clock_settime, int, clockid_t, const struct timespec *)
 DCE (clock_settime)
