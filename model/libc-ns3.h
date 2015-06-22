@@ -357,7 +357,9 @@ DCE (timer_settime)
 DCE (timer_gettime)
 
 // TIMEX.H
-DCE(adjtimex)
+DCE(adjtimex) // Specific to linux I believe
+//DCE(adjtime) // TODO
+// ntp_adjtime
 
 // MMAN.H
 DCE(mlockall);

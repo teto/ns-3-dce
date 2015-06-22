@@ -9,6 +9,9 @@ CHAUSSEE DE BRUXELLES 159
 Dans vim désactiver "let g:jedi#auto_vim_configuration = 0"
 stenn@ntp.org
 
+ntp_adjtime remplace adjtimex, that's what ntimed uses, chrony and ntpd uses adjtimex
+https://www.gnu.org/software/libc/manual/html_node/High-Accuracy-Clock.html
+
 
 2050-01-01T00:00:00Z local.c:143:(calculate_sys_precision) Clock precision 0.000001000 (-20)
 2050-01-01T00:00:00Z sys_linux.c:323:(get_version_specific_details) Linux kernel major=3 minor=16 patch=0

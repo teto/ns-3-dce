@@ -172,12 +172,19 @@ int main (int argc, char *argv[])
   Time startupTime = Seconds(0.7);
   Time simDuration = Seconds(1000);
 
+  Time fOwd1 = MilliSeconds(30);
+  Time bOwd1 = MilliSeconds(70);
+
   CommandLine cmd;
   NS_LOG_INFO("Parsing");
   cmd.AddValue ("stack", "Name of IP stack: ns3/linux/freebsd.", stack);
   cmd.AddValue ("debug", "Debug. Default true (0)", useDebug);
   cmd.AddValue ("server", "Server to use", MakeCallback(SetServerType));
   cmd.AddValue ("client", "client to use", MakeCallback(SetServerType));
+  cmd.AddValue ("fowd", "Forward One Way Delay", fOwd1);
+  cmd.AddValue ("bowd", "Backward One Way Delay",bOwd1 );
+
+
 //  cmd.AddValue ("bw", "BandWidth. Default 1m.", bandWidth);
 NS_LOG_INFO(argc << argv[1]);
   cmd.Parse (argc, argv);
@@ -195,7 +202,9 @@ NS_LOG_INFO(argc << argv[1]);
 
   PointToPointHelper pointToPoint;
   pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("5Mbps"));
-  pointToPoint.SetChannelAttribute ("Delay", StringValue ("1ms"));
+  // this is new
+  pointToPoint.SetChannelAttribute ("ForwardDelay", StringValue ("100ms"));
+  pointToPoint.SetChannelAttribute ("BackwardDelay", StringValue ("1000ms"));
 
   NetDeviceContainer devices, devices2;
   devices = pointToPoint.Install (nodes);
