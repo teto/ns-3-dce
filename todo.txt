@@ -12,6 +12,10 @@ stenn@ntp.org
 ntp_adjtime remplace adjtimex, that's what ntimed uses, chrony and ntpd uses adjtimex
 https://www.gnu.org/software/libc/manual/html_node/High-Accuracy-Clock.html
 
+I would love to put "rel_time_to_secs_str"
+mlichvar | matt1: looking at DCE, seems interesting. do you know if the simulated clock has some wander or it behaves as an ideal clock?
+   matt1 | mlichvar: DCE can run with the linux kernel compiled as a library (https://github.com/direct-code-execution/net-next-sim) or exclusively with the ns3 simula
+
 
 2050-01-01T00:00:00Z local.c:143:(calculate_sys_precision) Clock precision 0.000001000 (-20)
 2050-01-01T00:00:00Z sys_linux.c:323:(get_version_specific_details) Linux kernel major=3 minor=16 patch=0

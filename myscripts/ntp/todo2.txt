@@ -9,10 +9,18 @@ NTP utilise UDP, port 123
 
 "hstr" program
 
+
+=== CLKNETSIM ===
+advance
+
+
 === ntp terminology ===
+jitter=Jitter is the root-mean-square (RMS) difference between a series of time offsets, 
+wander=RMS difference between a series of frequency offsets.
 slew=
-wander=
+
 offset=
+reliability="the reliability of a timekeeping system is the fraction of the time it can be kept connected to the network and operating correctly relative to stated accuracy and stability tolerances" : une meilleure définition est donnée en chapitre 12.
 
 un entier signé négatif a le  MSB à 1 => négatif
 #define M_SUB(r_i, r_f, a_i, a_f) /* r -= a */ \
@@ -21,6 +29,10 @@ un entier signé négatif a le  MSB à 1 => négatif
     (r_f) -= (a_f); \
     (r_i) -= (a_i) + ((u_int32)(r_f) > sub_t); \
   } while (FALSE)
+
+
+
+
 
 === Linux time struct & functions: summary ===
 "int gettimeofday(struct timeval *tv, struct timezone *tz)" gives the number of seconds and microseconds since the Epoch
@@ -46,10 +58,15 @@ struct tm *gmtime(const time_t *timep);
 printf( "Year = %d\n", date->tm_year );
 
 
+sysconf(_SC_CLK_TCK); permet d'obtenir la résolution du systeme
+no it's not related, it's the number of times the timer interrupts the CPU for scheduling and other tasks, 100Hz is a common value, higher frequency equals higher timer resolution and more overhead. 
+
+
 === WIRESHARK ===
 Run wireshark from directory
 WIRESHARK_RUN_FROM_BUILD_DIRECTORY=1 ./wireshark
 
+Expert Info (Note/Protocol): Time spent in the server 0.000002062 seconds (2 microseconds)
 
 === NS3Off ===
 Pour voir la config actuelle de ns3, regarder dans build/c4che

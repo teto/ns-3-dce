@@ -358,7 +358,7 @@ DCE (timer_gettime)
 
 // TIMEX.H
 DCE(adjtimex) // Specific to linux I believe
-//DCE(adjtime) // TODO
+NATIVE_WITH_ALIAS2(adjtime, ntp_adjtime) // TODO
 // ntp_adjtime
 
 // MMAN.H

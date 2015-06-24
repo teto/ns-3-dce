@@ -5,6 +5,7 @@
 #include <ns3/log.h>
 #include <ns3/node.h>
 #include <ns3/simulator.h>
+#include <ns3/clock.h>
 #include <errno.h>
 #include "sys/dce-timerfd.h"
 #include "unix-timer-fd.h"
@@ -192,5 +193,37 @@ int dce_adjtimex(struct timex *buf)
 
 //       On failure, adjtimex() returns -1 and sets errno.
     return TIME_OK;
+}
+
+int dce_adjtime(const struct timeval *delta, struct timeval *olddelta)
+{
+    NS_LOG_INFO("DCE_adjtimex");
+    Ptr<Node> node = UtilsGetNode();
+
+    Ptr<Clock> clock = node->GetObject<Clock>();
+    if(!clock) {
+      return TIME_BAD;
+    }
+
+//       On failure, adjtimex() returns -1 and sets errno.
+//    TimevalTo
+    Time nsDelta = UtilsTimevalToTime(&delta);
+    Time nsOlddelta = 0;
+    int res = 0;
+//    Time temp;
+    if(olddelta)
+    {
+      nsOlddelta = UtilsTimevalToTime(&olddelta);
+      res = clock->AdjTime(  nsDelta, &nsOlddelta);
+      // convert back to a timeval value
+      UtilsTimeToTimeval(nsOlddelta)
+    }
+    else
+    {
+      res = clock->AdjTime(  nsDelta, NULL);
+    }
+
+
+    return res;
 }
 
