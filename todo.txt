@@ -6,15 +6,49 @@ CHAUSSEE DE BRUXELLES 159
  info breakpoints
  delete breakpoint <id>
 
-Dans vim désactiver "let g:jedi#auto_vim_configuration = 0"
+Now needs to be compiled with:
+CXX="clang++" CXXFLAGS=" -std=c++11" ./waf configure --prefix=install
+ValueError: Still no compile flags, no completions yet
+
+echo | clang -stdlib=libc++ -v -E -x c++ permet d'avoir les dossiers locaux
+De manière programmatique ici:
+https://groups.google.com/forum/?hl=en#!topic/ycm-users/yqU8z9MDcok
+
+-oDir::Parts
+
+Hi,
+
+This week hasn't delivered much in sound code as I was trying to understand how to simulate the clock.
+I've discovered the simulator [0] and proposed a similar way to simulate time. It was rightfully objected by my mentors that it would change ns3 into a timestep simulator. I had to come up with an alternate design which still needs some feedback. My proposal is to add Node::Schedule members that would convert node's time to simulation time. Whenever the node's clock frequency is changed or stepped, it should cancel the registered events and reregister them with an updated simulator time.
+
+Now the translation between node and simulator time is not that easy even in the simple case to which I limit myself (I only plan to support adjtime and not adjtimex). The clock's frequency has 3 potentially components: the background frequency + the ntp correction + a singleshot ntp correction that is removed as soon as the singleshot offset is compensated for.
+
+So for instance when translating from node's time to sim time, you potentially have to distinguish between 2 phases, the one with the singleshot frequency and the one without.
+
+I've started some experimental implementation adding C++11 flags to  quickly relay Node::Schedule calls to Simulator::Schedule (replaced with legacy templates if the branch proves successful). This doesn't compile yet. My plan is to have a test for the clock conversion covering different frequencies.
+
+I've updated the wiki with the midterm report with mainly a patch for mptcp options. I've added to it some crypto code so I would not advise it for immediate inclusion (as I had previosuly done) since I am not sure about how stable the crypto API will be.
+
+Matt
+
+PS: Be sure to check http://spendyourleapsecondhere.com/ if you don't know how to spend your next leap second
+
+[0] https://github.com/mlichvar/clknetsim
+[1] https://www.nsnam.org/wiki/GSOC2015MpTcpImplementation#Midterm_Report
+[2] https://github.com/teto/ns-3-dev-git/commits/clock_support
+
+i3
+window_update_name
+match_matches_window
+run_assignments
+
 stenn@ntp.org
 
 ntp_adjtime remplace adjtimex, that's what ntimed uses, chrony and ntpd uses adjtimex
 https://www.gnu.org/software/libc/manual/html_node/High-Accuracy-Clock.html
 
-I would love to put "rel_time_to_secs_str"
-mlichvar | matt1: looking at DCE, seems interesting. do you know if the simulated clock has some wander or it behaves as an ideal clock?
-   matt1 | mlichvar: DCE can run with the linux kernel compiled as a library (https://github.com/direct-code-execution/net-next-sim) or exclusively with the ns3 simula
+Pk  ScheduleWithContext ne retourne t'il pas d'id comme les autres ?
+m_currentContext
 
 
 2050-01-01T00:00:00Z local.c:143:(calculate_sys_precision) Clock precision 0.000001000 (-20)

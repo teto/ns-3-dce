@@ -11,16 +11,11 @@ NTP utilise UDP, port 123
 
 
 === CLKNETSIM ===
-advance
+Dans server.c, on a un main() dont la fonction la plus importante est vraisemblablement d'appeler Network::run
 
+La fréquence comprend 3 composants: fréquence réelle de l'horloge + fréquence offset de fond donnée par NTP + (singleshot offset qui disparaît une fois le ss_offset résorbé).
 
 === ntp terminology ===
-jitter=Jitter is the root-mean-square (RMS) difference between a series of time offsets, 
-wander=RMS difference between a series of frequency offsets.
-slew=
-
-offset=
-reliability="the reliability of a timekeeping system is the fraction of the time it can be kept connected to the network and operating correctly relative to stated accuracy and stability tolerances" : une meilleure définition est donnée en chapitre 12.
 
 un entier signé négatif a le  MSB à 1 => négatif
 #define M_SUB(r_i, r_f, a_i, a_f) /* r -= a */ \
@@ -51,6 +46,39 @@ struct tm {
    int tm_yday;        /* day in the year */
    int tm_isdst;       /* daylight saving time */
 };
+
+struct timex
+{
+  unsigned int modes;   /* mode selector */
+  __syscall_slong_t offset; /* time offset (usec) */
+  __syscall_slong_t freq; /* frequency offset (scaled ppm) */
+  __syscall_slong_t maxerror; /* maximum error (usec) */
+  __syscall_slong_t esterror; /* estimated error (usec) */
+  int status;     /* clock command/status */
+  __syscall_slong_t constant; /* pll time constant */
+  __syscall_slong_t precision;  /* clock precision (usec) (ro) */
+  __syscall_slong_t tolerance;  /* clock frequency tolerance (ppm) (ro) */
+  struct timeval time;    /* (read only) */
+  __syscall_slong_t tick; /* (modified) usecs between clock ticks */
+  __syscall_slong_t ppsfreq;  /* pps frequency (scaled ppm) (ro) */
+  __syscall_slong_t jitter; /* pps jitter (us) (ro) */
+  int shift;      /* interval duration (s) (shift) (ro) */
+  __syscall_slong_t stabil; /* pps stability (scaled ppm) (ro) */
+  __syscall_slong_t jitcnt; /* jitter limit exceeded (ro) */
+  __syscall_slong_t calcnt; /* calibration intervals (ro) */
+  __syscall_slong_t errcnt; /* calibration errors (ro) */
+  __syscall_slong_t stbcnt; /* stability limit exceeded (ro) */
+
+  int tai;      /* TAI offset (ro) */
+
+  /* ??? */
+  int  :32; int  :32; int  :32; int  :32;
+  int  :32; int  :32; int  :32; int  :32;
+  int  :32; int  :32; int  :32;
+};
+
+
+
 
 In C timestamps (ie: seconds from epoch) are usually stored in time_t (it is an uint64_t basically) , while human-wise dates are stored in structure tm. You need a function that converts time_ts in tms, for instance :
 
