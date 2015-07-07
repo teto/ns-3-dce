@@ -2,13 +2,88 @@
 CHAUSSEE DE BRUXELLES 159
 1410 WATERLOO
 
+Checking if target is up-to-date: 
+Running command: ./matt.sh
+sh: 1: Syntax error: "(" unexpected
+sh: 1: Syntax error: "(" unexpected
+sh: 1: Syntax error: "(" unexpected
+sh: 1: cannot open double: No such file
+Waf: Entering directory `/home/teto/ns3off/build'
+[1245/1373] Compiling src/network/test/node-schedule-test.cc
+../src/network/test/node-schedule-test.cc: In member function ‘virtual void NodeEventsTestCase::DoRun()’:
+../src/network/test/node-schedule-test.cc:227:38: error: ‘const struct TestEvent’ has no member named ‘second’
+         const TestEvent& params = i->second;
+                                      ^
+../src/network/test/node-schedule-test.cc:228:31: error: ‘const struct TestEvent’ has no member named ‘simTime’
+         Time simTime = params.simTime;
+
+
+
+
+
  b dce-netdb.cc:1095
  info breakpoints
  delete breakpoint <id>
 
+  // uids are allocated from 4.
+  // uid 0 is "invalid" events
+  // uid 1 is "now" events
+  // uid 2 is "destroy" events
+
+"Build directory               : " is not displayed
+
+
+2 étapes:
+- Pvr schedule un event
+- Pvr en schedule plusieurs
+
+Pr cela va ptet falloir depuis le simulateur enregistrer un 
+
+Dans trous les cas je dois avoir un mapping entre l'event 
+du coup je pourrai supprimer le GetFreeUid de ImplSimulator
+Quand l'événement du simulateur time est lancé, il faut le supprimer/cancel du scheduler du noeud
+
+
+
 Now needs to be compiled with:
-CXX="clang++" CXXFLAGS=" -std=c++11" ./waf configure --prefix=install
+CXX="clang++" CXXFLAGS="-g -Wno-potentially-evaluated-expression -std=c++11" ./waf configure --prefix=install--build-profile=debug  
 ValueError: Still no compile flags, no completions yet
+http://stackoverflow.com/questions/7594508/modulo-operator-with-negative-values
+Program received signal SIGFPE, Arithmetic exception
+
+A la fin de ProcessOneEvent, on appelle le noeud pour qu'il en reschedule un
+
+-Wno-potentially-evaluated-expression
+
+
+ScheduleNow should call (0)
+DefaultSimulatorImpl::Schedule (Time const &time, EventImpl *event)
+
+
+The answer is that it depends on if you're using hpet or tsc for as your clocksource. tsc is very fast and not as accurate. hpet aka "high precision event timer" is more accurate, and measurably much slower.
+
+$ cat /sys/devices/system/clocksource/clocksource0/current_clocksource
+tsc
+
+$ cat /sys/devices/system/clocksource/clocksource0/available_clocksource
+tsc hpet acpi_pm
+
+You can echo any of those 3 into the current_clocksource file to change it on the fly. Then use a canned benchmark like libMicro or something to measure gettimeofday(). It absolutely matters and slows down some applications, which are then forced to make rtdsc calls natively (gross).
+
+Reference: I've worked on low latency financial environments the last 7.5ish years of my career.
+
+
+echo "In file included from ./ns3/simulator.h:29" | sed -r 's#(.*)./ns3/(.[^.]*\.h)#echo -n  "$(find src/ -name \2)"#ge' | less
+
+echo "./ns3/clock.h" | sed -r "s#./ns3/(.*).h#echo \1 \|myscript.sh#ge"
+
+echo "./ns3/clock.h" | sed -r 's#./ns3/(.*).h#echo -n "$(find src/ -name \1.h)" #ge'
+
+  errorformat=%*[^"]"%f"%*\D%l: %m,"%f"%*\D%l: %m,%-G%f:%l: (Each undeclared identifier is reported only once,%-G%f:%l: for each funct
+ion it appears in.),%-GIn file included from %f:%l:%c:,%-GIn file included from %f:%l:%c\,,%-GIn file included from %f:%l:%c,%-GIn fil
+e included from %f:%l,%-G%*[ ]from %f:%l:%c,%-G%*[ ]from %f:%l:,%-G%*[ ]from %f:%l\,,%-G%*[ ]from %f:%l,%f:%l:%c:%m,%f(%l):%m,%f:%l:%m
+,"%f"\, line %l%*\D%c%*[^ ] %m,%D%*\a[%*\d]: Entering directory %*[`']%f',%X%*\a[%*\d]: Leaving directory %*[`']%f',%D%*\a: Entering d
+irectory %*[`']%f',%X%*\a: Leaving directory %*[`']%f',%DMaking %*\a in %f,%f|%l| %m
 
 echo | clang -stdlib=libc++ -v -E -x c++ permet d'avoir les dossiers locaux
 De manière programmatique ici:
