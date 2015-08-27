@@ -316,9 +316,9 @@ static void test_cwd (void)
   TEST_ASSERT_UNEQUAL (cwd, 0);
   free (buffer);
 
-  char tmp[PATH_MAX + 1];
-  cwd = getwd (tmp);
-  TEST_ASSERT_UNEQUAL (cwd, 0);
+//  char tmp[PATH_MAX + 1];
+//  cwd = getwd (tmp);
+//  TEST_ASSERT_UNEQUAL (cwd, 0);
 }
 
 static void test_chdir (void)

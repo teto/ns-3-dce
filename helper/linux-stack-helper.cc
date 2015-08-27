@@ -25,11 +25,15 @@
 #include "ns3/node.h"
 #include "ns3/node-container.h"
 #include "ns3/names.h"
+#include "ns3/log.h"
 #include "ns3/ipv4-list-routing-helper.h"
 #include "ns3/ipv4-static-routing-helper.h"
 #include "ns3/ipv4-global-routing-helper.h"
 
 namespace ns3 {
+
+NS_LOG_COMPONENT_DEFINE ("LinuxStackHelper");
+
 LinuxStackHelper::LinuxStackHelper ()
   : m_routing (0)
 {
@@ -53,7 +57,7 @@ LinuxStackHelper::~LinuxStackHelper ()
   delete m_routing;
 }
 
-void 
+void
 LinuxStackHelper::SetRoutingHelper (const Ipv4RoutingHelper &routing)
 {
   delete m_routing;
@@ -120,6 +124,7 @@ LinuxStackHelper::PopulateRoutingTables ()
 void
 LinuxStackHelper::RunIp (Ptr<Node> node, Time at, std::string str)
 {
+  NS_LOG_FUNCTION("Running ip command:\t" << str);
 #ifdef KERNEL_STACK
   DceApplicationHelper process;
   ApplicationContainer apps;
@@ -130,6 +135,11 @@ LinuxStackHelper::RunIp (Ptr<Node> node, Time at, std::string str)
   apps = process.Install (node);
   apps.Start (at);
 #endif
+}
+void
+LinuxStackHelper::RunIp (Ptr<Node> node, std::string str)
+{
+    RunIp(node, Simulator::Now(), str);
 }
 
 void

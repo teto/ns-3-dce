@@ -54,6 +54,7 @@ public:
   Ipv4DceRouting ();
   virtual ~Ipv4DceRouting ();
 
+  //! inherited
   virtual void NotifyInterfaceUp (uint32_t interface);
   virtual void NotifyInterfaceDown (uint32_t interface);
   virtual void NotifyAddAddress (uint32_t interface, Ipv4InterfaceAddress address);
