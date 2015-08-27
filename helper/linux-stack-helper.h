@@ -82,9 +82,9 @@ public:
    * \param routing a new routing helper
    *
    * Set the routing helper to use during Install. The routing
-   * helper is really an object factory which is used to create 
+   * helper is really an object factory which is used to create
    * an object of type ns3::Ipv4RoutingProtocol per node. This routing
-   * object is then associated to a single ns3::Ipv4 object through its 
+   * object is then associated to a single ns3::Ipv4 object through its
    * ns3::Ipv4::SetRoutingProtocol.
    */
   void SetRoutingHelper (const Ipv4RoutingHelper &routing);
@@ -130,6 +130,7 @@ public:
    * \param str a string for the command line argument of ip command. e.g., "route add 10.0.1.0/24 via 10.0.0.1"
    */
   static void RunIp (Ptr<Node> node, Time at, std::string str);
+  static void RunIp (Ptr<Node> node, std::string str);
 
 private:
   void Initialize ();

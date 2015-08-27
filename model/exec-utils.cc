@@ -28,6 +28,7 @@
 #include "process.h"
 #include "dce-unistd.h"
 #include "errno.h"
+#include "ns3/log.h"
 
 namespace ns3 {
 
@@ -377,6 +378,7 @@ SearchExecFile (std::string file, std::string vpath, uid_t uid, gid_t gid, int *
   std::string cwd = dce_get_current_dir_name ();
   std::string altRoots = "";
   char *c = getenv ("DCE_PATH");
+  NS_LOG_UNCOND("DCE_PATH=" << c);
   struct ExeCriteria userData;
   if (errNo)
     {
@@ -440,7 +442,7 @@ SearchExecFile (std::string envVar, std::string file, int *errNo)
   char *c = getenv (envVar.c_str ());
   std::string dcepath = "";
   struct ExeCriteria userData;
-
+  NS_LOG_UNCOND("DCE_PATH=" << c);
   if (c)
     {
       dcepath = c;

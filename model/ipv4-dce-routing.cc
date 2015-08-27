@@ -33,6 +33,7 @@
 #include "ns3/output-stream-wrapper.h"
 #include "ns3/ipv4-routing-table-entry.h"
 #include "ipv4-dce-routing.h"
+#include "ns3/linux-stack-helper.h"
 #include "../netlink/netlink-socket.h"
 
 
@@ -99,6 +100,7 @@ Ipv4DceRouting::NotifyRemoveAddress (uint32_t interface, Ipv4InterfaceAddress ad
   Ipv4StaticRouting::NotifyRemoveAddress (interface, address);
   // NS_LOG_DEBUG ("Not implemented yet");
 }
+
 
 void
 Ipv4DceRouting::SetIpv4 (Ptr<Ipv4> ipv4)

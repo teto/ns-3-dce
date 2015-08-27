@@ -1380,13 +1380,18 @@ NetlinkSocket::DoRouteMessage (const NetlinkMessage &nlmsg, uint16_t type, uint8
                 }
               else // dstlen != 32
                 {
+                  Ipv4Mask mask (~(1 << (32 - dstlen)) + 1);
                   if (attr_flags[RouteMessage::RT_A_GATEWAY])
                     {
-                      m_ipv4Routing->AddNetworkRouteTo (dest, Ipv4Mask (~(1 << (32 - dstlen)) + 1), gateway, index, metric);
+                      m_ipv4Routing->AddNetworkRouteTo (dest, mask, gateway, index, metric);
                     }
                   else
                     {
-                      m_ipv4Routing->AddNetworkRouteTo (dest, Ipv4Mask (~(1 << (32 - dstlen)) + 1), index, metric);
+                      m_ipv4Routing->AddNetworkRouteTo (dest,
+                      mask,
+                      index,
+                      metric
+                      );
                     }
                 }
             }
