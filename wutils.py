@@ -105,14 +105,17 @@ def get_proc_env(os_env=None):
                                              os.path.join(bld.env.NS3_DIR, 'lib'), \
                                              os.path.join(bld.env.NS3_DIR, 'bin')])
 
-
-    proc_env['DCE_PATH'] = os.pathsep.join([os.path.join(bld.out_dir, 'bin_dce'), \
-                                                os.path.join(bld.env.NS3_DIR, 'sbin'), \
-                                                os.path.join(bld.env.NS3_DIR, 'bin_dce'), \
-                                                proc_env[pathvar]])
-
-    proc_env['DCE_ROOT'] = os.pathsep.join([os.path.join(bld.out_dir), \
-                                                os.path.join(bld.env.PREFIX)])
+    dce_paths = [os.getenv('DCE_PATH'), \
+            os.path.join(bld.out_dir, 'bin_dce'), \
+            os.path.join(bld.env.NS3_DIR, 'sbin'), \
+            os.path.join(bld.env.NS3_DIR, 'bin_dce'), \
+            proc_env[pathvar]]
+    proc_env['DCE_PATH'] = os.pathsep.join(filter(None, dce_paths))
+    
+    dce_roots = [os.getenv('DCE_ROOT'), \
+            os.path.join(bld.out_dir), \
+            os.path.join(bld.env.PREFIX)]
+    proc_env['DCE_ROOT'] = os.pathsep.join(filter(None, dce_roots))
 
     pymoddir = bld.path.find_dir('bindings/python')
     if pymoddir is not None:
