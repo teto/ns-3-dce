@@ -18,6 +18,10 @@ void setPos (Ptr<Node> n, int x, int y, int z)
 }
 
 
+//enum StackType {
+//
+//}
+
 /**
 TODO Enable mptcp
 Can't find route
@@ -29,9 +33,17 @@ afficher une topologie
 int main (int argc, char *argv[])
 {
   uint32_t nRtrs = 2;
+
   const Time simMaxDuration = Seconds(200);
   CommandLine cmd;
+  std::string clientStack = "";
+  std::string serverStack = "";
+
   cmd.AddValue ("nRtrs", "Number of routers. Default 2", nRtrs);
+  /* TODO choose from an enum */
+  cmd.AddValue ("clientStack", "Clientstack. Default ", clientStack);
+  cmd.AddValue ("serverStack", "ServerStack. Default ", serverStack);
+//  cmd.AddValue ("routerStack", "Number of routers. Default ", nRtrs);
   cmd.Parse (argc, argv);
 
   NodeContainer nodes, routers;
@@ -40,23 +52,32 @@ int main (int argc, char *argv[])
   Ptr<Node> serverNode = nodes.Get(1);
   routers.Create (nRtrs);
 
+  /* TODO depending on command line arguments, load put nodes into these containers */
+  NodeContainer linuxStacks;
+  NodeContainer nsStacks;
+
   DceManagerHelper dceManager;
   dceManager.SetTaskManagerAttribute ("FiberManagerType",
                                       StringValue ("UcontextFiberManager"));
 
+  /** Install the linux stack **/
   dceManager.SetNetworkStack ("ns3::LinuxSocketFdFactory",
                               "Library", StringValue ("liblinux.so"));
   LinuxStackHelper linuxStack;
+  // TODO don't install it there
   linuxStack.Install (clientNode);
   linuxStack.Install (routers);
 
-
-
+  /** install in nsStacks **/
+  dceManager.SetNetworkStack ("ns3::Ns3SocketFdFactory"
+//                              "Library", StringValue ("liblinux.so")
+                              );
   InternetStackHelper nsStack;
 //  Ipv4DceRoutingHelper ipv4DceRoutingHelper;
 //  nsStack.SetRoutingHelper (ipv4DceRoutingHelper);
   nsStack.Install (serverNode);
 
+  // TODO la il installe
   dceManager.Install (nodes);
   dceManager.Install (routers);
 
@@ -96,7 +117,7 @@ int main (int argc, char *argv[])
       cmd_oss << "route add default via " << if1.GetAddress (1, 0) << " dev sim" << i << " table " << (i+1);
       LinuxStackHelper::RunIp (clientNode, Seconds (0.1), cmd_oss.str ().c_str ());
       cmd_oss.str ("");
-      cmd_oss << "route add 10.1.0.0/16 via " << if1.GetAddress (1, 0) << " dev sim0";
+      cmd_oss << "route add 10.1." << i << ".0/24 via " << if1.GetAddress (1, 0) << " dev sim0";
       LinuxStackHelper::RunIp (routers.Get (i), Seconds (0.2), cmd_oss.str ().c_str ());
 
       // Right link (from server to routers)
@@ -135,8 +156,10 @@ int main (int argc, char *argv[])
 //      LinuxStackHelper::RunIp (routers.Get (i), Seconds (0.2), cmd_oss.str ().c_str ());
     // TODO this should be delayed/scheduled to let the kernel
 //      Simulator::Schedule(Seconds (0.2), Ipv4StaticRouting::AddNetworkRouteTo, serverRouting,
+      cmd_oss.str ("");
+      cmd_oss << "10.2." << i << ".0";
       serverRouting->AddNetworkRouteTo(
-                    Ipv4Address("10.2.0.0"), // network
+                    Ipv4Address(cmd_oss.str().c_str()), // network
                     Ipv4Mask("/16"),         // mask
                     if2.GetAddress (1, 0),    // nextHop
                     1,                        // interface
