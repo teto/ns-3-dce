@@ -33,6 +33,8 @@ int main (int argc, char *argv[])
 
   dceManager.SetNetworkStack ("ns3::LinuxSocketFdFactory",
                               "Library", StringValue ("liblinux.so"));
+
+  /* TODO what's the interaction between LinuxStackHelper and SetNetworkStack ? */
   LinuxStackHelper stack;
   stack.Install (nodes);
   stack.Install (routers);
