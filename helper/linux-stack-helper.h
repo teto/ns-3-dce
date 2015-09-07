@@ -98,6 +98,7 @@ public:
    * \param value a string value to set for sysctl parameter.
    */
   void SysctlSet (NodeContainer c, std::string path, std::string value);
+  void SysctlSet (Ptr<Node> node, std::string path, std::string value);
 
   /**
    * Obtain Linux kernel state with traditional 'sysctl' interface.

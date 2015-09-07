@@ -10,6 +10,7 @@ extern "C" {
 #define dce_errno (*dce___errno_location ())
 
 int * dce___errno_location (void);
+int * dce___h_errno_location (void);
 
 #ifdef __cplusplus
 }
