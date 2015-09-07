@@ -43,6 +43,8 @@ using std::make_pair;
 
 namespace ns3 {
 
+static Time start = Seconds(0.1);
+
 NS_OBJECT_ENSURE_REGISTERED (IpProgramDceRouting);
 
 TypeId
@@ -109,13 +111,14 @@ IpProgramDceRouting::AddNetworkRouteTo (Ipv4Address network,
                           uint32_t interface,
                           uint32_t metric)
 {
-    //
+  NS_LOG_FUNCTION (this << network << " " << networkMask << " " << nextHop << " " << interface << " " << metric);   //
     std::ostringstream cmd_oss;
     cmd_oss.str ("");
 //    cmd_oss << "route add 10.2.0.0/16 via " << if2.GetAddress (1, 0) << " dev sim1";
 //mask.GetPrefixLength
     // TODO/WARNING Careful device name may be wrong or depend on simu
-    cmd_oss << "route add " << network << networkMask << " via " << nextHop
+    cmd_oss << "route add " << network << "/" << networkMask.GetPrefixLength()
+        << " via " << nextHop
         << " dev " << "sim" << (int)interface
 
 //    m_ipv4->GetNetDevice (i)->GetName()
@@ -124,7 +127,7 @@ IpProgramDceRouting::AddNetworkRouteTo (Ipv4Address network,
     NS_ASSERT(node);
     NS_LOG_DEBUG("Running ip command:\t" << cmd_oss.str());
 //    LinuxStackHelper::RunIp ( node, cmd_oss.str ().c_str ());
-    LinuxStackHelper::RunIp ( node, Simulator::Now(), cmd_oss.str ().c_str ());
+    LinuxStackHelper::RunIp ( node, start, cmd_oss.str ().c_str ());
     // will be generated
 //    Ipv4StaticRouting::AddNetworkRouteTo (network, networkMask, nextHop, interface, metric);
 }
@@ -135,6 +138,7 @@ IpProgramDceRouting::AddNetworkRouteTo (Ipv4Address network,
                           uint32_t interface,
                           uint32_t metric)
 {
+  NS_LOG_FUNCTION (this << network << " " << networkMask << " " << interface << " " << metric);   //
     std::ostringstream cmd_oss;
     cmd_oss.str ("");
     Ptr<Node> node = m_ipv4->GetObject<Node> ();
@@ -142,10 +146,10 @@ IpProgramDceRouting::AddNetworkRouteTo (Ipv4Address network,
 //    cmd_oss << "route add 10.2.0.0/16 via " << if2.GetAddress (1, 0) << " dev sim1";
 //mask.GetPrefixLength
     // TODO/WARNING Careful device name may be wrong or depend on simu
-    cmd_oss << "route add " << network << networkMask
+    cmd_oss << "route add " << network << "/" << networkMask.GetPrefixLength()
         << " dev " << "sim" << (int)interface;
 
-    LinuxStackHelper::RunIp ( node, Simulator::Now(), cmd_oss.str ().c_str ());
+    LinuxStackHelper::RunIp ( node, start, cmd_oss.str ().c_str ());
 }
 
 void
@@ -153,6 +157,7 @@ IpProgramDceRouting::SetDefaultRoute (Ipv4Address nextHop,
                         uint32_t interface,
                         uint32_t metric)
 {
+  NS_LOG_FUNCTION (this << nextHop << " " << interface << " " << metric);
 //    NS_FATAL_ERROR("")
     std::ostringstream cmd_oss;
     cmd_oss.str ("");
@@ -161,7 +166,7 @@ IpProgramDceRouting::SetDefaultRoute (Ipv4Address nextHop,
     cmd_oss << "route add default via " << nextHop << " dev sim" << interface;
 //      << " table " << (i+1)
     ;
-    LinuxStackHelper::RunIp ( node, Simulator::Now(), cmd_oss.str ().c_str ());
+    LinuxStackHelper::RunIp ( node, start, cmd_oss.str ().c_str ());
 
 //    Ipv4StaticRouting::AddNetworkRouteTo (nextHop, interface, metric);
 }
