@@ -33,6 +33,8 @@ int main (int argc, char *argv[])
 
   dceManager.SetNetworkStack ("ns3::LinuxSocketFdFactory",
                               "Library", StringValue ("liblinux.so"));
+
+  /* TODO what's the interaction between LinuxStackHelper and SetNetworkStack ? */
   LinuxStackHelper stack;
   stack.Install (nodes);
   stack.Install (routers);
@@ -67,7 +69,7 @@ int main (int argc, char *argv[])
       cmd_oss << "route add default via " << if1.GetAddress (1, 0) << " dev sim" << i << " table " << (i+1);
       LinuxStackHelper::RunIp (nodes.Get (0), Seconds (0.1), cmd_oss.str ().c_str ());
       cmd_oss.str ("");
-      cmd_oss << "route add 10.1.0.0/16 via " << if1.GetAddress (1, 0) << " dev sim0";
+      cmd_oss << "route add 10.1."<< i <<".0/24 via " << if1.GetAddress (1, 0) << " dev sim0";
       LinuxStackHelper::RunIp (routers.Get (i), Seconds (0.2), cmd_oss.str ().c_str ());
 
       // Right link
@@ -88,7 +90,7 @@ int main (int argc, char *argv[])
       cmd_oss << "route add default via " << if2.GetAddress (1, 0) << " dev sim" << i << " table " << (i+1);
       LinuxStackHelper::RunIp (nodes.Get (1), Seconds (0.1), cmd_oss.str ().c_str ());
       cmd_oss.str ("");
-      cmd_oss << "route add 10.2.0.0/16 via " << if2.GetAddress (1, 0) << " dev sim1";
+      cmd_oss << "route add 10.2."<< i <<".0/24 via " << if2.GetAddress (1, 0) << " dev sim1";
       LinuxStackHelper::RunIp (routers.Get (i), Seconds (0.2), cmd_oss.str ().c_str ());
 
       setPos (routers.Get (i), 50, i * 20, 0);
@@ -114,7 +116,7 @@ int main (int argc, char *argv[])
   dce.SetStackSize (1 << 20);
 
   // Launch iperf client on node 0
-  dce.SetBinary ("iperf");
+  dce.SetBinary ("iperf3");
   dce.ResetArguments ();
   dce.ResetEnvironment ();
   dce.AddArgument ("-c");
@@ -122,19 +124,21 @@ int main (int argc, char *argv[])
   dce.AddArgument ("-i");
   dce.AddArgument ("1");
   dce.AddArgument ("--time");
-  dce.AddArgument ("100");
+  dce.AddArgument ("10");
+  dce.AddArgument ("-J");   // Export to Json
+  dce.AddArgument ("--logfile=iperf.results");  // into this file
 
   apps = dce.Install (nodes.Get (0));
   apps.Start (Seconds (5.0));
   apps.Stop (Seconds (200));
 
   // Launch iperf server on node 1
-  dce.SetBinary ("iperf");
+  dce.SetBinary ("iperf3");
   dce.ResetArguments ();
   dce.ResetEnvironment ();
-  dce.AddArgument ("-s");
-  dce.AddArgument ("-P");
-  dce.AddArgument ("1");
+  dce.AddArgument ("-s");   // server
+//  dce.AddArgument ("-P");   // number of streams to run in parallel
+//  dce.AddArgument ("1");
   apps = dce.Install (nodes.Get (1));
 
   pointToPoint.EnablePcapAll ("iperf-mptcp", false);

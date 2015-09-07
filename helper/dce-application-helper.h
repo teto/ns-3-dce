@@ -20,7 +20,7 @@ public:
    * Construct a DceApplicationHelper
    */
   DceApplicationHelper ();
-  
+
   virtual ~DceApplicationHelper () {};
 
 
@@ -93,7 +93,7 @@ public:
   /**
    * Register callback function invoked at the end of application.
    *
-   * \param cb callback function to be called.
+   * \param cb callback function to be called. Callback accepts pid, exitValue
    */
   void SetFinishedCallback (Callback<void,uint16_t,int> cb);
 

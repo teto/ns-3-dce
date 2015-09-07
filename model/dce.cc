@@ -37,6 +37,11 @@ NS_LOG_COMPONENT_DEFINE ("Dce");
 
 using namespace ns3;
 
+int * dce___h_errno_location (void)
+{
+  GET_CURRENT_NOLOG ();
+  return &current->h_err;
+}
 int * dce___errno_location (void)
 {
   GET_CURRENT_NOLOG ();

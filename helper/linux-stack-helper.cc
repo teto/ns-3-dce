@@ -118,6 +118,16 @@ LinuxStackHelper::PopulateRoutingTables ()
 #endif
 }
 
+static
+void IpCompletionHandler (uint16_t pid, int exitValue)
+{
+    NS_LOG_INFO("pid " << pid << " exited with value=" << exitValue);
+    if(exitValue != 0) {
+//        NS_FATAL_ERROR("IP command failure !");
+        NS_LOG_ERROR("Exit value=" << exitValue);
+    }
+}
+
 void
 LinuxStackHelper::RunIp (Ptr<Node> node, Time at, std::string str)
 {
@@ -129,6 +139,7 @@ LinuxStackHelper::RunIp (Ptr<Node> node, Time at, std::string str)
   process.SetStackSize (1 << 16);
   process.ResetArguments ();
   process.ParseArguments (str.c_str ());
+  process.SetFinishedCallback(MakeCallback(&IpCompletionHandler));
   apps = process.Install (node);
   apps.Start (at);
 #endif
@@ -136,7 +147,7 @@ LinuxStackHelper::RunIp (Ptr<Node> node, Time at, std::string str)
 void
 LinuxStackHelper::RunIp (Ptr<Node> node, std::string str)
 {
-    RunIp(node, Simulator::Now(), str);
+    RunIp(node, Seconds(0.1), str);
 }
 
 void
@@ -168,7 +179,7 @@ LinuxStackHelper::SysctlGet (Ptr<Node> node, Time at, std::string path,
   if (!sock)
     {
       callback ("error", "no socket factory");
-      NS_ASSERT_MSG (0, "No LinuxSocketFdFactory is installed. "
+      NS_FATAL_ERROR ("No LinuxSocketFdFactory is installed. "
                      "You may need to do it via DceManagerHelper::Install ()");
       return;
     }
@@ -179,6 +190,23 @@ LinuxStackHelper::SysctlGet (Ptr<Node> node, Time at, std::string path,
   return;
 #endif
 }
+
+void
+LinuxStackHelper::SysctlSet (Ptr<Node> node, std::string path, std::string value)
+{
+#ifdef KERNEL_STACK
+      Ptr<LinuxSocketFdFactory> sock = node->GetObject<LinuxSocketFdFactory> ();
+      if (!sock)
+        {
+          NS_FATAL_ERROR ("No LinuxSocketFdFactory is installed. "
+                         "You may need to do it via DceManagerHelper::Install ()");
+        }
+      // i.e., TaskManager::Current() needs it.
+      Simulator::ScheduleWithContext (node->GetId (), Seconds (0.1),
+                                      MakeEvent (&LinuxSocketFdFactory::Set, sock,
+                                                 path, value));
+#endif
+}
 void
 LinuxStackHelper::SysctlSet (NodeContainer c, std::string path, std::string value)
 {
@@ -186,16 +214,7 @@ LinuxStackHelper::SysctlSet (NodeContainer c, std::string path, std::string valu
   for (NodeContainer::Iterator i = c.Begin (); i != c.End (); ++i)
     {
       Ptr<Node> node = *i;
-      Ptr<LinuxSocketFdFactory> sock = node->GetObject<LinuxSocketFdFactory> ();
-      if (!sock)
-        {
-          NS_ASSERT_MSG (0, "No LinuxSocketFdFactory is installed. "
-                         "You may need to do it via DceManagerHelper::Install ()");
-        }
-      // i.e., TaskManager::Current() needs it.
-      Simulator::ScheduleWithContext (node->GetId (), Seconds (0.1),
-                                      MakeEvent (&LinuxSocketFdFactory::Set, sock,
-                                                 path, value));
+      SysctlSet(node, path, value);
     }
 #endif
 }
