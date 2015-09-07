@@ -123,6 +123,9 @@ def configure(conf):
         kernel_stack_lib_dir = os.path.join(Options.options.kernel_stack, "lib")
         if os.path.isdir(kernel_stack_sim_dir):
             kernel_stack_dir = kernel_stack_sim_dir
+        else:
+            Logs.error("Could not find the 'sim' architecture: \"%s\" does not exist. make sure you use the net-next-sim kernel" % kernel_stack_sim_dir)
+            raise SystemExit(1)
         if os.path.isdir(kernel_stack_lib_dir):
             kernel_stack_dir = kernel_stack_lib_dir
 
