@@ -97,7 +97,14 @@ int dce_mkstemp (char *temp)
 
   std::string fullpath = UtilsGetRealFilePath (temp);
   NS_LOG_FUNCTION (fullpath);
-  int realFd = mkstemp ((char *)fullpath.c_str ());
+//  NS_ASSERT_MSG(strlen());
+  char* c_fullpath = new char[fullpath.length()+1]; // +1 for the null char
+  fullpath.copy(c_fullpath, fullpath.length());
+  c_fullpath[fullpath.length()] = '\0';
+
+  NS_LOG_FUNCTION ( "c_fullpath before=" << c_fullpath);
+  int realFd = mkstemp (c_fullpath);
+  NS_LOG_FUNCTION ( "c_fullpath after=" << c_fullpath);
   if (realFd == -1)
     {
       current->err = errno;
@@ -114,6 +121,10 @@ int dce_mkstemp (char *temp)
   unixFd = new UnixFileFd (realFd);
   unixFd->IncFdCount ();
   current->process->openFiles[fd] = new FileUsage (fd, unixFd);
+
+  strncpy(temp, &c_fullpath[strlen(c_fullpath)-strlen(temp)], strlen(temp));
+  delete c_fullpath;
+  NS_LOG_FUNCTION ( "======> temp after=" << temp);
   return fd;
 }
 

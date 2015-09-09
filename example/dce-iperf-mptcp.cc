@@ -18,7 +18,7 @@ void setPos (Ptr<Node> n, int x, int y, int z)
 
 int main (int argc, char *argv[])
 {
-  uint32_t nRtrs = 2;
+  uint32_t nRtrs = 1;
   CommandLine cmd;
   cmd.AddValue ("nRtrs", "Number of routers. Default 2", nRtrs);
   cmd.Parse (argc, argv);
@@ -102,19 +102,22 @@ int main (int argc, char *argv[])
   LinuxStackHelper::RunIp (nodes.Get (0), Seconds (0.1), "rule show");
 
   // Schedule Up/Down (XXX: didn't work...)
-  LinuxStackHelper::RunIp (nodes.Get (1), Seconds (1.0), "link set dev sim0 multipath off");
-  LinuxStackHelper::RunIp (nodes.Get (1), Seconds (15.0), "link set dev sim0 multipath on");
-  LinuxStackHelper::RunIp (nodes.Get (1), Seconds (30.0), "link set dev sim0 multipath off");
+//  LinuxStackHelper::RunIp (nodes.Get (1), Seconds (1.0), "link set dev sim0 multipath off");
+//  LinuxStackHelper::RunIp (nodes.Get (1), Seconds (15.0), "link set dev sim0 multipath on");
+//  LinuxStackHelper::RunIp (nodes.Get (1), Seconds (30.0), "link set dev sim0 multipath off");
 
 
   // debug
   stack.SysctlSet (nodes, ".net.mptcp.mptcp_debug", "1");
+  stack.SysctlSet (nodes, ".kernel.printk", "3 4 1 3");
+//  stack.SysctlSet (nodes, ".net.mptcp.syn_retries", "1");
 
   DceApplicationHelper dce;
   ApplicationContainer apps;
 
   dce.SetStackSize (1 << 20);
 
+  #ifdef IPERF3
   // Launch iperf client on node 0
   dce.SetBinary ("iperf3");
   dce.ResetArguments ();
@@ -124,9 +127,12 @@ int main (int argc, char *argv[])
   dce.AddArgument ("-i");
   dce.AddArgument ("1");
   dce.AddArgument ("--time");
-  dce.AddArgument ("10");
+  dce.AddArgument ("100");
+  dce.AddArgument ("-V");   // verbose
   dce.AddArgument ("-J");   // Export to Json
-  dce.AddArgument ("--logfile=iperf.results");  // into this file
+  dce.AddArgument ("--logfile=client.res");  // into this file
+//  dce.AddArgument ("-P");   // number of streams to run in parallel
+//  dce.AddArgument ("1");
 
   apps = dce.Install (nodes.Get (0));
   apps.Start (Seconds (5.0));
@@ -136,9 +142,37 @@ int main (int argc, char *argv[])
   dce.SetBinary ("iperf3");
   dce.ResetArguments ();
   dce.ResetEnvironment ();
+  dce.AddArgument ("-V");   // verbose
+  dce.AddArgument ("-J");   // verbose
+  dce.AddArgument ("--logfile=server.res");  // into this file
   dce.AddArgument ("-s");   // server
-//  dce.AddArgument ("-P");   // number of streams to run in parallel
-//  dce.AddArgument ("1");
+  #else
+  // Launch iperf client on node 0
+  dce.SetBinary ("iperf");
+  dce.ResetArguments ();
+  dce.ResetEnvironment ();
+  dce.AddArgument ("-c");
+  dce.AddArgument ("10.2.0.1");
+  dce.AddArgument ("-i");
+  dce.AddArgument ("1");
+  dce.AddArgument ("--time");
+  dce.AddArgument ("10");
+  dce.AddArgument ("--reportstyle=C");  // To export as CSV
+
+  apps = dce.Install (nodes.Get (0));
+  apps.Start (Seconds (5.0));
+  apps.Stop (Seconds (200));
+
+  // Launch iperf server on node 1
+  dce.SetBinary ("iperf");
+  dce.ResetArguments ();
+  dce.ResetEnvironment ();
+  dce.AddArgument ("-s");
+  dce.AddArgument ("-P");
+  dce.AddArgument ("1");
+
+
+  #endif
   apps = dce.Install (nodes.Get (1));
 
   pointToPoint.EnablePcapAll ("iperf-mptcp", false);

@@ -156,6 +156,7 @@ DceManager::CreatePidFile (struct Thread *current, std::string filename)
 {
   EnsureDirectoryExists (current, "/var");
   EnsureDirectoryExists (current, "/var/log");
+  EnsureDirectoryExists (current, "/tmp");
   std::ostringstream oss;
   oss << "/var/log/" << current->process->pid;
   std::string pidDirName = oss.str ();

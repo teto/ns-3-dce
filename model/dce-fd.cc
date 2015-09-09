@@ -41,6 +41,8 @@ NS_LOG_COMPONENT_DEFINE ("SimuFd");
 #define SOCK_MAX_ADDRESS_SIZE 128
 #endif
 
+#define EXPAND_STR(str) str
+
 #define DEFINE_FORWARDER_PATH(name, pathname, ...)                      \
   {                                                                     \
     Thread *current = Current ();                                       \
@@ -53,6 +55,7 @@ NS_LOG_COMPONENT_DEFINE ("SimuFd");
         return -1;                                                      \
       }                                                                 \
     std::string fullpath = UtilsGetRealFilePath (pathname);     \
+    NS_LOG_FUNCTION ( "Calling ## name  ##  with path=" << fullpath); \
     int status = ::name (fullpath.c_str (), ## __VA_ARGS__);             \
     if (status == -1)                                                   \
       {                                                                 \

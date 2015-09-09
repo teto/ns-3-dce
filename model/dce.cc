@@ -262,7 +262,7 @@ int dce_kill (pid_t pid, int sig)
 void dce_abort ()
 {
   Thread *current = Current ();
-  NS_LOG_FUNCTION (current);
+  NS_LOG_WARN (current);
 
   UtilsSendSignal (Current ()->process, SIGABRT);
   // If we are still alive force the exitation
