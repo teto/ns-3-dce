@@ -24,6 +24,7 @@
                 << " [node " << m_ipv4->GetObject < Node > ()->GetId () << "] "; }
 
 #include <iomanip>
+#include <ostream>
 #include "ns3/log.h"
 #include "ns3/names.h"
 #include "ns3/packet.h"
@@ -66,6 +67,14 @@ IpProgramDceRouting::~IpProgramDceRouting ()
 {
 }
 
+std::string
+IpProgramDceRouting::GetIfNameFromIndex(int idx)
+{
+    // TODO if it's 0 return localhost else sim[idx-1] right ?
+    std::ostringstream oss("");
+    oss << "sim" << idx;
+    return oss.str();
+}
 //void
 //IpProgramDceRouting::NotifyInterfaceUp (uint32_t i)
 //{
@@ -104,6 +113,8 @@ IpProgramDceRouting::~IpProgramDceRouting ()
 //}
 
 //#if 0
+// TODO it should check for the interface, retrieve its name and IP, depending on the network and IP, it should
+// create a specifc table
 void
 IpProgramDceRouting::AddNetworkRouteTo (Ipv4Address network,
                           Ipv4Mask networkMask,

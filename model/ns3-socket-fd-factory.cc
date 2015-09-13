@@ -70,6 +70,7 @@ Ns3SocketFdFactory::CreateSocket (int domain, int type, int protocol)
 {
   UnixSocketFd *socket = 0;
   Ptr<Socket> sock;
+  NS_LOG_FUNCTION (domain << type << protocol);
 
   if (domain == PF_INET)
     {
@@ -96,6 +97,7 @@ Ns3SocketFdFactory::CreateSocket (int domain, int type, int protocol)
           } break;
         case SOCK_STREAM:
           {
+            NS_LOG_INFO ("Request for TCP socket");
             TypeId tid = TypeId::LookupByName ("ns3::TcpSocketFactory");
             Ptr<SocketFactory> factory = GetObject<SocketFactory> (tid);
             NS_ASSERT_MSG (factory, "InternetStackHelper is not installed. "
