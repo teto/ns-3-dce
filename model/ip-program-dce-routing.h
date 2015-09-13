@@ -51,6 +51,8 @@ class IpProgramDceRouting : public Ipv4StaticRouting
 public:
   static TypeId GetTypeId (void);
 
+  static std::string GetIfNameFromIndex(int idx);
+
   IpProgramDceRouting ();
   virtual ~IpProgramDceRouting ();
 

@@ -18,7 +18,7 @@ void setPos (Ptr<Node> n, int x, int y, int z)
 
 int main (int argc, char *argv[])
 {
-  uint32_t nRtrs = 1;
+  uint32_t nRtrs = 2;
   CommandLine cmd;
   cmd.AddValue ("nRtrs", "Number of routers. Default 2", nRtrs);
   cmd.Parse (argc, argv);
