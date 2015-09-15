@@ -47,6 +47,13 @@ bool setupStackType(enum StackType& val, std::string newVal)
 }
 
 
+//Ipv4DceRouting
+// ipv4 static routing
+void
+PrintRouterTable(Ptr<Ipv4DceRouting> routing, Ptr<OutputStreamWrapper> stream)
+{
+  routing->PrintRoutingTable(stream);
+}
 //NS_LOG_COMPONENT_DEFINE ("DceMpTcpHybrid");
 
 /**
@@ -174,7 +181,7 @@ if(clientStack == "ns3") etc...
   clientRouting = ipv4RoutingHelper.GetStaticRouting (ipv4client);
   NS_ASSERT(clientRouting);
 
-  Ptr<OutputStreamWrapper> test = Create<OutputStreamWrapper>("rttables", std::ios::out);
+  Ptr<OutputStreamWrapper> stream = Create<OutputStreamWrapper>("rttables", std::ios::out);
 
   // configure routers
   for (uint32_t i = 0; i < nRtrs; i++)
@@ -280,8 +287,14 @@ if(clientStack == "ns3") etc...
 
       routerRouting->AddNetworkRouteTo(Ipv4Address(cmd_oss.str().c_str()),Ipv4Mask("/24"), routerIf);
 
-      routerRouting->PrintRoutingTable(test);
 
+      /*
+      That won't work like this, need to use ipv4 dce routing
+      */
+//      routerRouting->PrintRoutingTable(stream);
+//      Simulator::Schedule( Seconds(5), &PrintRouterTable, routerRouting, stream);
+      // will display the routing table
+      LinuxStackHelper::RunIp ( routerNode, Seconds (3), "route");
 
       setPos (routers.Get (i), 50, i * 20, 0);
     }
@@ -296,10 +309,10 @@ if(clientStack == "ns3") etc...
             );
   }
   #endif
-//  std::ostringstream test;
+//  std::ostringstream stream;
 
-  clientRouting->PrintRoutingTable(test);
-  serverRouting->PrintRoutingTable(test);
+  clientRouting->PrintRoutingTable(stream);
+  serverRouting->PrintRoutingTable(stream);
 
 //  for( uint32_t n =0; n < ipv4client->GetNInterfaces(); n++){
 //    for( uint32_t a=0; a < ipv4client->GetNAddresses(n); a++){
