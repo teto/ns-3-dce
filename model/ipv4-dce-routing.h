@@ -40,7 +40,23 @@ class NetlinkSocket;
  * entries from DCE and notify DCE about interface changes.
  *
  * The Ipv4DceRouting class inherits from Ipv4StaticRouting class.
- *
+ * I looked into it this afternoon, i.e., how DCE install routes in ns3.
+1/ DCE relies on the linux "ip" program to install routes. As such it
+is installed as an application with a start time.
+2/ the "ip" program uses netlink (a userspace <-> kernelspace
+protocol) packets to install the route
+3/ the netlink packet is received and processed by the DCE
+NetlinkSocket::DoNetlinkRouteMessage
+4/ depending on the netlink message, this very function installs the
+appropriate ns3 route (for instance line 1385) through a call to
+Ipv4DceRouting::AddNetworkRouteTo:
+m_ipv4Routing->AddNetworkRouteTo (dest, Ipv4Mask (~(1 << (32 -
+dstlen)) + 1), gateway, index, metric);
+5/ Note that m_ipv4Routing was installed by Ipv4DceRoutingHelper, it
+is of type Ipv4DceRouting whose parent is Ipv4staticRouting.
+Ipv4DceRouting just overrides the interface up/down callbacks in order
+to relay the information via netlink messages (calls
+NotifyIfLinkMessage)
  * \see Ipv4RoutingProtocol
  * \see Ipv4StaticRouting
  * \see Ipv4ListRouting

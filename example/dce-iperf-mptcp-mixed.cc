@@ -159,30 +159,29 @@ if(clientStack == "ns3") etc...
   Looking at convergence between DCE and ns3 to allow for seamless transitions
   Depending on the stack type, we setup a different static routing type
   **/
-
+  Ipv4StaticRoutingHelper ipv4RoutingHelper;
 //  Ptr<IpProgramDceRouting> serverRouting = Create<IpProgramDceRouting>();
 //  Ptr<Ipv4StaticRouting> serverRouting = Create<IpProgramDceRouting>();
   Ptr<Ipv4> ipv4Server = serverNode->GetObject<Ipv4> ();
   NS_ASSERT_MSG(ipv4Server , "node does not have ipv4");
   serverRouting->SetIpv4(ipv4Server);
+  serverRouting = ipv4RoutingHelper.GetStaticRouting (ipv4Server);
+  NS_ASSERT(serverRouting);
 
+  // get client routing
   Ptr<Ipv4> ipv4client = clientNode->GetObject<Ipv4> ();
   NS_ASSERT_MSG(ipv4client , "node does not have ipv4");
-//  clientRouting->SetIpv4(ipv4client);
-//    ns3::Ipv4StaticRoutingHelper::GetStaticRouting
-    Ipv4StaticRoutingHelper ipv4RoutingHelper;
-    clientRouting = ipv4RoutingHelper.GetStaticRouting (ipv4client);
-//  NS_ASSERT_MSG(serverRouting, "wrong static routing");
-//  if(client_stack == STACK_NS) {
-//     = clientNode->GetObject<Ipv4StaticRouting>();
-    NS_ASSERT(clientRouting);
-//  }
+  clientRouting = ipv4RoutingHelper.GetStaticRouting (ipv4client);
+  NS_ASSERT(clientRouting);
+
+  Ptr<OutputStreamWrapper> test = Create<OutputStreamWrapper>("rttables", std::ios::out);
 
   // configure routers
   for (uint32_t i = 0; i < nRtrs; i++)
     {
       NS_LOG_UNCOND("Setup for router #" << i);
       Ptr<Ipv4StaticRouting> routerRouting;
+      Ptr<Node> routerNode = routers.Get (i);
 
       // Left link (from client to routers)
       pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("5Mbps"));
@@ -199,6 +198,8 @@ if(clientStack == "ns3") etc...
 //      cmd_oss << "route add 10.1." << i << ".0/24 dev sim" << i << " scope link table " << (i+1);
 //      LinuxStackHelper::RunIp (clientNode, Seconds (0.1), cmd_oss.str ().c_str ());
       int clientInterface = if1.Get(0).second;  // instead of i
+      int routerIf = if1.Get(1).second;  // instead of i
+
       cmd_oss.str ("");
       cmd_oss << "10.1." << i << ".0";
       clientRouting->AddNetworkRouteTo(Ipv4Address(cmd_oss.str().c_str()), Ipv4Mask("/24"), clientInterface);
@@ -209,33 +210,39 @@ if(clientStack == "ns3") etc...
       clientRouting->SetDefaultRoute(if1.GetAddress (1, 0), clientInterface);
 
       /* setup routers routing */
+      Ptr<Ipv4> ipv4Router = serverNode->GetObject<Ipv4> ();
+      NS_ASSERT_MSG(ipv4Router, "router node does not have ipv4");
+//      routerRouting->SetIpv4(ipv4Router);
 
       if(router_stack == STACK_LINUX) {
           linuxStackNodes.Add(serverNode);
+          /* Maybe IpProgramDceRouting should be considered as  an app ? */
+          NS_LOG_UNCOND("Using a linux router with IpProgramDceRouting");
           routerRouting = Create<IpProgramDceRouting>();
+          routerRouting->SetIpv4(ipv4Router);
 //          cmd_oss.str ("");
 //          cmd_oss << "route add 10.1." << i << ".0/24 via " << if1.GetAddress (1, 0) << " dev sim0";
 //          LinuxStackHelper::RunIp (routers.Get (i), Seconds (0.2), cmd_oss.str ().c_str ());
         }
         else {
-
-          routerRouting = Create<Ipv4StaticRouting>();
+//          Ptr<Ipv4> ipv4router = routers.Get (i)->GetObject<Ipv4> ()
+          routerRouting = ipv4RoutingHelper.GetStaticRouting (ipv4Router);
+//          routerRouting = Create<Ipv4StaticRouting>();
 
         }
-      Ptr<Ipv4> ipv4Router = serverNode->GetObject<Ipv4> ();
-      NS_ASSERT_MSG(ipv4Router, "router node does not have ipv4");
-      routerRouting->SetIpv4(ipv4Router);
+      NS_ASSERT(routerRouting);
+
 
       cmd_oss.str ("");
       cmd_oss << "10.1." << i << ".0";
       // 0 c localhost ptet ?
-      routerRouting->AddNetworkRouteTo(Ipv4Address(cmd_oss.str().c_str()), Ipv4Mask("/24"), 0);
+      routerRouting->AddNetworkRouteTo(Ipv4Address(cmd_oss.str().c_str()), Ipv4Mask("/24"), routerIf);
 
 
       // Right link (from server to routers)
       pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("100Mbps"));
       pointToPoint.SetChannelAttribute ("Delay", StringValue ("1ns"));
-      devices2 = pointToPoint.Install (serverNode, routers.Get (i));
+      devices2 = pointToPoint.Install (serverNode, routerNode);
       // Assign ip addresses
       Ipv4InterfaceContainer if2 = address2.Assign (devices2);
       address2.NewNetwork ();
@@ -249,6 +256,7 @@ if(clientStack == "ns3") etc...
     //      cmd_oss << "route add 10.2." << i << ".0/24 dev sim" << i << " scope link table " << (i+1);
     //      LinuxStackHelper::RunIp (serverNode, Seconds (0.1), cmd_oss.str ().c_str ());
       int serverIf = if2.Get(0).second;
+      routerIf = if2.Get(1).second;
       serverRouting->AddNetworkRouteTo(Ipv4Address(cmd_oss.str().c_str()), Ipv4Mask("/24"), serverIf);
 
 
@@ -270,7 +278,10 @@ if(clientStack == "ns3") etc...
                     0                       // metric (optional)
                     );
 
-      routerRouting->AddNetworkRouteTo(Ipv4Address(cmd_oss.str().c_str()),Ipv4Mask("/24"), 1);
+      routerRouting->AddNetworkRouteTo(Ipv4Address(cmd_oss.str().c_str()),Ipv4Mask("/24"), routerIf);
+
+      routerRouting->PrintRoutingTable(test);
+
 
       setPos (routers.Get (i), 50, i * 20, 0);
     }
@@ -285,13 +296,22 @@ if(clientStack == "ns3") etc...
             );
   }
   #endif
+//  std::ostringstream test;
 
-  for( uint32_t n =0; n < ipv4client->GetNInterfaces(); n++){
-    for( uint32_t a=0; a < ipv4client->GetNAddresses(n); a++){
-        NS_LOG_UNCOND( "Got addr " << n <<"/" << a << "=" << ipv4client->GetAddress(n,a));
-    }
-  }
+  clientRouting->PrintRoutingTable(test);
+  serverRouting->PrintRoutingTable(test);
 
+//  for( uint32_t n =0; n < ipv4client->GetNInterfaces(); n++){
+//    for( uint32_t a=0; a < ipv4client->GetNAddresses(n); a++){
+//        NS_LOG_UNCOND( "Client addr " << n <<"/" << a << "=" << ipv4client->GetAddress(n,a));
+//    }
+//  }
+//
+//  for( uint32_t n =0; n < ipv4Server->GetNInterfaces(); n++){
+//    for( uint32_t a=0; a < ipv4Server->GetNAddresses(n); a++){
+//        NS_LOG_UNCOND( "Server  addr " << n <<"/" << a << "=" << ipv4Server->GetAddress(n,a));
+//    }
+//  }
 
   // default route
 //  LinuxStackHelper::RunIp (clientNode, Seconds (0.1), "route add default via 10.1.0.2 dev sim0");
