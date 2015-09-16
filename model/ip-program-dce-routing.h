@@ -78,8 +78,8 @@ public:
 
   virtual void SetIpv4 (Ptr<Ipv4> ipv4);
 
-  template<class T>
-  static Ptr<T> GetRouting (Ptr<Ipv4RoutingProtocol> ipv4rp, T*);
+//  template<class T>
+//  static Ptr<T> GetRouting (Ptr<Ipv4RoutingProtocol> ipv4rp, T*);
 
 private:
   Ptr<Ipv4> m_ipv4;
@@ -87,33 +87,33 @@ private:
 };
 // This function does a recursive search for a requested routing protocol.
 // Strictly speaking this recursion is not necessary, but why not?
-template<class T>
-Ptr<T> IpProgramDceRouting::GetRouting (Ptr<Ipv4RoutingProtocol> ipv4rp, T* type)
-{
-  if (ipv4rp == 0)
-    {
-      return 0;
-    }
-
-  if (DynamicCast<T> (ipv4rp))
-    {
-      return DynamicCast<T> (ipv4rp);
-    }
-  else if (DynamicCast<Ipv4ListRouting> (ipv4rp))
-    {
-      Ptr<Ipv4ListRouting> lrp = DynamicCast<Ipv4ListRouting> (ipv4rp);
-      for (uint32_t i = 0; i < lrp->GetNRoutingProtocols ();  i++)
-        {
-          int16_t priority;
-          Ptr<T> ret = GetRouting (lrp->GetRoutingProtocol (i, priority), type);
-          if (ret != 0)
-            {
-              return ret;
-            }
-        }
-    }
-  return 0;
-}
+//template<class T>
+//Ptr<T> IpProgramDceRouting::GetRouting (Ptr<Ipv4RoutingProtocol> ipv4rp, T* type)
+//{
+//  if (ipv4rp == 0)
+//    {
+//      return 0;
+//    }
+//
+//  if (DynamicCast<T> (ipv4rp))
+//    {
+//      return DynamicCast<T> (ipv4rp);
+//    }
+//  else if (DynamicCast<Ipv4ListRouting> (ipv4rp))
+//    {
+//      Ptr<Ipv4ListRouting> lrp = DynamicCast<Ipv4ListRouting> (ipv4rp);
+//      for (uint32_t i = 0; i < lrp->GetNRoutingProtocols ();  i++)
+//        {
+//          int16_t priority;
+//          Ptr<T> ret = GetRouting (lrp->GetRoutingProtocol (i, priority), type);
+//          if (ret != 0)
+//            {
+//              return ret;
+//            }
+//        }
+//    }
+//  return 0;
+//}
 } // Namespace ns3
 
 #endif /* IPV4_DCE_ROUTING_H */

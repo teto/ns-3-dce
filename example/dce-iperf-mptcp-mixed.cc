@@ -10,6 +10,9 @@
 #include "ns3/constant-position-mobility-model.h"
 
 using namespace ns3;
+
+NS_LOG_COMPONENT_DEFINE ("DceIperfMpTcpMixed");
+
 void setPos (Ptr<Node> n, int x, int y, int z)
 {
   Ptr<ConstantPositionMobilityModel> loc = CreateObject<ConstantPositionMobilityModel> ();
@@ -31,21 +34,55 @@ static const char* StackTypesStr[] = {
 "Linux"
 };
 
-bool setupStackType(enum StackType& val, std::string newVal)
+bool setupStackType(enum StackType *val, std::string newVal)
 {
     // TODO get the typeids child of
+    NS_LOG_UNCOND("newVal=" << newVal);
     if(newVal == "ns") {
-        val = STACK_NS;
+        *val = STACK_NS;
     }
     else if(newVal == "linux") {
-        val = STACK_LINUX;
+        *val = STACK_LINUX;
     }
     else {
         return false;
     }
+
+    NS_LOG_UNCOND("Stack type after arg processing=" << StackTypesStr[(int)*val]);
     return true;
 }
 
+Ptr<Ipv4StaticRouting>
+GetRouting(Ptr<Node> node, enum StackType type)
+{
+  Ptr<Ipv4StaticRouting> routing;
+  Ptr<Ipv4> ipv4 = node->GetObject<Ipv4> ();
+
+  NS_ASSERT_MSG(ipv4 , "node does not have ipv4");
+
+  if(type == STACK_LINUX) {
+
+    routing = Create<IpProgramDceRouting>();
+    routing->SetIpv4(ipv4);
+  }
+  else if(type == STACK_NS) {
+
+    Ipv4StaticRoutingHelper ipv4RoutingHelper;
+  //  Ptr<IpProgramDceRouting> serverRouting = Create<IpProgramDceRouting>();
+  //  Ptr<Ipv4StaticRouting> serverRouting = Create<IpProgramDceRouting>();
+
+
+//    serverRouting->SetIpv4(ipv4Server);
+    routing = ipv4RoutingHelper.GetStaticRouting (ipv4);
+
+
+  }
+  else {
+    NS_FATAL_ERROR("Unsupported stack (at the moment)");
+  }
+  NS_ASSERT(routing);
+  return routing;
+}
 
 //Ipv4DceRouting
 // ipv4 static routing
@@ -82,9 +119,9 @@ int main (int argc, char *argv[])
 
   cmd.AddValue ("nRtrs", "Number of routers. Default 2", nRtrs);
   /* TODO choose from an enum */
-  cmd.AddValue ("clientStack", "Clientstack. Default ", MakeBoundCallback(&setupStackType, client_stack) );
+  cmd.AddValue ("clientStack", "Clientstack. Default ", MakeBoundCallback(&setupStackType, &client_stack) );
 //  cmd.AddValue ("clientStack", "Clientstack. Default ", clientStack);
-  cmd.AddValue ("serverStack", "ServerStack. Default ", MakeBoundCallback(&setupStackType, server_stack));
+  cmd.AddValue ("serverStack", "ServerStack. Default ", MakeBoundCallback(&setupStackType, &server_stack));
 //  cmd.AddValue ("routerStack", "Number of routers. Default ", nRtrs);
 
   Config::SetDefault ("ns3::TcpSocketBase::EnableMpTcp", BooleanValue(true));
@@ -106,7 +143,7 @@ if(clientStack == "ns3") etc...
 //  linuxStackNodes.Add(routers);
   if(client_stack == STACK_LINUX) {
     linuxStackNodes.Add(clientNode);
-    clientRouting = Create<IpProgramDceRouting>();
+//    clientRouting = Create<IpProgramDceRouting>();
   }
   else {
     nsStackNodes.Add(clientNode);
@@ -114,7 +151,7 @@ if(clientStack == "ns3") etc...
 
   if(server_stack == STACK_LINUX) {
     linuxStackNodes.Add(serverNode);
-    serverRouting = Create<IpProgramDceRouting>();
+//    serverRouting = Create<IpProgramDceRouting>();
 
   }
   else {
@@ -124,7 +161,7 @@ if(clientStack == "ns3") etc...
 
   if(router_stack == STACK_LINUX) {
     linuxStackNodes.Add(routers);
-    serverRouting = Create<IpProgramDceRouting>();
+//    serverRouting = Create<IpProgramDceRouting>();
 
   }
   else {
@@ -179,21 +216,23 @@ if(clientStack == "ns3") etc...
   Looking at convergence between DCE and ns3 to allow for seamless transitions
   Depending on the stack type, we setup a different static routing type
   **/
-  Ipv4StaticRoutingHelper ipv4RoutingHelper;
-//  Ptr<IpProgramDceRouting> serverRouting = Create<IpProgramDceRouting>();
-//  Ptr<Ipv4StaticRouting> serverRouting = Create<IpProgramDceRouting>();
-  Ptr<Ipv4> ipv4Server = serverNode->GetObject<Ipv4> ();
-  NS_ASSERT_MSG(ipv4Server , "node does not have ipv4");
-  serverRouting->SetIpv4(ipv4Server);
-  serverRouting = ipv4RoutingHelper.GetStaticRouting (ipv4Server);
-  NS_ASSERT(serverRouting);
+//  Ipv4StaticRoutingHelper ipv4RoutingHelper;
+////  Ptr<IpProgramDceRouting> serverRouting = Create<IpProgramDceRouting>();
+////  Ptr<Ipv4StaticRouting> serverRouting = Create<IpProgramDceRouting>();
+//  Ptr<Ipv4> ipv4Server = serverNode->GetObject<Ipv4> ();
+//  NS_ASSERT_MSG(ipv4Server , "node does not have ipv4");
+//  serverRouting->SetIpv4(ipv4Server);
+//  serverRouting = ipv4RoutingHelper.GetStaticRouting (ipv4Server);
+//  NS_ASSERT(serverRouting);
+//
+//  // get client routing
+//  Ptr<Ipv4> ipv4client = clientNode->GetObject<Ipv4> ();
+//  NS_ASSERT_MSG(ipv4client , "node does not have ipv4");
+//  clientRouting = ipv4RoutingHelper.GetStaticRouting (ipv4client);
+//  NS_ASSERT(clientRouting);
 
-  // get client routing
-  Ptr<Ipv4> ipv4client = clientNode->GetObject<Ipv4> ();
-  NS_ASSERT_MSG(ipv4client , "node does not have ipv4");
-  clientRouting = ipv4RoutingHelper.GetStaticRouting (ipv4client);
-  NS_ASSERT(clientRouting);
-
+  serverRouting = GetRouting(serverNode, server_stack);
+  clientRouting = GetRouting(clientNode, client_stack);
   Ptr<OutputStreamWrapper> stream = Create<OutputStreamWrapper>("rttables", std::ios::out);
 
   // configure routers
@@ -230,10 +269,13 @@ if(clientStack == "ns3") etc...
       clientRouting->SetDefaultRoute(if1.GetAddress (1, 0), clientInterface);
 
       /* setup routers routing */
+
       Ptr<Ipv4> ipv4Router = serverNode->GetObject<Ipv4> ();
       NS_ASSERT_MSG(ipv4Router, "router node does not have ipv4");
 //      routerRouting->SetIpv4(ipv4Router);
+      routerRouting = GetRouting(routerNode, router_stack);
 
+      #if 0
       if(router_stack == STACK_LINUX) {
 //          linuxStackNodes.Add(serverNode);
           /* Maybe IpProgramDceRouting should be considered as  an app ? */
@@ -250,6 +292,7 @@ if(clientStack == "ns3") etc...
 //          routerRouting = Create<Ipv4StaticRouting>();
 
         }
+      #endif
       NS_ASSERT(routerRouting);
 
       cmd_oss.str ("");
@@ -312,8 +355,8 @@ if(clientStack == "ns3") etc...
 //      Simulator::Schedule( Seconds(5), &PrintRouterTable, routerRouting, stream);
       // will display the routing table
       LinuxStackHelper::RunIp ( routerNode, Seconds (3), "route");
-      linuxStack.SysctlSet ( routerNode, ".net.ipv4.conf.all.forwarding", "1");
-
+//      linuxStack.SysctlSet ( routerNode, ".net.ipv4.conf.all.forwarding", "1");
+      linuxStack.SysctlSet (routerNode, ".net.ipv4.conf.default.forwarding", "1");
       setPos (routers.Get (i), 50, i * 20, 0);
     }
 
