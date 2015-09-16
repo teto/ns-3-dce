@@ -88,6 +88,8 @@ int main (int argc, char *argv[])
 //  cmd.AddValue ("routerStack", "Number of routers. Default ", nRtrs);
 
   Config::SetDefault ("ns3::TcpSocketBase::EnableMpTcp", BooleanValue(true));
+  Config::SetDefault ("ns3::TcpSocketBase::NullISN", BooleanValue(false));
+  Config::SetDefault ("ns3::TcpSocket::SegmentSize", UintegerValue (1448));
 /**
 if(clientStack == "ns3") etc...
 **/
@@ -101,7 +103,7 @@ if(clientStack == "ns3") etc...
 
   /* TODO depending on command line arguments, load put nodes into these containers */
   NodeContainer linuxStackNodes, nsStackNodes;
-  linuxStackNodes.Add(routers);
+//  linuxStackNodes.Add(routers);
   if(client_stack == STACK_LINUX) {
     linuxStackNodes.Add(clientNode);
     clientRouting = Create<IpProgramDceRouting>();
@@ -117,11 +119,22 @@ if(clientStack == "ns3") etc...
   }
   else {
     nsStackNodes.Add(serverNode);
-    serverRouting = Create<Ipv4StaticRouting>();
+//    serverRouting = Create<Ipv4StaticRouting>();
   }
+
+  if(router_stack == STACK_LINUX) {
+    linuxStackNodes.Add(routers);
+    serverRouting = Create<IpProgramDceRouting>();
+
+  }
+  else {
+    nsStackNodes.Add(routers);
+  }
+
   NS_LOG_UNCOND("Nb of routers => " << nRtrs);
   NS_LOG_UNCOND("Client stack => " << StackTypesStr[(int)client_stack]);
   NS_LOG_UNCOND("Server stack => " << StackTypesStr[(int)server_stack]);
+  NS_LOG_UNCOND("Router stack => " << StackTypesStr[(int)router_stack]);
 
 //  NS_ASSERT(serverRouting);
 
@@ -222,7 +235,7 @@ if(clientStack == "ns3") etc...
 //      routerRouting->SetIpv4(ipv4Router);
 
       if(router_stack == STACK_LINUX) {
-          linuxStackNodes.Add(serverNode);
+//          linuxStackNodes.Add(serverNode);
           /* Maybe IpProgramDceRouting should be considered as  an app ? */
           NS_LOG_UNCOND("Using a linux router with IpProgramDceRouting");
           routerRouting = Create<IpProgramDceRouting>();
@@ -239,11 +252,13 @@ if(clientStack == "ns3") etc...
         }
       NS_ASSERT(routerRouting);
 
-
       cmd_oss.str ("");
-      cmd_oss << "10.1." << i << ".0";
-      // 0 c localhost ptet ?
-      routerRouting->AddNetworkRouteTo(Ipv4Address(cmd_oss.str().c_str()), Ipv4Mask("/24"), routerIf);
+      cmd_oss << "route add 10.1."<< i <<".0/24 via " << if1.GetAddress (1, 0) << " dev sim0";
+      LinuxStackHelper::RunIp (routers.Get (i), Seconds (0.2), cmd_oss.str ().c_str ());
+//
+//      cmd_oss.str ("");
+//      cmd_oss << "10.1." << i << ".0";
+//      routerRouting->AddNetworkRouteTo(Ipv4Address(cmd_oss.str().c_str()), Ipv4Mask("/24"), routerIf);
 
 
       // Right link (from server to routers)
@@ -272,9 +287,8 @@ if(clientStack == "ns3") etc...
     //      LinuxStackHelper::RunIp (serverNode, Seconds (0.1), cmd_oss.str ().c_str ());
       serverRouting->SetDefaultRoute(if2.GetAddress (1, 0), serverIf);
 
-    //      cmd_oss.str ("");
-    //      cmd_oss << "route add 10.2.0.0/16 via " << if2.GetAddress (1, 0) << " dev sim1";
-    //      LinuxStackHelper::RunIp (routers.Get (i), Seconds (0.2), cmd_oss.str ().c_str ());
+
+     #if 0
       cmd_oss.str ("");
       cmd_oss << "10.2." << i << ".0";
       serverRouting->AddNetworkRouteTo(
@@ -284,8 +298,11 @@ if(clientStack == "ns3") etc...
                     1,                        // interface
                     0                       // metric (optional)
                     );
-
-      routerRouting->AddNetworkRouteTo(Ipv4Address(cmd_oss.str().c_str()),Ipv4Mask("/24"), routerIf);
+      #endif
+          cmd_oss.str ("");
+          cmd_oss << "route add 10.2.0.0/16 via " << if2.GetAddress (1, 0) << " dev sim1";
+          LinuxStackHelper::RunIp (routers.Get (i), Seconds (0.2), cmd_oss.str ().c_str ());
+//      routerRouting->AddNetworkRouteTo(Ipv4Address(cmd_oss.str().c_str()),Ipv4Mask("/24"), routerIf);
 
 
       /*
@@ -295,6 +312,7 @@ if(clientStack == "ns3") etc...
 //      Simulator::Schedule( Seconds(5), &PrintRouterTable, routerRouting, stream);
       // will display the routing table
       LinuxStackHelper::RunIp ( routerNode, Seconds (3), "route");
+      linuxStack.SysctlSet ( routerNode, ".net.ipv4.conf.all.forwarding", "1");
 
       setPos (routers.Get (i), 50, i * 20, 0);
     }
@@ -310,8 +328,9 @@ if(clientStack == "ns3") etc...
   }
   #endif
 //  std::ostringstream stream;
-
+  *stream->GetStream() << "Client " << std::endl;
   clientRouting->PrintRoutingTable(stream);
+  *stream->GetStream() << "Router " << std::endl;
   serverRouting->PrintRoutingTable(stream);
 
 //  for( uint32_t n =0; n < ipv4client->GetNInterfaces(); n++){
@@ -347,7 +366,9 @@ if(clientStack == "ns3") etc...
   // debug
 
 //  linuxStack.SysctlSet (linuxStackNodes, ".net.mptcp.mptcp_debug", "1");
-//  linuxStack.SysctlSet (linuxStackNodes, ".kernel.printk", "3 4 1 3");
+  linuxStack.SysctlSet ( linuxStackNodes, ".kernel.printk", "8 4 8 1");
+  // for the router
+//  net.ipv4.conf.all.forwarding
 
   DceApplicationHelper dce;
   ApplicationContainer apps;

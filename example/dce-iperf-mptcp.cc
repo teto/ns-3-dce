@@ -93,6 +93,8 @@ int main (int argc, char *argv[])
       cmd_oss << "route add 10.2."<< i <<".0/24 via " << if2.GetAddress (1, 0) << " dev sim1";
       LinuxStackHelper::RunIp (routers.Get (i), Seconds (0.2), cmd_oss.str ().c_str ());
 
+      LinuxStackHelper::RunIp ( routers.Get (i), Seconds (3), "route");
+
       setPos (routers.Get (i), 50, i * 20, 0);
     }
 
@@ -109,7 +111,7 @@ int main (int argc, char *argv[])
 
   // debug
   stack.SysctlSet (nodes, ".net.mptcp.mptcp_debug", "1");
-  stack.SysctlSet (nodes, ".kernel.printk", "3 4 1 3");
+  stack.SysctlSet (nodes, ".kernel.printk", "8 4 8 1");
 //  stack.SysctlSet (nodes, ".net.mptcp.syn_retries", "1");
 
   DceApplicationHelper dce;
