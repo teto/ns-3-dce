@@ -469,7 +469,14 @@ UnixStreamSocketFd::ConnectionSuccess (Ptr<Socket> sock)
         {
           SetPeerAddress (new Address (ad));
         }
+
     }
+
+  if(!m_connectionSuccess.IsNull()) {
+    NS_LOG_DEBUG("calling on success callback");
+    m_connectionSuccess(sock);
+  }
+
   int pi = POLLIN;
   WakeWaiters (&pi);
 }

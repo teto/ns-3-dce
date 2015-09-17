@@ -2,6 +2,7 @@
 #define NS3_SOCKET_FD_FACTORY_H
 
 #include "socket-fd-factory.h"
+#include <ns3/socket.h>
 
 namespace ns3 {
 
@@ -15,7 +16,9 @@ public:
   void NotifyNewAggregate (void);
 
   virtual UnixFd * CreateSocket (int domain, int type, int protocol);
+
 private:
+  Callback<void, Ptr<Socket> > m_onTcpConnect;
   Ptr<SocketFactory> m_netlink;
 };
 

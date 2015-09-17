@@ -44,6 +44,11 @@ Ns3SocketFdFactory::GetTypeId (void)
   static TypeId tid = TypeId ("ns3::Ns3SocketFdFactory")
     .SetParent<SocketFdFactory> ()
     .AddConstructor<Ns3SocketFdFactory> ()
+    .AddAttribute ("OnTcpConnect",
+                   "Callback invoked whenever an icmp error is received on this socket.",
+                   CallbackValue (),
+                   MakeCallbackAccessor (&Ns3SocketFdFactory::m_onTcpConnect),
+                   MakeCallbackChecker ())
   ;
   return tid;
 }
@@ -103,7 +108,10 @@ Ns3SocketFdFactory::CreateSocket (int domain, int type, int protocol)
             NS_ASSERT_MSG (factory, "InternetStackHelper is not installed. "
                            "Install it before using Ns3SocketFdFactory.");
             sock = factory->CreateSocket ();
-            socket = new UnixStreamSocketFd (sock);
+            UnixStreamSocketFd* temp = new UnixStreamSocketFd (sock);
+            temp->m_connectionSuccess = m_onTcpConnect;
+            socket = temp;
+//            void, Ptr<Socket>
           } break;
         default:
           NS_FATAL_ERROR ("missing socket type");
@@ -135,6 +143,7 @@ Ns3SocketFdFactory::CreateSocket (int domain, int type, int protocol)
                            "Install it before using Ns3SocketFdFactory.");
             sock = factory->CreateSocket ();
             socket = new UnixStreamSocketFd (sock);
+//            socket->SetConnectCallback (sock);
           } break;
         default:
           NS_FATAL_ERROR ("missing socket type");
