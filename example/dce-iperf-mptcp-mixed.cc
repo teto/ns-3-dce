@@ -13,6 +13,56 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("DceIperfMpTcpMixed");
 
+
+/* global since it is needed
+ * in the path manager
+ */
+NodeContainer routers;
+Ptr<Node> clientNode;
+Ptr<Node> serverNode;
+
+/**
+TODO write a path manager in case it is an ns3 client
+
+**/
+void
+onClientConnect(Ptr<Socket> socket)
+{
+  NS_LOG_UNCOND("ALLELUIA !!");
+
+  Ptr<MpTcpSocketBase> m_metaClient = DynamicCast<MpTcpSocketBase>(socket);
+  NS_ASSERT_MSG(m_metaClient, "The passed socket should be the MPTCP meta socket");
+
+
+  // only if fully established can you create new subflows
+  if (!m_metaClient->FullyEstablished())
+  {
+    NS_LOG_UNCOND("Meta not fully established yet !!");
+    return;
+  }
+
+
+  NS_LOG_LOGIC("Meta fully established, Creating subflows");
+  //! Create additionnal subflows
+  //! i starts at 1 because master is already using that path
+  for (int i = 1; i < routers.GetN(); ++i)
+  {
+        //! 'i+1' because 0 is localhost
+        Ipv4Address serverAddr = serverNode->GetObject<Ipv4>()->GetAddress(i+1, 0).GetLocal();
+        Ipv4Address sourceAddr = clientNode->GetObject<Ipv4>()->GetAddress(i+1, 0).GetLocal();
+
+        //! TODO, we should be able to not specify a port but it seems buggy so for now, let's set a port
+      //  InetSocketAddress local( sourceAddr);
+        InetSocketAddress local(sourceAddr, 0);
+        InetSocketAddress remote(serverAddr, 5001);
+
+        NS_LOG_LOGIC("ConnectNewSubflow from " << local << " to " << remote);
+        m_metaClient->ConnectNewSubflow(local, remote);
+  }
+}
+
+
+
 void setPos (Ptr<Node> n, int x, int y, int z)
 {
   Ptr<ConstantPositionMobilityModel> loc = CreateObject<ConstantPositionMobilityModel> ();
@@ -107,10 +157,7 @@ int main (int argc, char *argv[])
 
   const Time simMaxDuration = Seconds(200);
   CommandLine cmd;
-//  std::string clientStack = "";
-//  std::string serverStack = "";
-  /* by default we use linux stacks */
-  //STACK_NS
+
   enum StackType client_stack = STACK_NS;
   enum StackType server_stack = STACK_NS;
   enum StackType router_stack = STACK_LINUX;
@@ -132,10 +179,10 @@ if(clientStack == "ns3") etc...
 **/
   cmd.Parse (argc, argv);
 
-  NodeContainer nodes, routers;
+  NodeContainer nodes;
   nodes.Create (2);
-  Ptr<Node> clientNode = nodes.Get(0);
-  Ptr<Node> serverNode = nodes.Get(1);
+  clientNode = nodes.Get(0);
+  serverNode = nodes.Get(1);
   routers.Create (nRtrs);
 
   /* TODO depending on command line arguments, load put nodes into these containers */
@@ -143,7 +190,6 @@ if(clientStack == "ns3") etc...
 //  linuxStackNodes.Add(routers);
   if(client_stack == STACK_LINUX) {
     linuxStackNodes.Add(clientNode);
-//    clientRouting = Create<IpProgramDceRouting>();
   }
   else {
     nsStackNodes.Add(clientNode);
@@ -151,18 +197,13 @@ if(clientStack == "ns3") etc...
 
   if(server_stack == STACK_LINUX) {
     linuxStackNodes.Add(serverNode);
-//    serverRouting = Create<IpProgramDceRouting>();
-
   }
   else {
     nsStackNodes.Add(serverNode);
-//    serverRouting = Create<Ipv4StaticRouting>();
   }
 
   if(router_stack == STACK_LINUX) {
     linuxStackNodes.Add(routers);
-//    serverRouting = Create<IpProgramDceRouting>();
-
   }
   else {
     nsStackNodes.Add(routers);
@@ -191,7 +232,8 @@ if(clientStack == "ns3") etc...
   dceManager.Install (linuxStackNodes);
 
   /** install in nsStacks **/
-  dceManager.SetNetworkStack ("ns3::Ns3SocketFdFactory");
+  dceManager.SetNetworkStack ("ns3::Ns3SocketFdFactory",
+      "OnTcpConnect", CallbackValue(MakeCallback(&onClientConnect)));
 
 
   InternetStackHelper nsStack;
@@ -216,21 +258,6 @@ if(clientStack == "ns3") etc...
   Looking at convergence between DCE and ns3 to allow for seamless transitions
   Depending on the stack type, we setup a different static routing type
   **/
-//  Ipv4StaticRoutingHelper ipv4RoutingHelper;
-////  Ptr<IpProgramDceRouting> serverRouting = Create<IpProgramDceRouting>();
-////  Ptr<Ipv4StaticRouting> serverRouting = Create<IpProgramDceRouting>();
-//  Ptr<Ipv4> ipv4Server = serverNode->GetObject<Ipv4> ();
-//  NS_ASSERT_MSG(ipv4Server , "node does not have ipv4");
-//  serverRouting->SetIpv4(ipv4Server);
-//  serverRouting = ipv4RoutingHelper.GetStaticRouting (ipv4Server);
-//  NS_ASSERT(serverRouting);
-//
-//  // get client routing
-//  Ptr<Ipv4> ipv4client = clientNode->GetObject<Ipv4> ();
-//  NS_ASSERT_MSG(ipv4client , "node does not have ipv4");
-//  clientRouting = ipv4RoutingHelper.GetStaticRouting (ipv4client);
-//  NS_ASSERT(clientRouting);
-
   serverRouting = GetRouting(serverNode, server_stack);
   clientRouting = GetRouting(clientNode, client_stack);
   Ptr<OutputStreamWrapper> stream = Create<OutputStreamWrapper>("rttables", std::ios::out);
@@ -269,31 +296,8 @@ if(clientStack == "ns3") etc...
       clientRouting->SetDefaultRoute(if1.GetAddress (1, 0), clientInterface);
 
       /* setup routers routing */
-
       Ptr<Ipv4> ipv4Router = serverNode->GetObject<Ipv4> ();
-      NS_ASSERT_MSG(ipv4Router, "router node does not have ipv4");
-//      routerRouting->SetIpv4(ipv4Router);
       routerRouting = GetRouting(routerNode, router_stack);
-
-      #if 0
-      if(router_stack == STACK_LINUX) {
-//          linuxStackNodes.Add(serverNode);
-          /* Maybe IpProgramDceRouting should be considered as  an app ? */
-          NS_LOG_UNCOND("Using a linux router with IpProgramDceRouting");
-          routerRouting = Create<IpProgramDceRouting>();
-          routerRouting->SetIpv4(ipv4Router);
-//          cmd_oss.str ("");
-//          cmd_oss << "route add 10.1." << i << ".0/24 via " << if1.GetAddress (1, 0) << " dev sim0";
-//          LinuxStackHelper::RunIp (routers.Get (i), Seconds (0.2), cmd_oss.str ().c_str ());
-        }
-        else {
-//          Ptr<Ipv4> ipv4router = routers.Get (i)->GetObject<Ipv4> ()
-          routerRouting = ipv4RoutingHelper.GetStaticRouting (ipv4Router);
-//          routerRouting = Create<Ipv4StaticRouting>();
-
-        }
-      #endif
-      NS_ASSERT(routerRouting);
 
       cmd_oss.str ("");
       cmd_oss << "route add 10.1."<< i <<".0/24 via " << if1.GetAddress (1, 0) << " dev sim0";
@@ -351,11 +355,8 @@ if(clientStack == "ns3") etc...
       /*
       That won't work like this, need to use ipv4 dce routing
       */
-//      routerRouting->PrintRoutingTable(stream);
-//      Simulator::Schedule( Seconds(5), &PrintRouterTable, routerRouting, stream);
-      // will display the routing table
+
       LinuxStackHelper::RunIp ( routerNode, Seconds (3), "route");
-//      linuxStack.SysctlSet ( routerNode, ".net.ipv4.conf.all.forwarding", "1");
       linuxStack.SysctlSet (routerNode, ".net.ipv4.conf.default.forwarding", "1");
       setPos (routers.Get (i), 50, i * 20, 0);
     }
@@ -448,6 +449,9 @@ if(clientStack == "ns3") etc...
   dce.AddArgument ("-s");   // server
   apps = dce.Install ( serverNode );
   #else
+  /* By default iperf2 listens on port 5001
+
+  */
   // Launch iperf client on node 0
   dce.SetBinary ("iperf");
   dce.ResetArguments ();
@@ -459,6 +463,7 @@ if(clientStack == "ns3") etc...
   dce.AddArgument ("--time");
   dce.AddArgument ("5");
   dce.AddArgument ("--reportstyle=C");  // To export as CSV
+  // TODO use --format to choose output
 
   apps = dce.Install ( clientNode );
   apps.Start (Seconds (5.0));

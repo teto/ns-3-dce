@@ -11,6 +11,9 @@ class UnixStreamSocketFd : public UnixSocketFd
 public:
   UnixStreamSocketFd (Ptr<Socket> sock, bool connected = 0);
   virtual ~UnixStreamSocketFd (void);
+  // Addition matt: to handle MPTCP manager
+  Callback<void, Ptr<Socket> > m_connectionSuccess;
+
 private:
   enum State
   {
