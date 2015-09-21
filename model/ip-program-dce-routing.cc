@@ -40,6 +40,12 @@
 
 NS_LOG_COMPONENT_DEFINE ("IpProgramDceRouting");
 
+
+/**
+ * TODO do as in SourceAddressSelection, a function to choose add rule from table
+ * qui choisit la table
+ */
+
 using std::make_pair;
 
 namespace ns3 {

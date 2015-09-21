@@ -159,6 +159,7 @@ int main (int argc, char *argv[])
   dce.AddArgument ("1");
   dce.AddArgument ("--time");
   dce.AddArgument ("10");
+//  dce.AddArgument ("--bind=10.1.0.1");  // TODO get address programmatacilly from clientNode
   dce.AddArgument ("--reportstyle=C");  // To export as CSV
 
   apps = dce.Install (nodes.Get (0));
