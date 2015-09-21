@@ -7,7 +7,15 @@
 extern "C" {
 #endif
 
+/**
+ * \warn Does not implement dns lookup here for now. We just interpret simple ip strings.
+ * \note see resolv/gethnameaddr.c in glibc
+ */
 struct hostent * dce_gethostbyname (const char *name);
+
+/*
+ * \note This is a GNU extension
+ */
 struct hostent * dce_gethostbyname2 (const char *name, int af);
 int dce_getaddrinfo (const char *node, const char *service,
                      const struct addrinfo *hints,
@@ -17,6 +25,9 @@ const char * dce_gai_strerror (int errcode);
 int dce_getnameinfo (const struct sockaddr *sa, socklen_t salen, char *host,
                      socklen_t hostlen, char *serv, socklen_t servlen, unsigned int flags);
 
+/**
+ *
+ */
 void dce_herror (const char *string);
 int dce_getifaddrs (struct ifaddrs **ifap);
 

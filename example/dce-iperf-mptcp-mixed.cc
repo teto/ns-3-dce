@@ -150,6 +150,15 @@ Creates 2 nodes (client/server) and nRtrs routers
 
 in this configuration, server is ns3 and client is kernel
 afficher une topologie
+
+iperf2 or 3 test
+
+
+TOPOLOGY:
+
+
+Client (10.1.X.1, in files-0)  ------------- (10.1.X.2) nbRtrs Routers (10.2.X.2) -------- ((10.2.X.1) Server (in files-1)
+
 **/
 int main (int argc, char *argv[])
 {
@@ -272,7 +281,7 @@ if(clientStack == "ns3") etc...
       // Left link (from client to routers)
       pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("5Mbps"));
       pointToPoint.SetChannelAttribute ("Delay", StringValue ("10ms"));
-      devices1 = pointToPoint.Install (clientNode, routers.Get (i));
+      devices1 = pointToPoint.Install (clientNode, routerNode);
       // Assign ip addresses
       Ipv4InterfaceContainer if1 = address1.Assign (devices1);
       address1.NewNetwork ();
@@ -462,6 +471,7 @@ if(clientStack == "ns3") etc...
   dce.AddArgument ("1");
   dce.AddArgument ("--time");
   dce.AddArgument ("5");
+  dce.AddArgument ("--bind=10.1.0.1");  // TODO get address programmatacilly from clientNode
   dce.AddArgument ("--reportstyle=C");  // To export as CSV
   // TODO use --format to choose output
 
@@ -474,6 +484,7 @@ if(clientStack == "ns3") etc...
   dce.ResetArguments ();
   dce.ResetEnvironment ();
   dce.AddArgument ("-s");
+  dce.AddArgument ("--bind=10.2.0.1");  // TODO get address programmatacilly from clientNode
   dce.AddArgument ("-P");
   dce.AddArgument ("1");
   apps = dce.Install ( serverNode );
