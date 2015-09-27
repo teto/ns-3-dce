@@ -8,6 +8,8 @@
 #include "ns3/netanim-module.h"
 #include "ns3/ip-program-dce-routing.h"
 #include "ns3/constant-position-mobility-model.h"
+#include <algorithm>
+#include "ns3/mptcp-scheduler.h"
 
 using namespace ns3;
 
@@ -20,6 +22,11 @@ NS_LOG_COMPONENT_DEFINE ("DceIperfMpTcpMixed");
 NodeContainer routers;
 Ptr<Node> clientNode;
 Ptr<Node> serverNode;
+
+/* global config */
+std::string scheduler = "default";
+std::string congestionAlg = "lia";
+std::string windowSize = "4M";
 
 /**
 TODO write a path manager in case it is an ns3 client
@@ -143,6 +150,63 @@ PrintRouterTable(Ptr<Ipv4DceRouting> routing, Ptr<OutputStreamWrapper> stream)
 }
 //NS_LOG_COMPONENT_DEFINE ("DceMpTcpHybrid");
 
+void
+setupNsNodes(NodeContainer nodes)
+{
+//    TypeId sched, algTypeId;
+    std::string sched_name;
+    std::string alg_name;
+
+    // Setup scheduler
+    if(scheduler == "roundrobin") {
+        sched_name= "ns3::MpTcpSchedulerRoundRobin";
+    }
+    else if(scheduler == "default") {
+        sched_name="ns3::MpTcpSchedulerFastestRTT";
+    }
+    else {
+        // TODO replace this check by one of the following one
+        NS_FATAL_ERROR("invalid scheduler");
+    }
+
+    // TODO che
+//    TypeId sched(scheduler)
+//    sched.IsChildOf(MpTcpScheduler::GetTypeId());
+//    NS_ASSERT_MSG( );
+
+    // Setuup congestion control
+
+    if(congestionAlg == "lia") {
+        alg_name= "ns3::MpTcpSchedulerRoundRobin";
+    }
+//    else if(scheduler == "olia") {
+//        alg_name="ns3::MpTcpSchedulerFastestRTT";
+//    }
+    else {
+        // TODO replace this check by one of the following one
+        NS_FATAL_ERROR("invalid congestion algorithm");
+    }
+
+
+    TypeId schedulerTypeId = TypeId::LookupByName(sched_name);
+    TypeId algTypeId       = TypeId::LookupByName(alg_name);
+
+    Config::SetDefault ("ns3::MpTcpSocketBase::Scheduler", TypeIdValue(schedulerTypeId));
+    Config::SetDefault ("ns3::TcpL4Protocol::SocketType", TypeIdValue(algTypeId));
+}
+
+void
+setupLinuxNodes(LinuxStackHelper& linuxStack, NodeContainer nodes)
+{
+
+  linuxStack.SysctlSet ( nodes, ".net.mptcp.mptcp_scheduler", scheduler);
+  linuxStack.SysctlSet ( nodes, ".net.ipv4.tcp_congestion_control", congestionAlg);
+  // Buffer size allocated by iperf
+//  linuxStack.SysctlSet ( nodes, "net.ipv4.tcp_rmem", "4096        87380   6291456");
+//  linuxStack.SysctlSet ( nodes, "net.ipv4.tcp_mem", "4096        87380   6291456");
+//  net.ipv4.tcp_mem = 187320       249763  374640
+}
+
 /**
 TODO Enable mptcp
 Can't find route
@@ -159,35 +223,65 @@ TOPOLOGY:
 
 Client (10.1.X.1, in files-0)  ------------- (10.1.X.2) nbRtrs Routers (10.2.X.2) -------- ((10.2.X.1) Server (in files-1)
 
+
+SO_SNDBUF
+SO_RCVBUF
 **/
 int main (int argc, char *argv[])
 {
   uint32_t nRtrs = 1;   //! For now set only one router
-
+  const uint32_t nMaxRtrs = 3;  //! max nb of routers
   const Time simMaxDuration = Seconds(200);
+
+
   CommandLine cmd;
 
   enum StackType client_stack = STACK_NS;
   enum StackType server_stack = STACK_NS;
   enum StackType router_stack = STACK_LINUX;
+
+  /* times in milliseconds forward/backward */
+  int forwardOwd[] = { 30,30,30 };
+  int backwardOwd[] = { 30,30,30 };
+
   Ptr<Ipv4StaticRouting> serverRouting;
   Ptr<Ipv4StaticRouting> clientRouting;
 
   cmd.AddValue ("nRtrs", "Number of routers. Default 2", nRtrs);
-  /* TODO choose from an enum */
   cmd.AddValue ("clientStack", "Clientstack. Default ", MakeBoundCallback(&setupStackType, &client_stack) );
-//  cmd.AddValue ("clientStack", "Clientstack. Default ", clientStack);
   cmd.AddValue ("serverStack", "ServerStack. Default ", MakeBoundCallback(&setupStackType, &server_stack));
-//  cmd.AddValue ("routerStack", "Number of routers. Default ", nRtrs);
+  cmd.AddValue ("scheduler", "bufferSize. Default ", scheduler);
+  cmd.AddValue ("congestion", "congestion control. Default ", congestionAlg);
+  cmd.AddValue ("window", "iperf --window parameter", windowSize);
 
+  std::ostringstream oss;
+  for ( uint32_t i = 0; i < nMaxRtrs; ++i) {
+    oss.str("");
+    oss << "forwardDelay" << i;
+    //MakeBoundCallback(&setupStackType, &server_stack)
+    cmd.AddValue ( oss.str(), "Forward delay ", forwardOwd[i]);
+    oss.str("");
+    oss << "backwardDelay" << i;
+    cmd.AddValue ( oss.str(), "Backward delay ", backwardOwd[i]);
+  }
+  // TODO being able to configure Scheduler and congestion control
+
+//  Config::SetDefault ("ns3::MpTcpSocketBase::Scheduler", BooleanValue(true));
   Config::SetDefault ("ns3::TcpSocketBase::EnableMpTcp", BooleanValue(true));
   Config::SetDefault ("ns3::TcpSocketBase::NullISN", BooleanValue(false));
   Config::SetDefault ("ns3::TcpSocket::SegmentSize", UintegerValue (1448));
+
+  // choose congestion control
+  // Setup node
+
+
 /**
 if(clientStack == "ns3") etc...
 **/
   cmd.Parse (argc, argv);
 
+  // we limit to 3 routers
+  nRtrs = std::min( (uint32_t)3, nRtrs);
   NodeContainer nodes;
   nodes.Create (2);
   clientNode = nodes.Get(0);
@@ -222,6 +316,8 @@ if(clientStack == "ns3") etc...
   NS_LOG_UNCOND("Client stack => " << StackTypesStr[(int)client_stack]);
   NS_LOG_UNCOND("Server stack => " << StackTypesStr[(int)server_stack]);
   NS_LOG_UNCOND("Router stack => " << StackTypesStr[(int)router_stack]);
+  NS_LOG_UNCOND("forwardOwd[0] => " << forwardOwd[0]);
+  NS_LOG_UNCOND("backwardOwd[0] => " << backwardOwd[0]);
 
 //  NS_ASSERT(serverRouting);
 
@@ -238,7 +334,11 @@ if(clientStack == "ns3") etc...
   // TODO don't install it there
 //  linuxStack.Install (clientNode);
   linuxStack.Install (linuxStackNodes);
+
+
+
   dceManager.Install (linuxStackNodes);
+  setupLinuxNodes(linuxStack,linuxStackNodes);
 
   /** install in nsStacks **/
   dceManager.SetNetworkStack ("ns3::Ns3SocketFdFactory",
@@ -250,7 +350,7 @@ if(clientStack == "ns3") etc...
 //  nsStack.SetRoutingHelper (ipv4DceRoutingHelper);
   nsStack.Install (nsStackNodes);
   dceManager.Install (nsStackNodes);
-
+  setupNsNodes(nsStackNodes);
 
   // TODO la il installe
 
@@ -280,8 +380,19 @@ if(clientStack == "ns3") etc...
 
       // Left link (from client to routers)
       pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("5Mbps"));
-      pointToPoint.SetChannelAttribute ("Delay", StringValue ("10ms"));
+
+      pointToPoint.SetChannelAttribute ("Delay", TimeValue( MilliSeconds(forwardOwd[i])) );
+      pointToPoint.SetChannelAttribute ("AlternateDelay", TimeValue( MilliSeconds(backwardOwd[i])));
       devices1 = pointToPoint.Install (clientNode, routerNode);
+
+
+       TimeValue t;
+        devices1.Get(0)->GetChannel()->GetAttribute("Delay", t);
+        std::cout << "BEBE=" << t.Get().As(Time::MS) << std::endl;
+        devices1.Get(0)->GetChannel()->GetAttribute("AlternateDelay", t);
+        std::cout << t.Get().As(Time::MS) << std::endl;
+
+
       // Assign ip addresses
       Ipv4InterfaceContainer if1 = address1.Assign (devices1);
       address1.NewNetwork ();
@@ -319,8 +430,15 @@ if(clientStack == "ns3") etc...
 
       // Right link (from server to routers)
       pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("100Mbps"));
-      pointToPoint.SetChannelAttribute ("Delay", StringValue ("1ns"));
+//      pointToPoint.SetChannelAttribute ("Delay", TimeValue( MilliSeconds(forwardOwd[i])) );
+//      pointToPoint.SetChannelAttribute ("AlternateDelay", TimeValue( MilliSeconds(backwardOwd[i])));
       devices2 = pointToPoint.Install (serverNode, routerNode);
+
+        devices2.Get(0)->GetChannel()->GetAttribute("Delay", t);
+        std::cout << "BIBI=" << t.Get().As(Time::MS) << std::endl;
+        devices2.Get(0)->GetChannel()->GetAttribute("AlternateDelay", t);
+        std::cout << t.Get().As(Time::MS) << std::endl;
+
       // Assign ip addresses
       Ipv4InterfaceContainer if2 = address2.Assign (devices2);
       address2.NewNetwork ();
@@ -461,6 +579,9 @@ if(clientStack == "ns3") etc...
   /* By default iperf2 listens on port 5001
 
   */
+  oss.str("--window=");
+  oss << windowSize;
+
   // Launch iperf client on node 0
   dce.SetBinary ("iperf");
   dce.ResetArguments ();
@@ -473,6 +594,7 @@ if(clientStack == "ns3") etc...
   dce.AddArgument ("5");
   dce.AddArgument ("--bind=10.1.0.1");  // TODO get address programmatacilly from clientNode
   dce.AddArgument ("--reportstyle=C");  // To export as CSV
+  dce.AddArgument ( oss.str());   // size of Rcv or send buffer
   // TODO use --format to choose output
 
   apps = dce.Install ( clientNode );
@@ -485,8 +607,10 @@ if(clientStack == "ns3") etc...
   dce.ResetEnvironment ();
   dce.AddArgument ("-s");
   dce.AddArgument ("--bind=10.2.0.1");  // TODO get address programmatacilly from clientNode
-  dce.AddArgument ("-P");
-  dce.AddArgument ("1");
+  dce.AddArgument ("--parallel=1");
+//  dce.AddArgument ("-P");
+//  dce.AddArgument ("1");
+  dce.AddArgument ( oss.str());   // size of Rcv or send buffer
   apps = dce.Install ( serverNode );
   #endif
   /* use the same name as dce-iperf-mptcp to ease postprocessing */

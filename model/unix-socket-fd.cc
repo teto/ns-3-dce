@@ -46,6 +46,7 @@
 #include <poll.h>
 #include <linux/netlink.h>
 #include <sys/ioctl.h>
+#include <netinet/tcp.h>
 
 NS_LOG_COMPONENT_DEFINE ("DceUnixSocketFd");
 
@@ -464,6 +465,30 @@ UnixSocketFd::Setsockopt (int level, int optname,
           break;
         }
       break;
+
+    case IPPROTO_TCP:
+        switch(optname) {
+            case TCP_NODELAY:
+            {
+                if (optlen != sizeof (int))
+                  {
+                    current->err = EINVAL;
+                    return -1;
+                  }
+                int *v = (int*)optval;
+                if (!m_socket->SetAttributeFailSafe ("TcpNoDelay",
+                                                     BooleanValue (*v ? true : false)))
+                  {
+                    current->err = ENOPROTOOPT;
+                    return -1;
+                  }
+            }
+            default:
+          NS_LOG_WARN ("Unsupported setsockopt requested. level: IPPROTO_TCP, optname: " << optname);
+          current->err = ENOPROTOOPT;
+          break;
+        };
+        break;
     default:
       {
         NS_LOG_WARN ("Unsupported sockopt: level = " << level);
