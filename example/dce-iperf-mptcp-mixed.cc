@@ -26,7 +26,10 @@ Ptr<Node> serverNode;
 /* global config */
 std::string scheduler = "default";
 std::string congestionAlg = "lia";
-std::string windowSize = "4M";
+std::string windowSize = "120KB";
+
+// for good simulations put a longer duration here
+const std::string iperfDuration =  "5";
 
 /**
 TODO write a path manager in case it is an ns3 client
@@ -275,6 +278,12 @@ int main (int argc, char *argv[])
   // Setup node
 
 
+  /** 
+  TODO for good simulations, you need to average the results of different runs with different seeds.
+  For reproducibility, put the seed into a file.
+  for instance use SetSeed()
+  **/
+//  ns3::RngSeedManager::SetSeed();
 /**
 if(clientStack == "ns3") etc...
 **/
@@ -379,7 +388,7 @@ if(clientStack == "ns3") etc...
       Ptr<Node> routerNode = routers.Get (i);
 
       // Left link (from client to routers)
-      pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("5Mbps"));
+      pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("10Mbps"));
 
       pointToPoint.SetChannelAttribute ("Delay", TimeValue( MilliSeconds(forwardOwd[i])) );
       pointToPoint.SetChannelAttribute ("AlternateDelay", TimeValue( MilliSeconds(backwardOwd[i])));
@@ -430,8 +439,8 @@ if(clientStack == "ns3") etc...
 
       // Right link (from server to routers)
       pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("100Mbps"));
-//      pointToPoint.SetChannelAttribute ("Delay", TimeValue( MilliSeconds(forwardOwd[i])) );
-//      pointToPoint.SetChannelAttribute ("AlternateDelay", TimeValue( MilliSeconds(backwardOwd[i])));
+      pointToPoint.SetChannelAttribute ("Delay", TimeValue( MilliSeconds(1)) );
+      pointToPoint.SetChannelAttribute ("AlternateDelay", TimeValue( MilliSeconds(1)));
       devices2 = pointToPoint.Install (serverNode, routerNode);
 
         devices2.Get(0)->GetChannel()->GetAttribute("Delay", t);
@@ -579,8 +588,8 @@ if(clientStack == "ns3") etc...
   /* By default iperf2 listens on port 5001
 
   */
-  oss.str("--window=");
-  oss << windowSize;
+  oss.str("");
+  oss << "--window=" << windowSize;
 
   // Launch iperf client on node 0
   dce.SetBinary ("iperf");
@@ -591,7 +600,7 @@ if(clientStack == "ns3") etc...
   dce.AddArgument ("-i");
   dce.AddArgument ("1");
   dce.AddArgument ("--time");
-  dce.AddArgument ("5");
+  dce.AddArgument (iperfDuration);
   dce.AddArgument ("--bind=10.1.0.1");  // TODO get address programmatacilly from clientNode
   dce.AddArgument ("--reportstyle=C");  // To export as CSV
   dce.AddArgument ( oss.str());   // size of Rcv or send buffer
