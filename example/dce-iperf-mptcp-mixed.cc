@@ -272,12 +272,20 @@ int main (int argc, char *argv[])
 //  Config::SetDefault ("ns3::MpTcpSocketBase::Scheduler", BooleanValue(true));
   Config::SetDefault ("ns3::TcpSocketBase::EnableMpTcp", BooleanValue(true));
   Config::SetDefault ("ns3::TcpSocketBase::NullISN", BooleanValue(false));
-  Config::SetDefault ("ns3::TcpSocket::SegmentSize", UintegerValue (1448));
+  //! lowered segment size else I had ip fragmentation with wireshark bugs (have to make the dissector more robust)
+  Config::SetDefault ("ns3::TcpSocket::SegmentSize", UintegerValue (1460));
 
   // choose congestion control
   // Setup node
-
-
+  /**
+   In other words, the more statistically rigorous way 
+   to configure multiple independent replications is to use a fixed seed and to advance the run number. 
+   https://www.nsnam.org/docs/manual/html/random-variables.html
+  **/
+  RngSeedManager::SetSeed (3);  // Changes seed from default of 1 to 3
+//  RngSeedManager::SetRun (7);   // Changes run number from default of 1 to 7
+  NS_LOG_INFO("Seed=" << RngSeedManager::GetSeed());
+  NS_LOG_INFO("Run=" << RngSeedManager::GetRun());
   /** 
   TODO for good simulations, you need to average the results of different runs with different seeds.
   For reproducibility, put the seed into a file.
@@ -546,7 +554,10 @@ if(clientStack == "ns3") etc...
   // debug
 
 //  linuxStack.SysctlSet (linuxStackNodes, ".net.mptcp.mptcp_debug", "1");
-  linuxStack.SysctlSet ( linuxStackNodes, ".kernel.printk", "8 4 8 1");
+/* The four values in printk denote: 
+  console_loglevel, default_message_loglevel, minimum_console_loglevel and default_console_loglevel respectively.
+  */
+  linuxStack.SysctlSet ( linuxStackNodes, ".kernel.printk", "0 4 8 1");
   // for the router
 //  net.ipv4.conf.all.forwarding
 
