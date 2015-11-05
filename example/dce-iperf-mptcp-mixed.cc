@@ -280,8 +280,12 @@ int main (int argc, char *argv[])
 //  Config::SetDefault ("ns3::MpTcpSocketBase::Scheduler", BooleanValue(true));
   Config::SetDefault ("ns3::TcpSocketBase::EnableMpTcp", BooleanValue(true));
   Config::SetDefault ("ns3::TcpSocketBase::NullISN", BooleanValue(false));
-  //! lowered segment size else I had ip fragmentation with wireshark bugs (have to make the dissector more robust)
-  Config::SetDefault ("ns3::TcpSocket::SegmentSize", UintegerValue (1460));
+  /**
+  WARNING
+   lowered segment size else I had ip fragmentation with wireshark bugs (have to make the dissector more robust)
+  is that taken into account by DCE+linux ?
+  **/
+  Config::SetDefault ("ns3::TcpSocket::SegmentSize", UintegerValue (1400));
 
   // choose congestion control
   // Setup node
