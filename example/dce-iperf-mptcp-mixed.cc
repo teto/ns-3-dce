@@ -16,6 +16,7 @@ unedefine XP  if you want to compile this test with ns3 master
 #define XP
 #ifdef XP
 #include "ns3/mptcp-scheduler.h"
+#include "ns3/tcp-trace-helper.h"
 #endif
 using namespace ns3;
 
@@ -47,9 +48,12 @@ onClientConnect(Ptr<Socket> socket)
 {
   NS_LOG_UNCOND("ALLELUIA !!");
     #ifdef XP
+  TcpTraceHelper helper;
+
+  
   Ptr<MpTcpSocketBase> m_metaClient = DynamicCast<MpTcpSocketBase>(socket);
   NS_ASSERT_MSG(m_metaClient, "The passed socket should be the MPTCP meta socket");
-
+  helper.SetupSocketTracing(m_metaClient, "xp");
 
   // only if fully established can you create new subflows
   if (!m_metaClient->FullyEstablished())

@@ -218,6 +218,7 @@ LinuxSocketImpl::GetSocketType (void) const
     default:
         break;
     }
+    
 }
 
 uint16_t

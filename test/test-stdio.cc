@@ -64,7 +64,7 @@ static void test_fopen (void)
 
 static void test_freadwrite (void)
 {
-  char buffer[] = {
+  unsigned char buffer[] = {
     0xff, 0xfe, 0xfd, 0x00,
     0x02, 0x05, 0x12, 0x15
   };
@@ -157,7 +157,7 @@ void test_seek (void)
   // cleanup
   unlink ("X");
   // let's write a file
-  char buffer[] = {
+  unsigned char buffer[] = {
     0xff, 0xfe, 0xfd, 0x00,
     0x02, 0x05, 0x12, 0x15
   };
