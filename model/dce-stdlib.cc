@@ -129,7 +129,8 @@ int dce_mkstemp (char *temp)
 }
 
 FILE * dce_tmpfile(void) {
-	int fd = dce_mkstemp ("temp");
+    char filename[] = "temp";
+	int fd = dce_mkstemp (filename);
   	return dce_fdopen(fd, "w+");
 }
 

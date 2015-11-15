@@ -84,6 +84,11 @@ DceManagerHelper::SetLoader (std::string type)
   m_loaderFactory.SetTypeId (type);
 }
 void
+DceManagerHelper::SetNetworkStackAttribute(std::string n0, const AttributeValue &v0)
+{
+  m_networkStackFactory.Set (n0, v0);
+}
+void
 DceManagerHelper::SetNetworkStack (std::string type,
                                    std::string n0, const AttributeValue &v0)
 {

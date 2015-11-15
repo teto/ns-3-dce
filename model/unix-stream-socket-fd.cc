@@ -417,6 +417,13 @@ UnixStreamSocketFd::ConnectionCreated (Ptr<Socket> sock, const Address & from)
 {
   NS_LOG_FUNCTION (sock << from);
   NS_ASSERT (((int)m_connectionQueue.size ()) < m_backlog);
+  
+
+  if(!m_onSocketCreation.IsNull()) {
+    NS_LOG_DEBUG("calling on success callback");
+    m_onSocketCreation(sock, from);
+  }
+  
   m_connectionQueue.push_back (std::make_pair (sock, from));
 
   int pi = POLLIN;

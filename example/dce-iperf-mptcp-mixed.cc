@@ -13,7 +13,7 @@
 /**
 unedefine XP  if you want to compile this test with ns3 master
 **/
-#define XP
+//#define XP
 #ifdef XP
 #include "ns3/mptcp-scheduler.h"
 #include "ns3/tcp-trace-helper.h"
@@ -43,17 +43,69 @@ TODO write a path manager in case it is an ns3 client
 
 **/
 
+#ifdef XP
+void
+onSubflowEstablishement(Ptr<MpTcpSubflow> subflow)
+{
+    //!
+    NS_LOG_UNCOND("Subflow connected");
+    NS_ASSERT(subflow);
+    static int counter = 0;
+    std::ostringstream oss;
+    oss << "client/subflow" << counter++;
+    subflow->SetupTracing(oss.str());
+}
+
+
+#endif // XP
+
+
+void
+onServerCreation(Ptr<Socket> sock, const Address & from)
+{
+    NS_LOG_UNCOND("EUREKA  Server created !!");
+    #ifdef XP
+    //! start tracing
+  TcpTraceHelper helper;
+
+  
+  Ptr<MpTcpSocketBase> server = DynamicCast<MpTcpSocketBase>(sock);
+
+  /* */
+  NS_ASSERT_MSG(server, "The passed socket should be the MPTCP meta socket");
+
+ // TODO enable tracing straightaway
+//  helper.SetupSocketTracing(m_metaClient, "client/");
+  server->SetupTracing("server/meta");
+  // Connect to created subflow
+//  server->SetSubflowConnectCallback(
+    #endif // XP
+}
+
 void
 onClientConnect(Ptr<Socket> socket)
 {
-  NS_LOG_UNCOND("ALLELUIA !!");
+  NS_LOG_UNCOND("EUREKA Client connected !!");
     #ifdef XP
   TcpTraceHelper helper;
 
   
   Ptr<MpTcpSocketBase> m_metaClient = DynamicCast<MpTcpSocketBase>(socket);
+
+  /* */
   NS_ASSERT_MSG(m_metaClient, "The passed socket should be the MPTCP meta socket");
-  helper.SetupSocketTracing(m_metaClient, "xp");
+
+ // TODO enable tracing straightaway
+//  helper.SetupSocketTracing(m_metaClient, "client/");
+  m_metaClient->SetupTracing("client/meta");
+  // TODO it should trigger this even for master !
+//  m_metaClient->GetSubflow(0)->SetupSocketTracing("client/subflow0")
+  m_metaClient->SetSubflowConnectCallback(
+//                    MakeBoundCallback(&onSubflowEstablishement, "client/"),
+                    MakeCallback(&onSubflowEstablishement),
+                    MakeNullCallback<void, Ptr<MpTcpSubflow> >()
+                                          );
+  //! Enable tracing on new Subflow as always
 
   // only if fully established can you create new subflows
   if (!m_metaClient->FullyEstablished())
@@ -61,6 +113,7 @@ onClientConnect(Ptr<Socket> socket)
     NS_LOG_UNCOND("Meta not fully established yet !!");
     return;
   }
+
 
 
   NS_LOG_LOGIC("Meta fully established, Creating subflows");
@@ -168,6 +221,7 @@ PrintRouterTable(Ptr<Ipv4DceRouting> routing, Ptr<OutputStreamWrapper> stream)
 void
 setupNsNodes(NodeContainer nodes)
 {
+    #ifdef XP
 //    TypeId sched, algTypeId;
     std::string sched_name;
     std::string alg_name;
@@ -190,7 +244,7 @@ setupNsNodes(NodeContainer nodes)
 //    NS_ASSERT_MSG( );
 
     // Setuup congestion control
-
+    // Fix this !
     if(congestionAlg == "lia") {
         alg_name= "ns3::MpTcpSchedulerRoundRobin";
     }
@@ -208,6 +262,7 @@ setupNsNodes(NodeContainer nodes)
 
     Config::SetDefault ("ns3::MpTcpSocketBase::Scheduler", TypeIdValue(schedulerTypeId));
     Config::SetDefault ("ns3::TcpL4Protocol::SocketType", TypeIdValue(algTypeId));
+    #endif
 }
 
 void
@@ -263,8 +318,8 @@ int main (int argc, char *argv[])
   Ptr<Ipv4StaticRouting> clientRouting;
 
   cmd.AddValue ("nRtrs", "Number of routers. Default 2", nRtrs);
-  cmd.AddValue ("clientStack", "Clientstack. Default ", MakeBoundCallback(&setupStackType, &client_stack) );
-  cmd.AddValue ("serverStack", "ServerStack. Default ", MakeBoundCallback(&setupStackType, &server_stack));
+  cmd.AddValue ("client_stack", "Clientstack. Default ", MakeBoundCallback(&setupStackType, &client_stack) );
+  cmd.AddValue ("server_stack", "ServerStack. Default ", MakeBoundCallback(&setupStackType, &server_stack));
   cmd.AddValue ("scheduler", "bufferSize. Default ", scheduler);
   cmd.AddValue ("congestion", "congestion control. Default ", congestionAlg);
   cmd.AddValue ("window", "iperf --window parameter", windowSize);
@@ -282,8 +337,11 @@ int main (int argc, char *argv[])
   // TODO being able to configure Scheduler and congestion control
 
 //  Config::SetDefault ("ns3::MpTcpSocketBase::Scheduler", BooleanValue(true));
+  #ifdef XP
   Config::SetDefault ("ns3::TcpSocketBase::EnableMpTcp", BooleanValue(true));
   Config::SetDefault ("ns3::TcpSocketBase::NullISN", BooleanValue(false));
+  #endif
+
   /**
   WARNING
    lowered segment size else I had ip fragmentation with wireshark bugs (have to make the dissector more robust)
@@ -374,10 +432,13 @@ if(clientStack == "ns3") etc...
   setupLinuxNodes(linuxStack,linuxStackNodes);
 
   /** install in nsStacks **/
-  dceManager.SetNetworkStack ("ns3::Ns3SocketFdFactory",
-      "OnTcpConnect", CallbackValue(MakeCallback(&onClientConnect)));
-
-
+  dceManager.SetNetworkStack ("ns3::Ns3SocketFdFactory");
+  
+  dceManager.SetNetworkStackAttribute("OnTcpConnect", CallbackValue(MakeCallback(&onClientConnect)));
+  // TODO do the same for server on ConnectionCreated !
+//  dceManager.SetNetworkStackAttribute("OnSocketCreation", CallbackValue(MakeCallback(&onServerCreation)));
+  
+  
   InternetStackHelper nsStack;
 //  Ipv4DceRoutingHelper ipv4DceRoutingHelper;
 //  nsStack.SetRoutingHelper (ipv4DceRoutingHelper);
@@ -415,15 +476,19 @@ if(clientStack == "ns3") etc...
       pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("10Mbps"));
 
       pointToPoint.SetChannelAttribute ("Delay", TimeValue( MilliSeconds(forwardOwd[i])) );
+      #ifdef XP
       pointToPoint.SetChannelAttribute ("AlternateDelay", TimeValue( MilliSeconds(backwardOwd[i])));
+      #endif
       devices1 = pointToPoint.Install (clientNode, routerNode);
 
 
        TimeValue t;
         devices1.Get(0)->GetChannel()->GetAttribute("Delay", t);
         std::cout << "BEBE=" << t.Get().As(Time::MS) << std::endl;
+        #ifdef XP
         devices1.Get(0)->GetChannel()->GetAttribute("AlternateDelay", t);
         std::cout << t.Get().As(Time::MS) << std::endl;
+        #endif
 
 
       // Assign ip addresses
@@ -476,13 +541,17 @@ if(clientStack == "ns3") etc...
       // Right link (from server to routers)
       pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("100Mbps"));
       pointToPoint.SetChannelAttribute ("Delay", TimeValue( MilliSeconds(1)) );
+      #ifdef XP
       pointToPoint.SetChannelAttribute ("AlternateDelay", TimeValue( MilliSeconds(1)));
+      #endif
       devices2 = pointToPoint.Install (serverNode, routerNode);
 
       devices2.Get(0)->GetChannel()->GetAttribute("Delay", t);
       std::cout << "BIBI=" << t.Get().As(Time::MS) << std::endl;
+      #ifdef XP
       devices2.Get(0)->GetChannel()->GetAttribute("AlternateDelay", t);
       std::cout << t.Get().As(Time::MS) << std::endl;
+      #endif
 
       // Assign ip addresses
       Ipv4InterfaceContainer if2 = address2.Assign (devices2);
@@ -673,6 +742,10 @@ if(clientStack == "ns3") etc...
   // TODO use --format to choose output
 
   apps = dce.Install ( clientNode );
+  
+  // Otherwise graphs hardly readable
+//  Time::SetResolution (Time::MS);
+
   apps.Start (Seconds (5.0));
   apps.Stop (simMaxDuration);
 

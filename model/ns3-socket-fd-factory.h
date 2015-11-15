@@ -19,6 +19,7 @@ public:
 
 private:
   Callback<void, Ptr<Socket> > m_onTcpConnect;
+  Callback<void, Ptr<Socket>, const Address& > m_onSocketCreation;
   Ptr<SocketFactory> m_netlink;
 };
 

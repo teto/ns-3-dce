@@ -142,6 +142,7 @@ public:
    */
   void SetNetworkStack (std::string type,
                         std::string n0 = "", const AttributeValue &v0 = EmptyAttributeValue ());
+  void SetNetworkStackAttribute(std::string n0, const AttributeValue &v0);
 
   /**
    * \param n1 the name of the attribute to set to the ns3::DceManager

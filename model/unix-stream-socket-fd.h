@@ -13,6 +13,7 @@ public:
   virtual ~UnixStreamSocketFd (void);
   // Addition matt: to handle MPTCP manager
   Callback<void, Ptr<Socket> > m_connectionSuccess;
+  Callback<void, Ptr<Socket>, const Address& > m_onSocketCreation;
 
 private:
   enum State
