@@ -13,11 +13,12 @@
 /**
 unedefine XP  if you want to compile this test with ns3 master
 **/
-//#define XP
+#define XP
 #ifdef XP
 #include "ns3/mptcp-scheduler.h"
 #include "ns3/tcp-trace-helper.h"
 #endif
+
 using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("DceIperfMpTcpMixed");
@@ -56,7 +57,17 @@ onSubflowEstablishement(Ptr<MpTcpSubflow> subflow)
     subflow->SetupTracing(oss.str());
 }
 
-
+void
+onSubflowCreation(Ptr<MpTcpSubflow> subflow)
+{
+    //!
+    NS_LOG_UNCOND("Subflow created");
+    NS_ASSERT(subflow);
+    static int counter = 0;
+    std::ostringstream oss;
+    oss << "server/subflow" << counter++;
+    subflow->SetupTracing(oss.str());
+}
 #endif // XP
 
 
@@ -77,6 +88,15 @@ onServerCreation(Ptr<Socket> sock, const Address & from)
  // TODO enable tracing straightaway
 //  helper.SetupSocketTracing(m_metaClient, "client/");
   server->SetupTracing("server/meta");
+//MpTcpSocketBase::SetSubflowAcceptCallback(
+////  Callback<void, Ptr<MpTcpSubflow> > connectionRequest,
+//  Callback<bool, Ptr<MpTcpSocketBase>, const Address &, const Address & > joinRequest,
+//  Callback<void, Ptr<MpTcpSubflow> > connectionCreated
+//)
+    server->SetSubflowAcceptCallback(
+        MakeNullCallback<bool, Ptr<MpTcpSocketBase>, const Address &, const Address & >(),
+        MakeCallback(&onSubflowCreation)
+    );
   // Connect to created subflow
 //  server->SetSubflowConnectCallback(
     #endif // XP
@@ -158,6 +178,7 @@ static const char* StackTypesStr[] = {
 "ns3",
 "Linux"
 };
+
 
 bool setupStackType(enum StackType *val, std::string newVal)
 {
@@ -335,6 +356,11 @@ int main (int argc, char *argv[])
     cmd.AddValue ( oss.str(), "Backward delay ", backwardOwd[i]);
   }
   // TODO being able to configure Scheduler and congestion control
+  /******************************************
+  *** WARNING: For some reason, changing resolution with SetResolution 
+   breaks tests
+   ***/
+//  Time::SetResolution (Time::MS);
 
 //  Config::SetDefault ("ns3::MpTcpSocketBase::Scheduler", BooleanValue(true));
   #ifdef XP
@@ -436,7 +462,7 @@ if(clientStack == "ns3") etc...
   
   dceManager.SetNetworkStackAttribute("OnTcpConnect", CallbackValue(MakeCallback(&onClientConnect)));
   // TODO do the same for server on ConnectionCreated !
-//  dceManager.SetNetworkStackAttribute("OnSocketCreation", CallbackValue(MakeCallback(&onServerCreation)));
+  dceManager.SetNetworkStackAttribute("OnSocketCreation", CallbackValue(MakeCallback(&onServerCreation)));
   
   
   InternetStackHelper nsStack;
@@ -743,8 +769,7 @@ if(clientStack == "ns3") etc...
 
   apps = dce.Install ( clientNode );
   
-  // Otherwise graphs hardly readable
-//  Time::SetResolution (Time::MS);
+
 
   apps.Start (Seconds (5.0));
   apps.Stop (simMaxDuration);
