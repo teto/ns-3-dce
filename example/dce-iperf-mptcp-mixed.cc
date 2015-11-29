@@ -19,6 +19,11 @@ unedefine XP  if you want to compile this test with ns3 master
 #include "ns3/tcp-trace-helper.h"
 #endif
 
+/*
+
+*/
+#define IPERF3
+
 using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("DceIperfMpTcpMixed");
@@ -37,7 +42,7 @@ std::string congestionAlg = "lia";
 std::string windowSize = "120KB";
 
 // for good simulations put a longer duration here
-const std::string iperfDuration =  "5";
+const std::string iperfDuration =  "10";
 
 /**
 TODO write a path manager in case it is an ns3 client
@@ -499,7 +504,7 @@ if(clientStack == "ns3") etc...
       Ptr<Node> routerNode = routers.Get (i);
 
       // Left link (from client to routers)
-      pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("10Mbps"));
+      pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("2Mbps"));
 
       pointToPoint.SetChannelAttribute ("Delay", TimeValue( MilliSeconds(forwardOwd[i])) );
       #ifdef XP
@@ -565,7 +570,7 @@ if(clientStack == "ns3") etc...
 
 
       // Right link (from server to routers)
-      pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("100Mbps"));
+      pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("2Mbps"));
       pointToPoint.SetChannelAttribute ("Delay", TimeValue( MilliSeconds(1)) );
       #ifdef XP
       pointToPoint.SetChannelAttribute ("AlternateDelay", TimeValue( MilliSeconds(1)));
@@ -758,6 +763,7 @@ if(clientStack == "ns3") etc...
   dce.ResetEnvironment ();
   dce.AddArgument ("-c");
   dce.AddArgument ("10.2.0.1");
+  dce.AddArgument ("--format=m"); // m  stands for Mbps / M for MBps
   dce.AddArgument ("-i");
   dce.AddArgument ("1");
   dce.AddArgument ("--time");
