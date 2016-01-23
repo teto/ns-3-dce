@@ -155,7 +155,13 @@ struct timespec UtilsTimeToTimespec (Time time)
 }
 
 std::string
-UtilsGenerateIfNameFromIndex(uint32_t i) {
+UtilsGenerateIfName (Ptr<NetDevice> device)
+{
+    return "sim%d";
+}
+
+std::string
+UtilsGenerateIfNameFromIndex (uint32_t i) {
     std::stringstream ss;
     ss <<  "ns3-device " << i;
     return ss.str();

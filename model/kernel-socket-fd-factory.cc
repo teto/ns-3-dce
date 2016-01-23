@@ -529,7 +529,7 @@ KernelSocketFdFactory::NotifyAddDeviceTask (Ptr<NetDevice> device)
     }
   m_loader->NotifyStartExecute (); // Restore the memory of the kernel before access it !
 #if ((LIBOS_API_VERSION == 2))
-  struct SimDevice *dev = m_exported->dev_create ("sim%d", PeekPointer (device), (enum SimDevFlags)flags);
+  struct SimDevice *dev = m_exported->dev_create (UtilsGenerateIfName (device), PeekPointer (device), (enum SimDevFlags)flags);
 #else
   struct SimDevice *dev = m_exported->dev_create (PeekPointer (device), (enum SimDevFlags)flags);
 #endif  // LIBOS_API_VERSION

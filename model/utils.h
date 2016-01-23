@@ -68,7 +68,9 @@ std::string UtilsGetCurrentDirName (void);
 /** ns3 does not name interfaces but some applications using netlink expect consistent
  * interface naming hence DCE propose its scheme.
  */
-std::string UtilsGenerateIfNameFromIndex(uint32_t i);
+std::string UtilsGenerateIfNameFromIndex (uint32_t i);
+// TODO replace UtilsGenerateIfNameFromIndex, ensure it's consistant with netlink
+//std::string UtilsGenerateIfName (Ptr<NetDevice> device);
 
 #define MAX_FDS 1024
 
