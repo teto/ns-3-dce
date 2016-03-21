@@ -28,7 +28,7 @@ std::string scheduler = "default";
 std::string congestionAlg = "lia";
 std::string windowSize = "120KB";
 
-// for good simulations put a longer duration here
+// for good simulations put a longer duration here (s)
 const std::string iperfDuration =  "5";
 
 /**
