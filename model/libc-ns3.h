@@ -611,7 +611,7 @@ NATIVE (__cmsg_nxthdr)
 // math.h
 NATIVE (lrintl)
 NATIVE (llrintl)
-NATIVE (ceil)
+NATIVE_EXPLICIT (double, ceil)
 NATIVE (floor)
 
 // dlfcn.h

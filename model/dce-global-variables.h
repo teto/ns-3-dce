@@ -24,6 +24,7 @@
 extern "C" {
 #endif
 
+#include <stdio.h>
 
 struct DceGlobalVariables
 {

@@ -6,10 +6,16 @@
 #include <sys/types.h>
 #undef _SYS_SELECT_H
 
+#include <type_traits>
+#include "dce-global-variables.h"
+
+/**
+ *
+ **/
 struct Libc
 {
 
-#define DCE(name) void (*name ## _fn) (...);
+#define DCE(name) (std::result_of<name>::type)(*name ## _fn) (...);
 
 #define DCET(rtype, name) DCE (name)
 #define NATIVET(rtype, name) NATIVE (name)
