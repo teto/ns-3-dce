@@ -248,6 +248,7 @@ def build_dce_tests(module, bld):
             'test/dce-cradle-test.cc',
             'test/dce-mptcp-test.cc',
             ]
+<<<<<<< HEAD
 
     for dir in os.listdir('test/addons'):
         if dir.startswith('.') or dir == 'CVS':
@@ -255,6 +256,11 @@ def build_dce_tests(module, bld):
         elif dir.endswith(".cc"):
             tests_source += ["test/addons/" + dir]
 
+||||||| merged common ancestors
+        
+=======
+
+>>>>>>> ae27801fa931199dc8a0fc5131369b8e0142b085
     module.add_runner_test(needed=['core', 'dce', 'internet', 'applications'],
                            source=tests_source)
 
@@ -444,12 +450,20 @@ def build_dce_kernel_examples(module, bld):
                        target='bin/dce-iperf-mptcp',
                        source=['example/dce-iperf-mptcp.cc'])
 
+<<<<<<< HEAD
     module.add_example(needed = ['core', 'internet', 'network', 'dce', 'point-to-point', 'mobility'],
                        target='bin/dce-iperf-heterogeneous-multihop',
                        source=['example/dce-iperf-heterogeneous-multihop.cc'])
     module.add_example(needed = ['core', 'network', 'dce', 'point-to-point', 'mobility'],
                        target='bin/dce-iperf-mptcp-mixed',
                        source=['example/dce-iperf-mptcp-mixed.cc'])
+||||||| merged common ancestors
+=======
+    module.add_example(needed = ['core', 'network', 'dce', 'point-to-point', 'mobility'],
+                       target='bin/dce-iperf-mptcp-mixed',
+                       source=['example/dce-iperf-mptcp-mixed.cc'])
+
+>>>>>>> ae27801fa931199dc8a0fc5131369b8e0142b085
     module.add_example(needed = ['core', 'network', 'dce', 'point-to-point', 'mobility', 'applications'],
                        target='bin/dce-cradle-mptcp',
                        source=['example/dce-cradle-mptcp.cc'])

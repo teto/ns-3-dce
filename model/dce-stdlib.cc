@@ -99,12 +99,25 @@ int dce_mkstemp (char *temp)
 
   std::string fullpath = UtilsGetRealFilePath (temp);
   NS_LOG_FUNCTION (fullpath);
+<<<<<<< HEAD
 
   char* c_fullpath = new char[fullpath.length()+1];
   fullpath.copy (c_fullpath, fullpath.length());
   c_fullpath[fullpath.length()] = '\0';
 
   int realFd = mkstemp (c_fullpath);
+||||||| merged common ancestors
+  int realFd = mkstemp ((char *)fullpath.c_str ());
+=======
+//  NS_ASSERT_MSG(strlen());
+  char* c_fullpath = new char[fullpath.length()+1]; // +1 for the null char
+  fullpath.copy(c_fullpath, fullpath.length());
+  c_fullpath[fullpath.length()] = '\0';
+
+  NS_LOG_FUNCTION ( "c_fullpath before=" << c_fullpath);
+  int realFd = mkstemp (c_fullpath);
+  NS_LOG_FUNCTION ( "c_fullpath after=" << c_fullpath);
+>>>>>>> ae27801fa931199dc8a0fc5131369b8e0142b085
   if (realFd == -1)
     {
       current->err = errno;
