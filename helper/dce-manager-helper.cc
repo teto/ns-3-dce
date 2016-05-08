@@ -119,7 +119,6 @@ DceManagerHelper::Install (Ptr<Node> node)
       taskManager->SetDelayModel (delay);
       Ptr<UniformRandomVariable> uv = CreateObject<UniformRandomVariable> ();
       manager->SetAttribute ("FirstPid", UintegerValue (uv->GetInteger (0, 0xffff)));
-      Ptr<Node> node = *i;
       node->AggregateObject (taskManager);
       node->AggregateObject (loader);
       node->AggregateObject (manager);

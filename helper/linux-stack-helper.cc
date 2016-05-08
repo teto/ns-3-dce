@@ -142,7 +142,7 @@ LinuxStackHelper::RunIp (Ptr<Node> node, Time at, std::string str)
   process.SetStackSize (1 << 16);
   process.ResetArguments ();
   process.ParseArguments (str.c_str ());
-  process.SetFinishedCallback(MakeCallback(&IpCompletionHandler));
+//  process.SetFinishedCallback(MakeCallback(&IpCompletionHandler));
   apps = process.Install (node);
   apps.Start (at);
 #endif

@@ -56,7 +56,7 @@ NATIVE (dce_global_variables_setup)
 DCE    (__cxa_finalize)
 DCE    (__cxa_atexit)
 // Not sure where it is defined and implemented
-NATIVE (__gxx_personality_v0)
+//NATIVE (__gxx_personality_v0)
 
 // STDLIB.H
 DCE (atexit)
@@ -612,8 +612,8 @@ NATIVE (__cmsg_nxthdr)
 // math.h
 NATIVE (lrintl)
 NATIVE (llrintl)
-NATIVE (ceil)
-NATIVE (floor)
+NATIVE_EXPLICIT (ceil, double (*)(double))
+NATIVE_EXPLICIT (floor, double (*)(double))
 
 // dlfcn.h
 DCE_WITH_ALIAS2 (dlopen, __dlopen)

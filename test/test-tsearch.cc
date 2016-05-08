@@ -72,7 +72,11 @@ main (void)
         }
       else if ((*(int **) val) != ptr)
         {
-          free (ptr);
+        // Disabled because on gcc 5.3
+//        réadressage R_X86_64_PLTOFF64 sans solution vers le symbole « free@@GLIBC_2.2.5 »
+///usr/bin/ld.bfd.real : échec de l'édition de liens finale : Section non-représentable pour la sortie
+//collect2: error: ld returned 1 exit status
+//          free (ptr);
         }
     }
   twalk (root, action);

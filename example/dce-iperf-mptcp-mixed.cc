@@ -11,6 +11,10 @@
 #include <algorithm>
 #include "ns3/mptcp-scheduler.h"
 
+// Test to get netanim working
+#include "ns3/netanim-module.h"
+#include "ns3/constant-position-mobility-model.h"
+
 using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("DceIperfMpTcpMixed");
@@ -18,6 +22,7 @@ NS_LOG_COMPONENT_DEFINE ("DceIperfMpTcpMixed");
 
 /* global since it is needed
  * in the path manager
+ * TODO tracer les 
  */
 NodeContainer routers;
 Ptr<Node> clientNode;
@@ -31,45 +36,6 @@ std::string windowSize = "120KB";
 // for good simulations put a longer duration here (s)
 const std::string iperfDuration =  "5";
 
-/**
-TODO write a path manager in case it is an ns3 client
-
-**/
-void
-onClientConnect(Ptr<Socket> socket)
-{
-  NS_LOG_UNCOND("ALLELUIA !!");
-
-  Ptr<MpTcpSocketBase> m_metaClient = DynamicCast<MpTcpSocketBase>(socket);
-  NS_ASSERT_MSG(m_metaClient, "The passed socket should be the MPTCP meta socket");
-
-
-  // only if fully established can you create new subflows
-  if (!m_metaClient->FullyEstablished())
-  {
-    NS_LOG_UNCOND("Meta not fully established yet !!");
-    return;
-  }
-
-
-  NS_LOG_LOGIC("Meta fully established, Creating subflows");
-  //! Create additionnal subflows
-  //! i starts at 1 because master is already using that path
-  for (int i = 1; i < routers.GetN(); ++i)
-  {
-        //! 'i+1' because 0 is localhost
-        Ipv4Address serverAddr = serverNode->GetObject<Ipv4>()->GetAddress(i+1, 0).GetLocal();
-        Ipv4Address sourceAddr = clientNode->GetObject<Ipv4>()->GetAddress(i+1, 0).GetLocal();
-
-        //! TODO, we should be able to not specify a port but it seems buggy so for now, let's set a port
-      //  InetSocketAddress local( sourceAddr);
-        InetSocketAddress local(sourceAddr, 0);
-        InetSocketAddress remote(serverAddr, 5001);
-
-        NS_LOG_LOGIC("ConnectNewSubflow from " << local << " to " << remote);
-        m_metaClient->ConnectNewSubflow(local, remote);
-  }
-}
 
 
 
@@ -82,6 +48,7 @@ void setPos (Ptr<Node> n, int x, int y, int z)
 }
 
 
+// TODO replace this with TypeIds
 enum StackType {
 STACK_FREEBSD = 0,
 STACK_NS,
@@ -196,6 +163,8 @@ setupNsNodes(NodeContainer nodes)
 
     Config::SetDefault ("ns3::MpTcpSocketBase::Scheduler", TypeIdValue(schedulerTypeId));
     Config::SetDefault ("ns3::TcpL4Protocol::SocketType", TypeIdValue(algTypeId));
+    CallbackValue cbValue = MakeCallback (&TcpTraceHelper::OnNewSocket);
+    Config::SetDefault ("ns3::TcpL4Protocol::OnNewSocket", cbValue);
 }
 
 void
@@ -337,8 +306,10 @@ if(clientStack == "ns3") etc...
                                       StringValue ("UcontextFiberManager"));
 
   /** Install the linux stack **/
-  dceManager.SetNetworkStack ("ns3::LinuxSocketFdFactory",
-                              "Library", StringValue ("liblinux.so"));
+//  dceManager.SetNetworkStack ("ns3::LinuxSocketFdFactory", "Library", StringValue ("liblinux.so"));
+  dceManager.SetNetworkStack ("ns3::LinuxSocketFdFactory", "Library", 
+//  StringValue ("libsim-linux-4.1.0.so"));
+  StringValue ("liblinux.so"));
   LinuxStackHelper linuxStack;
   // TODO don't install it there
 //  linuxStack.Install (clientNode);
@@ -351,7 +322,7 @@ if(clientStack == "ns3") etc...
 
   /** install in nsStacks **/
   dceManager.SetNetworkStack ("ns3::Ns3SocketFdFactory",
-      "OnTcpConnect", CallbackValue(MakeCallback(&onClientConnect)));
+      "OnTcpConnect", CallbackValue(MakeCallback(&TcpTraceHelper::OnNewSocket)));
 
 
   InternetStackHelper nsStack;
@@ -380,6 +351,10 @@ if(clientStack == "ns3") etc...
   clientRouting = GetRouting(clientNode, client_stack);
   Ptr<OutputStreamWrapper> stream = Create<OutputStreamWrapper>("rttables", std::ios::out);
 
+  // TODO
+//  setPos (m_serverNode, 0,0,0);
+//  setPos (m_sourceNode, 100,0,0);
+
   // configure routers
   for (uint32_t i = 0; i < nRtrs; i++)
     {
@@ -391,7 +366,7 @@ if(clientStack == "ns3") etc...
       pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("10Mbps"));
 
       pointToPoint.SetChannelAttribute ("Delay", TimeValue( MilliSeconds(forwardOwd[i])) );
-      pointToPoint.SetChannelAttribute ("AlternateDelay", TimeValue( MilliSeconds(backwardOwd[i])));
+//      pointToPoint.SetChannelAttribute ("AlternateDelay", TimeValue( MilliSeconds(backwardOwd[i])));
       devices1 = pointToPoint.Install (clientNode, routerNode);
 
 
@@ -622,7 +597,9 @@ if(clientStack == "ns3") etc...
   dce.AddArgument ( oss.str());   // size of Rcv or send buffer
   apps = dce.Install ( serverNode );
   #endif
+  
   /* use the same name as dce-iperf-mptcp to ease postprocessing */
+  // TODO generate a better name
   pointToPoint.EnablePcapAll ("iperf-mptcp", false);
 
   apps.Start (Seconds (4));
