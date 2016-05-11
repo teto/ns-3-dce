@@ -34,7 +34,7 @@ std::string congestionAlg = "lia";
 std::string windowSize = "120KB";
 
 // for good simulations put a longer duration here (s)
-const std::string iperfDuration =  "5";
+const std::string iperfDuration =  "60";
 
 
 
@@ -147,10 +147,11 @@ setupNsNodes(NodeContainer nodes)
     // Setuup congestion control
 
     if(congestionAlg == "lia") {
-        alg_name= "ns3::MpTcpSchedulerRoundRobin";
+//        alg_name= "ns3::MpTcpCongestionLia";
+        alg_name= "ns3::TcpNewReno";
     }
 //    else if(scheduler == "olia") {
-//        alg_name="ns3::MpTcpSchedulerFastestRTT";
+//        alg_name="ns3::MpTcp";
 //    }
     else {
         // TODO replace this check by one of the following one
@@ -195,6 +196,7 @@ TOPOLOGY:
 
 Client (10.1.X.1, in files-0)  ------------- (10.1.X.2) nbRtrs Routers (10.2.X.2) -------- ((10.2.X.1) Server (in files-1)
 
+In Iperf the client sends the data to the server
 
 SO_SNDBUF
 SO_RCVBUF
