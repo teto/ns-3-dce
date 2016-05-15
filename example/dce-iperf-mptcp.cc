@@ -111,7 +111,7 @@ int main (int argc, char *argv[])
 
   // debug
   stack.SysctlSet (nodes, ".net.mptcp.mptcp_debug", "1");
-  stack.SysctlSet (nodes, ".kernel.printk", "8 4 8 1");
+  stack.SysctlSet (nodes, ".kernel.printk", "0 4 8 1");
 //  stack.SysctlSet (nodes, ".net.mptcp.syn_retries", "1");
 
   DceApplicationHelper dce;
@@ -160,7 +160,7 @@ int main (int argc, char *argv[])
   dce.AddArgument ("--time");
   dce.AddArgument ("10");
 //  dce.AddArgument ("--bind=10.1.0.1");  // TODO get address programmatacilly from clientNode
-  dce.AddArgument ("--reportstyle=C");  // To export as CSV
+//  dce.AddArgument ("--reportstyle=C");  // To export as CSV
 
   apps = dce.Install (nodes.Get (0));
   apps.Start (Seconds (5.0));
@@ -171,8 +171,8 @@ int main (int argc, char *argv[])
   dce.ResetArguments ();
   dce.ResetEnvironment ();
   dce.AddArgument ("-s");
-  dce.AddArgument ("-P");
-  dce.AddArgument ("1");
+//  dce.AddArgument ("--bind=10.2.0.1");  // TODO get address programmatacilly from clientNode
+  dce.AddArgument ("--parallel=1");
 
 
   #endif

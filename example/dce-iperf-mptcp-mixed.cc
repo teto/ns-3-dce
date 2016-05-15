@@ -9,7 +9,20 @@
 #include "ns3/ip-program-dce-routing.h"
 #include "ns3/constant-position-mobility-model.h"
 #include <algorithm>
+
+/**
+unedefine XP  if you want to compile this test with ns3 master
+**/
+#define XP
+#ifdef XP
 #include "ns3/mptcp-scheduler.h"
+#include "ns3/tcp-trace-helper.h"
+#endif
+
+/*
+
+*/
+#define IPERF3
 
 // Test to get netanim working
 #include "ns3/netanim-module.h"
@@ -43,11 +56,27 @@ const std::string iperfDuration =  "20";
 void
 onClientConnect(Ptr<Socket> socket)
 {
-  NS_LOG_UNCOND("ALLELUIA !!");
+  NS_LOG_UNCOND("EUREKA Client connected !!");
+    #ifdef XP
+  TcpTraceHelper helper;
 
+  
   Ptr<MpTcpSocketBase> m_metaClient = DynamicCast<MpTcpSocketBase>(socket);
+
+  /* */
   NS_ASSERT_MSG(m_metaClient, "The passed socket should be the MPTCP meta socket");
 
+ // TODO enable tracing straightaway
+//  helper.SetupSocketTracing(m_metaClient, "client/");
+//  m_metaClient->SetupTracing("client/meta");
+  // TODO it should trigger this even for master !
+//  m_metaClient->GetSubflow(0)->SetupSocketTracing("client/subflow0")
+//  m_metaClient->SetSubflowConnectCallback(
+////                    MakeBoundCallback(&onSubflowEstablishement, "client/"),
+//                    MakeCallback(&onSubflowEstablishement),
+//                    MakeNullCallback<void, Ptr<MpTcpSubflow> >()
+//                                          );
+  //! Enable tracing on new Subflow as always
 
   // only if fully established can you create new subflows
   if (!m_metaClient->FullyEstablished())
@@ -55,6 +84,7 @@ onClientConnect(Ptr<Socket> socket)
     NS_LOG_UNCOND("Meta not fully established yet !!");
     return;
   }
+
 
 
   NS_LOG_LOGIC("Meta fully established, Creating subflows");
@@ -74,6 +104,7 @@ onClientConnect(Ptr<Socket> socket)
         NS_LOG_LOGIC("ConnectNewSubflow from " << local << " to " << remote);
         m_metaClient->ConnectNewSubflow(local, remote);
   }
+  #endif
 }
 
 
@@ -99,6 +130,7 @@ static const char* StackTypesStr[] = {
 "ns3",
 "Linux"
 };
+
 
 bool setupStackType(enum StackType *val, std::string newVal)
 {
@@ -162,6 +194,7 @@ PrintRouterTable(Ptr<Ipv4DceRouting> routing, Ptr<OutputStreamWrapper> stream)
 void
 setupNsNodes(NodeContainer nodes)
 {
+    #ifdef XP
 //    TypeId sched, algTypeId;
     std::string sched_name;
     std::string alg_name;
@@ -184,7 +217,7 @@ setupNsNodes(NodeContainer nodes)
 //    NS_ASSERT_MSG( );
 
     // Setuup congestion control
-
+    // Fix this !
     if(congestionAlg == "lia") {
 //        alg_name= "ns3::MpTcpCongestionLia";
         alg_name= "ns3::TcpNewReno";
@@ -205,6 +238,7 @@ setupNsNodes(NodeContainer nodes)
     Config::SetDefault ("ns3::TcpL4Protocol::SocketType", TypeIdValue(algTypeId));
     CallbackValue cbValue = MakeCallback (&TcpTraceHelper::OnNewSocket);
     Config::SetDefault ("ns3::TcpL4Protocol::OnNewSocket", cbValue);
+    #endif
 }
 
 void
@@ -261,8 +295,8 @@ int main (int argc, char *argv[])
   Ptr<Ipv4StaticRouting> clientRouting;
 
   cmd.AddValue ("nRtrs", "Number of routers. Default 2", nRtrs);
-  cmd.AddValue ("clientStack", "Clientstack. Default ", MakeBoundCallback(&setupStackType, &client_stack) );
-  cmd.AddValue ("serverStack", "ServerStack. Default ", MakeBoundCallback(&setupStackType, &server_stack));
+  cmd.AddValue ("client_stack", "Clientstack. Default ", MakeBoundCallback(&setupStackType, &client_stack) );
+  cmd.AddValue ("server_stack", "ServerStack. Default ", MakeBoundCallback(&setupStackType, &server_stack));
   cmd.AddValue ("scheduler", "bufferSize. Default ", scheduler);
   cmd.AddValue ("congestion", "congestion control. Default ", congestionAlg);
   cmd.AddValue ("window", "iperf --window parameter", windowSize);
@@ -278,16 +312,36 @@ int main (int argc, char *argv[])
     cmd.AddValue ( oss.str(), "Backward delay ", backwardOwd[i]);
   }
   // TODO being able to configure Scheduler and congestion control
+  /******************************************
+  *** WARNING: For some reason, changing resolution with SetResolution 
+   breaks tests
+   ***/
+//  Time::SetResolution (Time::MS);
 
 //  Config::SetDefault ("ns3::MpTcpSocketBase::Scheduler", BooleanValue(true));
+  #ifdef XP
   Config::SetDefault ("ns3::TcpSocketBase::EnableMpTcp", BooleanValue(true));
   Config::SetDefault ("ns3::TcpSocketBase::NullISN", BooleanValue(false));
-  Config::SetDefault ("ns3::TcpSocket::SegmentSize", UintegerValue (1448));
+  #endif
+
+  /**
+  WARNING
+   lowered segment size else I had ip fragmentation with wireshark bugs (have to make the dissector more robust)
+  is that taken into account by DCE+linux ?
+  **/
+  Config::SetDefault ("ns3::TcpSocket::SegmentSize", UintegerValue (1400));
 
   // choose congestion control
   // Setup node
-
-
+  /**
+   In other words, the more statistically rigorous way 
+   to configure multiple independent replications is to use a fixed seed and to advance the run number. 
+   https://www.nsnam.org/docs/manual/html/random-variables.html
+  **/
+  RngSeedManager::SetSeed (3);  // Changes seed from default of 1 to 3
+//  RngSeedManager::SetRun (7);   // Changes run number from default of 1 to 7
+  NS_LOG_INFO("Seed=" << RngSeedManager::GetSeed());
+  NS_LOG_INFO("Run=" << RngSeedManager::GetRun());
   /** 
   TODO for good simulations, you need to average the results of different runs with different seeds.
   For reproducibility, put the seed into a file.
@@ -367,6 +421,17 @@ if(clientStack == "ns3") etc...
  "OnTcpConnect", CallbackValue(MakeCallback(&onClientConnect)));
 
 
+  dceManager.SetNetworkStack ("ns3::Ns3SocketFdFactory",
+      "OnTcpConnect", CallbackValue(MakeCallback(&onClientConnect)));
+
+
+  dceManager.SetNetworkStack ("ns3::Ns3SocketFdFactory");
+  
+  dceManager.SetNetworkStackAttribute("OnTcpConnect", CallbackValue(MakeCallback(&onClientConnect)));
+  // TODO do the same for server on ConnectionCreated !
+//  dceManager.SetNetworkStackAttribute("OnSocketCreation", CallbackValue(MakeCallback(&onServerCreation)));
+  
+  
   InternetStackHelper nsStack;
 //  Ipv4DceRoutingHelper ipv4DceRoutingHelper;
 //  nsStack.SetRoutingHelper (ipv4DceRoutingHelper);
@@ -405,87 +470,130 @@ if(clientStack == "ns3") etc...
       Ptr<Node> routerNode = routers.Get (i);
 
       // Left link (from client to routers)
-      pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("10Mbps"));
+      pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("2Mbps"));
 
       pointToPoint.SetChannelAttribute ("Delay", TimeValue( MilliSeconds(forwardOwd[i])) );
 //      pointToPoint.SetChannelAttribute ("AlternateDelay", TimeValue( MilliSeconds(backwardOwd[i])));
+      #ifdef XP
+      pointToPoint.SetChannelAttribute ("AlternateDelay", TimeValue( MilliSeconds(backwardOwd[i])));
+      #endif
       devices1 = pointToPoint.Install (clientNode, routerNode);
 
 
        TimeValue t;
         devices1.Get(0)->GetChannel()->GetAttribute("Delay", t);
         std::cout << "BEBE=" << t.Get().As(Time::MS) << std::endl;
+        #ifdef XP
         devices1.Get(0)->GetChannel()->GetAttribute("AlternateDelay", t);
         std::cout << t.Get().As(Time::MS) << std::endl;
+        #endif
 
 
       // Assign ip addresses
       Ipv4InterfaceContainer if1 = address1.Assign (devices1);
       address1.NewNetwork ();
-      // setup ip routes
-//      cmd_oss.str ("");
-//      cmd_oss << "rule add from " << if1.GetAddress (0, 0) << " table " << (i+1);
-//      LinuxStackHelper::RunIp (clientNode, Seconds (0.1), cmd_oss.str ().c_str ());
-//      cmd_oss.str ("");
-//      cmd_oss << "route add 10.1." << i << ".0/24 dev sim" << i << " scope link table " << (i+1);
-//      LinuxStackHelper::RunIp (clientNode, Seconds (0.1), cmd_oss.str ().c_str ());
+      /* setup ip routes between client and router */
       int clientInterface = if1.Get(0).second;  // instead of i
       int routerIf = if1.Get(1).second;  // instead of i
 
-      cmd_oss.str ("");
-      cmd_oss << "10.1." << i << ".0";
-      clientRouting->AddNetworkRouteTo(Ipv4Address(cmd_oss.str().c_str()), Ipv4Mask("/24"), clientInterface);
+      switch(client_stack) {
+      case STACK_LINUX:
+          cmd_oss.str ("");
+          cmd_oss << "rule add from " << if1.GetAddress (0, 0) << " table " << (i+1);
+          LinuxStackHelper::RunIp (clientNode, Seconds (0.1), cmd_oss.str ().c_str ());
+          cmd_oss.str ("");
+          cmd_oss << "route add 10.1." << i << ".0/24 dev sim" << i << " scope link table " << (i+1);
+          LinuxStackHelper::RunIp (clientNode, Seconds (0.1), cmd_oss.str ().c_str ());
+          cmd_oss.str ("");
+          cmd_oss << "route add default via " << if1.GetAddress (1, 0) << " dev sim" << i << " table " << (i+1);
+          LinuxStackHelper::RunIp (clientNode, Seconds (0.1), cmd_oss.str ().c_str ());
+          break;
 
-      cmd_oss.str ("");
+      case STACK_NS:
+          cmd_oss.str ("");
+          cmd_oss << "10.1." << i << ".0";
+          clientRouting->AddNetworkRouteTo(Ipv4Address(cmd_oss.str().c_str()), Ipv4Mask("/24"), clientInterface);
+          cmd_oss.str ("");
 //      cmd_oss << "route add default via " << if1.GetAddress (1, 0) << " dev sim" << i << " table " << (i+1);
 //      LinuxStackHelper::RunIp (clientNode, Seconds (0.1), cmd_oss.str ().c_str ());
-      clientRouting->SetDefaultRoute(if1.GetAddress (1, 0), clientInterface);
+          clientRouting->SetDefaultRoute(if1.GetAddress (1, 0), clientInterface);
+          break;
 
-      /* setup routers routing */
-      Ptr<Ipv4> ipv4Router = serverNode->GetObject<Ipv4> ();
-      routerRouting = GetRouting(routerNode, router_stack);
+        default:
+            NS_FATAL_ERROR("Unsupported stack");
+      };
 
+      /* setup routers routing router always runs linux*/
       cmd_oss.str ("");
       cmd_oss << "route add 10.1."<< i <<".0/24 via " << if1.GetAddress (1, 0) << " dev sim0";
-      LinuxStackHelper::RunIp (routers.Get (i), Seconds (0.2), cmd_oss.str ().c_str ());
-//
+      LinuxStackHelper::RunIp (routerNode, Seconds (0.2), cmd_oss.str ().c_str ());
+//      Ptr<Ipv4> ipv4Router = serverNode->GetObject<Ipv4> ();
+//      routerRouting = GetRouting(routerNode, router_stack);
+
+
 //      cmd_oss.str ("");
 //      cmd_oss << "10.1." << i << ".0";
 //      routerRouting->AddNetworkRouteTo(Ipv4Address(cmd_oss.str().c_str()), Ipv4Mask("/24"), routerIf);
 
 
       // Right link (from server to routers)
-      pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("100Mbps"));
+      pointToPoint.SetDeviceAttribute ("DataRate", StringValue ("2Mbps"));
       pointToPoint.SetChannelAttribute ("Delay", TimeValue( MilliSeconds(1)) );
+      #ifdef XP
       pointToPoint.SetChannelAttribute ("AlternateDelay", TimeValue( MilliSeconds(1)));
+      #endif
       devices2 = pointToPoint.Install (serverNode, routerNode);
 
-        devices2.Get(0)->GetChannel()->GetAttribute("Delay", t);
-        std::cout << "BIBI=" << t.Get().As(Time::MS) << std::endl;
-        devices2.Get(0)->GetChannel()->GetAttribute("AlternateDelay", t);
-        std::cout << t.Get().As(Time::MS) << std::endl;
+      devices2.Get(0)->GetChannel()->GetAttribute("Delay", t);
+      std::cout << "BIBI=" << t.Get().As(Time::MS) << std::endl;
+      #ifdef XP
+      devices2.Get(0)->GetChannel()->GetAttribute("AlternateDelay", t);
+      std::cout << t.Get().As(Time::MS) << std::endl;
+      #endif
 
       // Assign ip addresses
       Ipv4InterfaceContainer if2 = address2.Assign (devices2);
       address2.NewNetwork ();
-      // setup ip routes
-//      cmd_oss.str ("");
-//      cmd_oss << "rule add from " << if2.GetAddress (0, 0) << " table " << (i+1);
-//      LinuxStackHelper::RunIp (serverNode, Seconds (0.1), cmd_oss.str ().c_str ());
-      cmd_oss.str ("");
-      cmd_oss << "10.2." << i << ".0";
 
-    //      cmd_oss << "route add 10.2." << i << ".0/24 dev sim" << i << " scope link table " << (i+1);
-    //      LinuxStackHelper::RunIp (serverNode, Seconds (0.1), cmd_oss.str ().c_str ());
+
       int serverIf = if2.Get(0).second;
       routerIf = if2.Get(1).second;
-      serverRouting->AddNetworkRouteTo(Ipv4Address(cmd_oss.str().c_str()), Ipv4Mask("/24"), serverIf);
+      
 
+      /* setup ip routes between router and server */
+      switch(server_stack)
+      {
+        case STACK_LINUX:
+          cmd_oss.str ("");
+          cmd_oss << "rule add from " << if2.GetAddress (0, 0) << " table " << (i+1);
+          LinuxStackHelper::RunIp (serverNode, Seconds (0.1), cmd_oss.str ().c_str ());
+          cmd_oss.str ("");
+          cmd_oss << "route add 10.2." << i << ".0/24 dev sim" << i << " scope link table " << (i+1);
+          LinuxStackHelper::RunIp (serverNode, Seconds (0.1), cmd_oss.str ().c_str ());
+          cmd_oss.str ("");
+          cmd_oss << "route add default via " << if2.GetAddress (1, 0) << " dev sim" << i << " table " << (i+1);
+          LinuxStackHelper::RunIp (serverNode, Seconds (0.1), cmd_oss.str ().c_str ());
+          break;
 
+        case STACK_NS:
     //      cmd_oss.str ("");
     //      cmd_oss << "route add default via " << if2.GetAddress (1, 0) << " dev sim" << i << " table " << (i+1);
     //      LinuxStackHelper::RunIp (serverNode, Seconds (0.1), cmd_oss.str ().c_str ());
-      serverRouting->SetDefaultRoute(if2.GetAddress (1, 0), serverIf);
+            cmd_oss.str ("");
+            cmd_oss << "10.2." << i << ".0";
+            serverRouting->AddNetworkRouteTo(Ipv4Address(cmd_oss.str().c_str()), Ipv4Mask("/24"), serverIf);
+            serverRouting->SetDefaultRoute(if2.GetAddress (1, 0), serverIf);
+            break;
+        default:
+            NS_FATAL_ERROR("Unsupported stack");
+      };
+
+
+    /*  */
+    cmd_oss.str ("");
+    cmd_oss << "route add 10.2."<< i <<".0/24 via " << if2.GetAddress (1, 0) << " dev sim1";
+    LinuxStackHelper::RunIp (routerNode, Seconds (0.2), cmd_oss.str ().c_str ());
+
 
 
      #if 0
@@ -499,9 +607,6 @@ if(clientStack == "ns3") etc...
                     0                       // metric (optional)
                     );
       #endif
-          cmd_oss.str ("");
-          cmd_oss << "route add 10.2.0.0/16 via " << if2.GetAddress (1, 0) << " dev sim1";
-          LinuxStackHelper::RunIp (routers.Get (i), Seconds (0.2), cmd_oss.str ().c_str ());
 //      routerRouting->AddNetworkRouteTo(Ipv4Address(cmd_oss.str().c_str()),Ipv4Mask("/24"), routerIf);
 
 
@@ -524,11 +629,19 @@ if(clientStack == "ns3") etc...
             );
   }
   #endif
+  
+  if(server_stack == STACK_LINUX) {
+    LinuxStackHelper::RunIp (nodes.Get (1), Seconds (0.1), "route add default via 10.2.0.2 dev sim0");
+  }
+  if(client_stack == STACK_LINUX) {
+    LinuxStackHelper::RunIp (nodes.Get (0), Seconds (0.1), "route add default via 10.1.0.2 dev sim0");
+    LinuxStackHelper::RunIp (nodes.Get (0), Seconds (0.1), "rule show");
+  }
 //  std::ostringstream stream;
-  *stream->GetStream() << "Client " << std::endl;
-  clientRouting->PrintRoutingTable (stream);
-  *stream->GetStream() << "Router " << std::endl;
-  serverRouting->PrintRoutingTable (stream);
+//  *stream->GetStream() << "Client " << std::endl;
+//  clientRouting->PrintRoutingTable(stream);
+//  *stream->GetStream() << "Router " << std::endl;
+//  serverRouting->PrintRoutingTable(stream);
 
 //  for( uint32_t n =0; n < ipv4client->GetNInterfaces(); n++){
 //    for( uint32_t a=0; a < ipv4client->GetNAddresses(n); a++){
@@ -562,8 +675,11 @@ if(clientStack == "ns3") etc...
 
   // debug
 
-  linuxStack.SysctlSet (linuxStackNodes, ".net.mptcp.mptcp_debug", "1");
   linuxStack.SysctlSet ( linuxStackNodes, ".kernel.printk", "8 4 8 1");
+/* The four values in printk denote: 
+  console_loglevel, default_message_loglevel, minimum_console_loglevel and default_console_loglevel respectively.
+  */
+  linuxStack.SysctlSet ( linuxStackNodes, ".kernel.printk", "0 4 8 1");
   // for the router
 //  net.ipv4.conf.all.forwarding
 
@@ -617,6 +733,7 @@ if(clientStack == "ns3") etc...
   dce.ResetEnvironment ();
   dce.AddArgument ("-c");
   dce.AddArgument ("10.2.0.1");
+  dce.AddArgument ("--format=m"); // m  stands for Mbps / M for MBps
   dce.AddArgument ("-i");
   dce.AddArgument ("1");
   dce.AddArgument ("--time");
@@ -627,6 +744,9 @@ if(clientStack == "ns3") etc...
   // TODO use --format to choose output
 
   apps = dce.Install ( clientNode );
+  
+
+
   apps.Start (Seconds (5.0));
   apps.Stop (simMaxDuration);
 

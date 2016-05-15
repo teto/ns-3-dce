@@ -44,6 +44,11 @@ Ns3SocketFdFactory::GetTypeId (void)
   static TypeId tid = TypeId ("ns3::Ns3SocketFdFactory")
     .SetParent<SocketFdFactory> ()
     .AddConstructor<Ns3SocketFdFactory> ()
+    .AddAttribute ("OnSocketCreation",
+                   "Callback to allow user to register call.",
+                   CallbackValue (),
+                   MakeCallbackAccessor (&Ns3SocketFdFactory::m_onSocketCreation),
+                   MakeCallbackChecker ())    
     .AddAttribute ("OnTcpConnect",
                    "Callback invoked whenever an icmp error is received on this socket.",
                    CallbackValue (),
@@ -109,7 +114,9 @@ Ns3SocketFdFactory::CreateSocket (int domain, int type, int protocol)
                            "Install it before using Ns3SocketFdFactory.");
             sock = factory->CreateSocket ();
             UnixStreamSocketFd* temp = new UnixStreamSocketFd (sock);
+            // TODO make it generic ?
             temp->m_connectionSuccess = m_onTcpConnect;
+            temp->m_onSocketCreation = m_onSocketCreation;
             socket = temp;
 //            void, Ptr<Socket>
           } break;
