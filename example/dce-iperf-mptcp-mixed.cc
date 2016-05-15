@@ -34,8 +34,47 @@ std::string congestionAlg = "lia";
 std::string windowSize = "120KB";
 
 // for good simulations put a longer duration here (s)
-const std::string iperfDuration =  "60";
+const std::string iperfDuration =  "20";
 
+
+/**
+ * Some kind of path manager, creates new subflows
+ **/
+void
+onClientConnect(Ptr<Socket> socket)
+{
+  NS_LOG_UNCOND("ALLELUIA !!");
+
+  Ptr<MpTcpSocketBase> m_metaClient = DynamicCast<MpTcpSocketBase>(socket);
+  NS_ASSERT_MSG(m_metaClient, "The passed socket should be the MPTCP meta socket");
+
+
+  // only if fully established can you create new subflows
+  if (!m_metaClient->FullyEstablished())
+  {
+    NS_LOG_UNCOND("Meta not fully established yet !!");
+    return;
+  }
+
+
+  NS_LOG_LOGIC("Meta fully established, Creating subflows");
+  //! Create additionnal subflows
+  //! i starts at 1 because master is already using that path
+  for (int i = 1; i < routers.GetN(); ++i)
+  {
+        //! 'i+1' because 0 is localhost
+        Ipv4Address serverAddr = serverNode->GetObject<Ipv4>()->GetAddress(i+1, 0).GetLocal();
+        Ipv4Address sourceAddr = clientNode->GetObject<Ipv4>()->GetAddress(i+1, 0).GetLocal();
+
+        //! TODO, we should be able to not specify a port but it seems buggy so for now, let's set a port
+      //  InetSocketAddress local( sourceAddr);
+        InetSocketAddress local(sourceAddr, 0);
+        InetSocketAddress remote(serverAddr, 5001);
+
+        NS_LOG_LOGIC("ConnectNewSubflow from " << local << " to " << remote);
+        m_metaClient->ConnectNewSubflow(local, remote);
+  }
+}
 
 
 
@@ -311,7 +350,7 @@ if(clientStack == "ns3") etc...
 //  dceManager.SetNetworkStack ("ns3::LinuxSocketFdFactory", "Library", StringValue ("liblinux.so"));
   dceManager.SetNetworkStack ("ns3::LinuxSocketFdFactory", "Library", 
 //  StringValue ("libsim-linux-4.1.0.so"));
-  StringValue ("liblinux.so"));
+      StringValue ("liblinux.so"));
   LinuxStackHelper linuxStack;
   // TODO don't install it there
 //  linuxStack.Install (clientNode);
@@ -324,7 +363,8 @@ if(clientStack == "ns3") etc...
 
   /** install in nsStacks **/
   dceManager.SetNetworkStack ("ns3::Ns3SocketFdFactory",
-      "OnTcpConnect", CallbackValue(MakeCallback(&TcpTraceHelper::OnNewSocket)));
+//      "OnTcpConnect", CallbackValue(MakeCallback(&TcpTraceHelper::OnNewSocket)));
+ "OnTcpConnect", CallbackValue(MakeCallback(&onClientConnect)));
 
 
   InternetStackHelper nsStack;
@@ -486,9 +526,9 @@ if(clientStack == "ns3") etc...
   #endif
 //  std::ostringstream stream;
   *stream->GetStream() << "Client " << std::endl;
-  clientRouting->PrintRoutingTable(stream);
+  clientRouting->PrintRoutingTable (stream);
   *stream->GetStream() << "Router " << std::endl;
-  serverRouting->PrintRoutingTable(stream);
+  serverRouting->PrintRoutingTable (stream);
 
 //  for( uint32_t n =0; n < ipv4client->GetNInterfaces(); n++){
 //    for( uint32_t a=0; a < ipv4client->GetNAddresses(n); a++){
@@ -522,11 +562,14 @@ if(clientStack == "ns3") etc...
 
   // debug
 
-//  linuxStack.SysctlSet (linuxStackNodes, ".net.mptcp.mptcp_debug", "1");
+  linuxStack.SysctlSet (linuxStackNodes, ".net.mptcp.mptcp_debug", "1");
   linuxStack.SysctlSet ( linuxStackNodes, ".kernel.printk", "8 4 8 1");
   // for the router
 //  net.ipv4.conf.all.forwarding
 
+  LinuxStackHelper::RunIp ( serverNode, Seconds (3), "route");
+  LinuxStackHelper::RunIp ( clientNode, Seconds (3), "route");
+  
   DceApplicationHelper dce;
   ApplicationContainer apps;
 
