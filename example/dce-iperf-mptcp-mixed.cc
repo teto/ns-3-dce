@@ -14,6 +14,7 @@
 unedefine XP  if you want to compile this test with ns3 master
 **/
 #define XP
+
 #ifdef XP
 #include "ns3/mptcp-scheduler.h"
 #include "ns3/tcp-trace-helper.h"
@@ -22,7 +23,7 @@ unedefine XP  if you want to compile this test with ns3 master
 /*
 
 */
-#define IPERF3
+//#define IPERF3
 
 // Test to get netanim working
 #include "ns3/netanim-module.h"
@@ -67,15 +68,9 @@ onClientConnect(Ptr<Socket> socket)
   NS_ASSERT_MSG(m_metaClient, "The passed socket should be the MPTCP meta socket");
 
  // TODO enable tracing straightaway
-//  helper.SetupSocketTracing(m_metaClient, "client/");
-//  m_metaClient->SetupTracing("client/meta");
+
   // TODO it should trigger this even for master !
-//  m_metaClient->GetSubflow(0)->SetupSocketTracing("client/subflow0")
-//  m_metaClient->SetSubflowConnectCallback(
-////                    MakeBoundCallback(&onSubflowEstablishement, "client/"),
-//                    MakeCallback(&onSubflowEstablishement),
-//                    MakeNullCallback<void, Ptr<MpTcpSubflow> >()
-//                                          );
+
   //! Enable tracing on new Subflow as always
 
   // only if fully established can you create new subflows
@@ -772,7 +767,8 @@ if(clientStack == "ns3") etc...
   setPos (clientNode, 0, 20 * (nRtrs - 1) / 2, 0);
   setPos (serverNode, 100, 20 * (nRtrs - 1) / 2, 0);
 
-  Simulator::Stop (simMaxDuration);
+  // Let the time for hte connection to finish 
+  Simulator::Stop (simMaxDuration + Seconds(10));
   Simulator::Run ();
   Simulator::Destroy ();
 
