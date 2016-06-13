@@ -19,7 +19,7 @@ NS_LOG_COMPONENT_DEFINE ("DceIperf");
 //
 //     node 0 (client)       node 1 (server)
 //   +----------------+    +----------------+
-//   |                |    |                |
+//   |     Client     |    |     Server     |
 //   +----------------+    +----------------+
 //   |    10.1.1.1    |    |    10.1.1.2    |
 //   +----------------+    +----------------+
@@ -43,13 +43,13 @@ NS_LOG_COMPONENT_DEFINE ("DceIperf");
 
 
 // duration of the iperf in seconds (s)
-const std::string iperfDuration =  "5";
+const std::string iperfDuration =  "20";
 
 int main (int argc, char *argv[])
 {
   Ptr<Node> clientNode;
   Ptr<Node> serverNode;
-  std::string stack = "ns3";
+  std::string stack = "linux";
   bool useUdp = 0;
   std::string bandWidth = "1m";
   std::string windowSize = "120KB";
@@ -93,7 +93,7 @@ int main (int argc, char *argv[])
 #else
       NS_LOG_ERROR ("Linux kernel stack for DCE is not available. build with dce-linux module.");
       // silently exit
-      return 0;
+      return 1;
 #endif
     }
   else if (stack == "freebsd")
@@ -133,11 +133,6 @@ int main (int argc, char *argv[])
   dce.SetStackSize (1 << 20);
 
 
-  //! 'i+1' because 0 is localhost
-  Ipv4Address serverAddr = serverNode->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
-  Ipv4Address sourceAddr = clientNode->GetObject<Ipv4>()->GetAddress(1, 0).GetLocal();
-//  NS_LOG_UNCOND ("serverAddr=" << serverAddr);
-
   #ifdef IPERF3
   // Setup client on node 0
   dce.SetBinary ("iperf3");
@@ -147,7 +142,6 @@ int main (int argc, char *argv[])
   dce.AddArgument ("10.1.1.2");
   dce.AddArgument ("--interval=1"); // interval between reports
   dce.AddArgument ("--time=10");  // duration of the test
-  //TODO use iperfDuration
   dce.AddArgument ("--verbose");
   dce.AddArgument ("--json");   // export to json
   dce.AddArgument ("--logfile=client.res");  // into this file
@@ -158,13 +152,14 @@ int main (int argc, char *argv[])
   apps.Start (Seconds (5.0));
   apps.Stop (simMaxDuration);
 
-  // Launch iperf server on node 1
+  // Launch iperf server on node 1, listens on 5201 by default
   dce.SetBinary ("iperf3");
   dce.ResetArguments ();
   dce.ResetEnvironment ();
   dce.AddArgument ("--verbose");
-  dce.AddArgument ("--json");   // export to json
-  dce.AddArgument ("--logfile=server.res");  // into this file
+//  dce.AddArgument ("--json");   // export to json
+//  dce.AddArgument ("--logfile=server.res");  // into this file
+  dce.AddArgument ("--bind=10.1.1.2");  //TODO get address programmatacilly from clientNode
   dce.AddArgument ("--server");
   if (useUdp)
   {
@@ -183,10 +178,8 @@ int main (int argc, char *argv[])
   dce.SetBinary ("iperf");
   dce.ResetArguments ();
   dce.ResetEnvironment ();
-  oss.str("");
-  oss << "--client=";
-  serverAddr.Print(oss);
-  dce.AddArgument (oss.str());
+  dce.AddArgument ("--client=10.1.1.2");
+//  dce.AddArgument ("");
   dce.AddArgument ("-i");
   dce.AddArgument ("1");
   dce.AddArgument ("--time");
@@ -204,7 +197,7 @@ int main (int argc, char *argv[])
   dce.ResetArguments ();
   dce.ResetEnvironment ();
   dce.AddArgument ("-s");
-//  dce.AddArgument ("--bind=10.1.1.2");  //TODO get address programmatacilly from clientNode
+  dce.AddArgument ("--bind=10.1.1.2");  //TODO get address programmatacilly from clientNode
   dce.AddArgument ("--parallel=1");
   dce.AddArgument (oss.str());   // size of Rcv or send buffer
   if (useUdp)
@@ -216,8 +209,10 @@ int main (int argc, char *argv[])
 
   pointToPoint.EnablePcapAll ("iperf2-" + stack, false);
   #endif
-
   apps.Start (Seconds (0.6));
+
+
+  
 
   setPos (clientNode, 1, 10, 0);
   setPos (serverNode, 50,10, 0);

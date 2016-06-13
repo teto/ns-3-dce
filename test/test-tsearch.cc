@@ -72,8 +72,7 @@ main (void)
         }
       else if ((*(int **) val) != ptr)
         {
-        // see https://github.com/direct-code-execution/ns-3-dce/issues/46
-        // free (ptr);
+//          free (ptr);
         }
     }
   twalk (root, action);
