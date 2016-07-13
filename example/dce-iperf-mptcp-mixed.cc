@@ -48,7 +48,7 @@ std::string congestionAlg = "lia";
 std::string windowSize = "120KB";
 
 // for good simulations put a longer duration here (s)
-const std::string iperfDuration =  "20";
+const std::string iperfDuration =  "60";
 
 
 /**
@@ -187,7 +187,7 @@ PrintRouterTable(Ptr<Ipv4DceRouting> routing, Ptr<OutputStreamWrapper> stream)
 //NS_LOG_COMPONENT_DEFINE ("DceMpTcpHybrid");
 
 void
-setupNsNodes(NodeContainer nodes)
+setupNsNodes (NodeContainer nodes)
 {
     #ifdef XP
 //    TypeId sched, algTypeId;
@@ -214,8 +214,8 @@ setupNsNodes(NodeContainer nodes)
     // Setuup congestion control
     // Fix this !
     if(congestionAlg == "lia") {
-//        alg_name= "ns3::MpTcpCongestionLia";
-        alg_name= "ns3::TcpNewReno";
+        alg_name= "ns3::MpTcpCongestionLia";
+//        alg_name= "ns3::TcpNewReno";
     }
 //    else if(scheduler == "olia") {
 //        alg_name="ns3::MpTcp";
