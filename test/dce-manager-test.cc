@@ -200,7 +200,7 @@ DceManagerTestSuite::DceManagerTestSuite ()
     {  "test-malloc", 0, "", false, false, NS3_STACK|LINUX_STACK|FREEBSD_STACK},
     {  "test-malloc-2", 0, "", false, false, NS3_STACK|LINUX_STACK|FREEBSD_STACK},
     
-    {  "test-fd-simple", 0, "", false, false, NS3_STACK|LINUX_STACK|FREEBSD_STACK}, // ok
+//    {  "test-fd-simple", 0, "", false, false, NS3_STACK|LINUX_STACK|FREEBSD_STACK}, // ok
     {  "test-strerror", 0, "", false, false, NS3_STACK|LINUX_STACK|FREEBSD_STACK},  //OK 
     {  "test-stdio", 0, "/etc/passwd",false, false, NS3_STACK|LINUX_STACK|FREEBSD_STACK},  // OK
 
@@ -220,7 +220,7 @@ DceManagerTestSuite::DceManagerTestSuite ()
 
     {  "test-poll", 3200, "", true, false, NS3_STACK|LINUX_STACK},  // OK
     {  "test-tcp-socket", 320, "", true, false, LINUX_STACK}, // OK
-//    {  "test-exec", 0, "", false, true, NS3_STACK|LINUX_STACK|FREEBSD_STACK}, // FOIRE
+    {  "test-exec", 0, "", false, true, NS3_STACK|LINUX_STACK|FREEBSD_STACK}, // FOIRE
 
     // OK
     {  "test-raw-socket", 320, "", true, false, NS3_STACK|LINUX_STACK|FREEBSD_STACK},
