@@ -25,7 +25,7 @@ log = logging.getLogger("dce")
 log.setLevel(logging.DEBUG)
 log.addHandler(logging.StreamHandler())
 
-
+API_COVERAGE_CSV = "doc/source/api_cov.csv"
 
 # Parse the c++ file
 # decls = parser.parse([filename], xml_generator_config)
@@ -416,6 +416,8 @@ def main():
             help="Enables -i and -h")
     parser.add_argument('-r','--regen', action="store_true", default=False,
             help="TODO: Disable the cache")
+    parser.add_argument('-d','--write-doc', action="store_true", default=False,
+            help="Write %s.csv" % API_COVERAGE_CSV)
     
     args, unknown = parser.parse_known_args ()
     
@@ -443,6 +445,8 @@ def main():
     # libc-ns3.generated.tmp
     g.generate_wrappers(output, libc_filename, write_headers=args.write_headers or args.write_all, 
             write_impl=args.write_impl or args.write_all)
+    # if args.write_headers or args.write_all: 
+    # if args.write_impl or args.write_all:
 
 if __name__ == "__main__":
     main()

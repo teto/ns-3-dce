@@ -21,6 +21,46 @@ To do this, DCE does a job equivalent to an operating system like:
 3. DCE manages and monitors the execution of processes and handles liberate the memory and close open files when the stop process.
 4. DCE manages the scheduling of the various virtual processes and threads.
 
+
+
+C programs typically rely on a few C libraries such as:
+- the C standard library also called `libc` for system related operations (with functions like "malloc", "free", "printf" etc...)
+- libm for maths operations ("ceil", "floor" ...)
+- libpthread to manage POSIX threads ("pthread_create")
+
+DCE generates `shim` libraries wich aim at providing the same symbols (function names).
+The exhaustive list of symbols supported by DCE is accessible in model/libc-ns3.h.
+Some of these symbols are just wrappers for the original function; these symbols are marked with the macro `NATIVE` (for instance NATIVE(ceil)).
+Other symbols are marked with the macro `DCE` (e.g., `DCE(printf)` ); this means DCE reimplements the function so that it can work in the simulator.
+For instance if you take into consideration the main characteristic of discrete time simulators, it makes sense to override all functions related to time management such as
+gettimeofday or setitimer.
+
+
+Reminder on linking
+------------------------
+
+When compiling a program, it usually relies on external functions such as printf, hence you need to help compiler find these external functions.
+This is achieved via passing -l<sonameofthelibrary> (compilers usually link the libc by default). In case of static linking, the code is copied, while in dynamic linking (the usual one), the list of dependancies is recorded in the binary:
+
+.. code-block:: console 
+    $ LANG=C readelf -a iperf3|grep NEEDED                                                                                                                     
+    0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+
+The previous output shows that the iperf3 binary depends on the libc.so.6 library. 
+The linker will try to locate a library matching the name according to its cache /etc/ld.so.cache. The linker will also search in the paths listed in the environment variable LD_LIBRARY_PATH.
+
+The same is also true for libraries, i.e., libraries can depend on other libraries.
+
+How can DCE override the libc calls ?
+--------------------------------------------------
+
+DCE embeds its own linker.
+
+
+Why not using LD_PRELOAD or ldd --wrap ?
+----------------------------------------
+
+
 Main classes and main data structures
 =====================================
 
