@@ -1,9 +1,6 @@
-checkout:
-
-
-general:
-  artifacts: # save files after tests
-    
+# checkout:
+# general:
+#   artifacts: # save files after tests
 dependencies:
     pre: 
         - sudo apt-get update
