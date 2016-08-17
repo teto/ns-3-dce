@@ -6,18 +6,17 @@ dependencies:
         - sudo apt-get update
         - sudo apt-get install -y mercurial libexpat1-dev git-core build-essential bison flex libssl-dev libdb-dev libpcap-dev libc6-dbg libsysfs-dev gawk indent pkg-config autoconf automake bc libsaxonb-java
     
-    post:
-        - hg clone http://code.nsnam.org/bake
-        - ./bake/bake.py configure -e dce-umip-dev -e dce-meta-dev -e net-next-sim-3.7.0 -e freebsd-sim-dev
-        - ./bake/bake.py download
-        - ./bake/bake.py --debug update -vvv
-        - ./bake/bake.py build -j1 -vvv
-    
+    # post:
+    #     - hg clone http://code.nsnam.org/bake
+    #     - ./bake/bake.py configure -e dce-umip-dev -e dce-meta-dev -e net-next-sim-3.7.0 -e freebsd-sim-dev
+    #     - ./bake/bake.py download
+    #     - ./bake/bake.py --debug update -vvv
+    #     - ./bake/bake.py build -j1 -vvv
     cache_directories:
 
 test:
     override: 
-        - cd ${CIRCLE_PR_REPONAME} && ./test.py -r
+        - cd ${CIRCLE_PROJECT_REPONAME} && ./test.py -r
 
     post:
         - mkdir -p $CIRCLE_TEST_REPORTS/junit/
