@@ -17,6 +17,7 @@ dependencies:
         - hg clone http://code.nsnam.org/ns-3-dev ../ns-3-dev
         - ./waf configure --prefix=$(pwd)/install --enable-tests && ./waf build -v -j1 && ./waf install:
             pwd: ../ns-3-dev
+        - ./waf configure --with-ns3=../ns-3-dev && ./waf build -j1 -v
 
         # - curl http://sourceforge.net/projects/iperf/files/iperf-2.0.5.tar.gz -o iperf2.tar.gz
         # - tar xvf iperf2.tar.gz  
