@@ -1,11 +1,30 @@
+machine:
+    environment:
+        LDFLAGS: -pie LDFLAGS+=-rdynamic
+        DCE_PATH: $HOME/iperf2
+
+    hosts:
+
 # checkout:
 # general:
 #   artifacts: # save files after tests
 dependencies:
     pre: 
         - sudo apt-get update
-        - sudo apt-get install -y mercurial libexpat1-dev git-core build-essential bison flex libssl-dev libdb-dev libpcap-dev libc6-dbg libsysfs-dev gawk indent pkg-config autoconf automake bc libsaxonb-java
-    
+        - sudo apt-get install -y mercurial libexpat1-dev git-core build-essential bison flex libssl-dev libdb-dev libpcap-dev libc6-dbg libsysfs-dev gawk indent pkg-config autoconf automake bc libsaxonb-java curl
+          # todo install castxml and pygccxml afterward
+    post: 
+        - hg http://code.nsnam.org/ns-3-dev
+        - ./waf configure --prefix=$(pwd)/install --enable-tests && ./waf build -v -j1 && ./waf install
+            pwd: ns-3-dev
+
+        # - curl http://sourceforge.net/projects/iperf/files/iperf-2.0.5.tar.gz -o iperf2.tar.gz
+        # - tar xvf iperf2.tar.gz  
+        # - patch --directory=iperf2 -i ~/ns-3-dce/utils/iperf_4_dce.patch && ./configure && make
+        #     pwd: iperf2
+
+        # - ./waf configure --with-ns3=$(pwd)/ns-3-dev/install && ./waf build -j1 -v
+          
     # post:
     #     - hg clone http://code.nsnam.org/bake
     #     - ./bake/bake.py configure -e dce-umip-dev -e dce-meta-dev -e net-next-sim-3.7.0 -e freebsd-sim-dev
@@ -16,10 +35,12 @@ dependencies:
 
 test:
     override: 
-        - ./test.py -r
+        # -r retains test files
+        - ./test.py -r -sdce-process-manager
+            # DCE_PATH="$"
 
-    post:
-        - mkdir -p $CIRCLE_TEST_REPORTS/junit/
-        - find ./ -type f -name results.xml -exec cp {} $CIRCLE_TEST_REPORTS/ \;
-        - find ./ -type f -name xml2junit.xsl -exec cp {} $CIRCLE_TEST_REPORTS/ \;
-        - saxonb-xslt $CIRCLE_TEST_REPORTS/results.xml $CIRCLE_TEST_REPORTS/xml2junit.xsl  > $CIRCLE_TEST_REPORTS/junit/junit-results.xml
+    # post:
+    #     - mkdir -p $CIRCLE_TEST_REPORTS/junit/
+    #     - find ./ -type f -name results.xml -exec cp {} $CIRCLE_TEST_REPORTS/ \;
+    #     - find ./ -type f -name xml2junit.xsl -exec cp {} $CIRCLE_TEST_REPORTS/ \;
+    #     - saxonb-xslt $CIRCLE_TEST_REPORTS/results.xml $CIRCLE_TEST_REPORTS/xml2junit.xsl  > $CIRCLE_TEST_REPORTS/junit/junit-results.xml
