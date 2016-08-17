@@ -14,9 +14,9 @@ dependencies:
         - sudo apt-get install -y mercurial libexpat1-dev git-core build-essential bison flex libssl-dev libdb-dev libpcap-dev libc6-dbg libsysfs-dev gawk indent pkg-config autoconf automake bc libsaxonb-java curl libc6-dev libboost-dev
           # todo install castxml and pygccxml afterward
     post: 
-        - hg clone http://code.nsnam.org/ns-3-dev
+        - hg clone http://code.nsnam.org/ns-3-dev ../ns-3-dev
         - ./waf configure --prefix=$(pwd)/install --enable-tests && ./waf build -v -j1 && ./waf install:
-            pwd: ns-3-dev
+            pwd: ../ns-3-dev
 
         # - curl http://sourceforge.net/projects/iperf/files/iperf-2.0.5.tar.gz -o iperf2.tar.gz
         # - tar xvf iperf2.tar.gz  
