@@ -1,6 +1,6 @@
 machine:
     environment:
-        LDFLAGS: -pie LDFLAGS+=-rdynamic
+        # LDFLAGS: -pie LDFLAGS+=-rdynamic
         DCE_PATH: $HOME/iperf2
 
     hosts:
