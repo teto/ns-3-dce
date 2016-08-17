@@ -15,12 +15,12 @@ dependencies:
           # todo install castxml and pygccxml afterward
     post: 
         - hg http://code.nsnam.org/ns-3-dev
-        - ./waf configure --prefix=$(pwd)/install --enable-tests && ./waf build -v -j1 && ./waf install
+        - ./waf configure --prefix=$(pwd)/install --enable-tests && ./waf build -v -j1 && ./waf install:
             pwd: ns-3-dev
 
         # - curl http://sourceforge.net/projects/iperf/files/iperf-2.0.5.tar.gz -o iperf2.tar.gz
         # - tar xvf iperf2.tar.gz  
-        # - patch --directory=iperf2 -i ~/ns-3-dce/utils/iperf_4_dce.patch && ./configure && make
+        # - patch --directory=iperf2 -i ~/ns-3-dce/utils/iperf_4_dce.patch && ./configure && make:
         #     pwd: iperf2
 
         # - ./waf configure --with-ns3=$(pwd)/ns-3-dev/install && ./waf build -j1 -v
