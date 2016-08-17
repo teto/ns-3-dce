@@ -11,7 +11,7 @@ machine:
 dependencies:
     pre: 
         - sudo apt-get update
-        - sudo apt-get install -y mercurial libexpat1-dev git-core build-essential bison flex libssl-dev libdb-dev libpcap-dev libc6-dbg libsysfs-dev gawk indent pkg-config autoconf automake bc libsaxonb-java curl libc6-dev 
+        - sudo apt-get install -y mercurial libexpat1-dev git-core build-essential bison flex libssl-dev libdb-dev libpcap-dev libc6-dbg libsysfs-dev gawk indent pkg-config autoconf automake bc libsaxonb-java curl libc6-dev libboost-dev
           # todo install castxml and pygccxml afterward
     post: 
         - hg clone http://code.nsnam.org/ns-3-dev
