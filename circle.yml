@@ -15,16 +15,18 @@ dependencies:
           # todo install castxml and pygccxml afterward
     post: 
           
-        - git clone -b dce_testing --single-branch git@github.com:teto/bake.git 
+        - git clone -b dce_testing --single-branch git@github.com:teto/bake.git ../bake
         # DCE will be install $CIRCLE_BRANCH
-        - ./bake/bake.py configure -e dce-umip-dev -e dce-linux-dev
+        - ../bake/bake.py configure -e dce-umip-dev -e dce-linux-dev
     #     Personal way of dealing with it
     #     - ./bake/bake.py configure -e dce-umip-dev -e dce-meta-dev -e net-next-sim-3.7.0 -e freebsd-sim-dev
-        - ./bake/bake.py download
+        - ../bake/bake.py download
         - git checkout $CIRCLE_BRANCH:
             pwd: source/ns-3-dce
-        - ./bake/bake.py --debug update -vvv
-        - ./bake/bake.py build -j1 -vvv
+
+        # updates the source tree, which can fail because of the previous checkout 
+        # - ../bake/bake.py --debug update -vvv
+        - ../bake/bake.py build -j1 -vvv
     cache_directories:
 
 test:
