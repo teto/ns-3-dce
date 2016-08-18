@@ -14,34 +14,28 @@ dependencies:
         - sudo apt-get install -y mercurial libexpat1-dev git-core build-essential bison flex libssl-dev libdb-dev libpcap-dev libc6-dbg libsysfs-dev gawk indent pkg-config autoconf automake bc libsaxonb-java curl libc6-dev libboost-dev
           # todo install castxml and pygccxml afterward
     post: 
-        - hg clone http://code.nsnam.org/ns-3-dev ../ns-3-dev
-        - ./waf configure --prefix=$(pwd)/install --enable-tests && ./waf build -v -j1 && ./waf install:
-            pwd: ../ns-3-dev
-        - ./waf configure --with-ns3=../ns-3-dev/install && ./waf build -j1 -v
-
-        # - curl http://sourceforge.net/projects/iperf/files/iperf-2.0.5.tar.gz -o iperf2.tar.gz
-        # - tar xvf iperf2.tar.gz  
-        # - patch --directory=iperf2 -i ~/ns-3-dce/utils/iperf_4_dce.patch && ./configure && make:
-        #     pwd: iperf2
-
-        # - ./waf configure --with-ns3=$(pwd)/ns-3-dev/install && ./waf build -j1 -v
           
-    # post:
-    #     - hg clone http://code.nsnam.org/bake
+        - git clone -b dce_testing --single-branch git@github.com:teto/bake.git 
+        # DCE will be install $CIRCLE_BRANCH
+        - ./bake/bake.py configure -e dce-umip-dev -e dce-linux-dev
+    #     Personal way of dealing with it
     #     - ./bake/bake.py configure -e dce-umip-dev -e dce-meta-dev -e net-next-sim-3.7.0 -e freebsd-sim-dev
-    #     - ./bake/bake.py download
-    #     - ./bake/bake.py --debug update -vvv
-    #     - ./bake/bake.py build -j1 -vvv
+        - ./bake/bake.py download
+        - git checkout $CIRCLE_BRANCH:
+            pwd: source/ns-3-dce
+        - ./bake/bake.py --debug update -vvv
+        - ./bake/bake.py build -j1 -vvv
     cache_directories:
 
 test:
     override: 
         # -r retains test files
-        - ./test.py -r -sdce-process-manager
-            # DCE_PATH="$"
+        - ./test.py -r :
+            pwd: source/ns-3-dce
+        # or else I could set DCE_PATH and run normally
 
-    # post:
-    #     - mkdir -p $CIRCLE_TEST_REPORTS/junit/
-    #     - find ./ -type f -name results.xml -exec cp {} $CIRCLE_TEST_REPORTS/ \;
-    #     - find ./ -type f -name xml2junit.xsl -exec cp {} $CIRCLE_TEST_REPORTS/ \;
-    #     - saxonb-xslt $CIRCLE_TEST_REPORTS/results.xml $CIRCLE_TEST_REPORTS/xml2junit.xsl  > $CIRCLE_TEST_REPORTS/junit/junit-results.xml
+    post:
+        - mkdir -p $CIRCLE_TEST_REPORTS/junit/
+        - find ./ -type f -name results.xml -exec cp {} $CIRCLE_TEST_REPORTS/ \;
+        - find ./ -type f -name xml2junit.xsl -exec cp {} $CIRCLE_TEST_REPORTS/ \;
+        - saxonb-xslt $CIRCLE_TEST_REPORTS/results.xml $CIRCLE_TEST_REPORTS/xml2junit.xsl  > $CIRCLE_TEST_REPORTS/junit/junit-results.xml
