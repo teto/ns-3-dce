@@ -8,11 +8,6 @@
 #include "ns3/constant-position-mobility-model.h"
 #include "ccnx/misc-tools.h"
 
-/**
- * Comment to use iperf2 instead
- */
-#define IPERF3
-
 using namespace ns3;
 NS_LOG_COMPONENT_DEFINE ("DceIperf");
 // ===========================================================================
@@ -29,15 +24,16 @@ NS_LOG_COMPONENT_DEFINE ("DceIperf");
 //           +---------------------+
 //                5 Mbps, 2 ms
 //
-// 2 nodes : iperf client en iperf server ....
+// 2 nodes : iperf client and iperf server ....
 //
 // Note : Tested with iperf 2.0.5, you need to modify iperf source in order to
 //        allow DCE to have a chance to end an endless loop in iperf as follow:
 //        in source named Thread.c at line 412 in method named thread_rest
 //        you must add a sleep (1); to break the infinite loop....
 //
-// Note : Tested with iperf 3.1, you need to modify source as is done in 
+// Note : Tested with iperf 3.1, same pb as iperf2 you need to modify source as is done in 
 //        utils/iperf3_1.patch
+//        iperf3 seems to use a control protocol over TCP.
 // ===========================================================================
 
 
@@ -50,15 +46,18 @@ int main (int argc, char *argv[])
   Ptr<Node> clientNode;
   Ptr<Node> serverNode;
   std::string stack = "linux";
-  bool useUdp = 0;
+  bool useUdp = false;
+  bool useIperf3 = false;
   std::string bandWidth = "1m";
   std::string windowSize = "120KB";
+  
   const Time simMaxDuration = Seconds(40);
   CommandLine cmd;
   cmd.AddValue ("stack", "Name of IP stack: ns3/linux/freebsd.", stack);
   cmd.AddValue ("udp", "Use UDP. Default false (0)", useUdp);
   cmd.AddValue ("bw", "BandWidth. Default 1m.", bandWidth);
   cmd.AddValue ("window", "iperf --window parameter", windowSize);
+  cmd.AddValue ("iperf3", "Use iperf3 instead of the default iperf2", useIperf3);
   cmd.Parse (argc, argv);
 
   NodeContainer nodes;
@@ -133,86 +132,85 @@ int main (int argc, char *argv[])
   dce.SetStackSize (1 << 20);
 
 
-  #ifdef IPERF3
-  // Setup client on node 0
-  dce.SetBinary ("iperf3");
-  dce.ResetArguments ();
-  dce.ResetEnvironment ();
-  dce.AddArgument ("-c");
-  dce.AddArgument ("10.1.1.2");
-  dce.AddArgument ("--interval=1"); // interval between reports
-  dce.AddArgument ("--time=10");  // duration of the test
-  dce.AddArgument ("--verbose");
-  dce.AddArgument ("--json");   // export to json
-  dce.AddArgument ("--logfile=client.res");  // into this file
-//  dce.AddArgument ("-P");   // number of streams to run in parallel
-//  dce.AddArgument ("1");
+  if(useIperf3) {
+    // Setup client on node 0
+    dce.SetBinary ("iperf3");
+    dce.ResetArguments ();
+    dce.ResetEnvironment ();
+    dce.AddArgument ("-c");
+    dce.AddArgument ("10.1.1.2");
+    dce.AddArgument ("--interval=1"); // interval between reports
+    dce.AddArgument ("--time=10");  // duration of the test
+    dce.AddArgument ("--verbose");
+    dce.AddArgument ("--json");   // export to json
+    dce.AddArgument ("--logfile=client.res");  // into this file
+  //  dce.AddArgument ("-P");   // number of streams to run in parallel
+  //  dce.AddArgument ("1");
 
-  apps = dce.Install ( clientNode );
-  apps.Start (Seconds (5.0));
-  apps.Stop (simMaxDuration);
+    apps = dce.Install ( clientNode );
+    apps.Start (Seconds (5.0));
+    apps.Stop (simMaxDuration);
 
-  // Launch iperf server on node 1, listens on 5201 by default
-  dce.SetBinary ("iperf3");
-  dce.ResetArguments ();
-  dce.ResetEnvironment ();
-  dce.AddArgument ("--verbose");
-//  dce.AddArgument ("--json");   // export to json
-//  dce.AddArgument ("--logfile=server.res");  // into this file
-  dce.AddArgument ("--bind=10.1.1.2");  //TODO get address programmatacilly from clientNode
-  dce.AddArgument ("--server");
-  if (useUdp)
-  {
-    dce.AddArgument ("--udp");
-  }
-
-  apps = dce.Install (serverNode);
-
-  pointToPoint.EnablePcapAll ("iperf3-" + stack, false);
-  #else
-  /* By default iperf2 listens on port 5001 */
-  oss.str("");
-  oss << "--window=" << windowSize;
-
-  // Launch iperf client on node 0
-  dce.SetBinary ("iperf");
-  dce.ResetArguments ();
-  dce.ResetEnvironment ();
-  dce.AddArgument ("--client=10.1.1.2");
-//  dce.AddArgument ("");
-  dce.AddArgument ("-i");
-  dce.AddArgument ("1");
-  dce.AddArgument ("--time");
-  dce.AddArgument (iperfDuration);
-//  dce.AddArgument ("--bind=10.1.1.1");  // TODO get address from clientNode
-  dce.AddArgument ("--reportstyle=C");  // export as CSV
-  dce.AddArgument (oss.str());   // size of Rcv or send buffer
-
-  apps = dce.Install ( clientNode );
-  apps.Start (Seconds (5.0));
-  apps.Stop (simMaxDuration);
-
-  // Launch iperf server on node 1
-  dce.SetBinary ("iperf");
-  dce.ResetArguments ();
-  dce.ResetEnvironment ();
-  dce.AddArgument ("-s");
-  dce.AddArgument ("--bind=10.1.1.2");  //TODO get address programmatacilly from clientNode
-  dce.AddArgument ("--parallel=1");
-  dce.AddArgument (oss.str());   // size of Rcv or send buffer
-  if (useUdp)
+    // Launch iperf server on node 1, listens on 5201 by default
+    dce.SetBinary ("iperf3");
+    dce.ResetArguments ();
+    dce.ResetEnvironment ();
+    dce.AddArgument ("--verbose");
+  //  dce.AddArgument ("--json");   // export to json
+  //  dce.AddArgument ("--logfile=server.res");  // into this file
+    dce.AddArgument ("--bind=10.1.1.2");  //TODO get address programmatacilly from clientNode
+    dce.AddArgument ("--server");
+    if (useUdp)
     {
       dce.AddArgument ("--udp");
     }
 
-  apps = dce.Install (serverNode);
+    apps = dce.Install (serverNode);
 
-  pointToPoint.EnablePcapAll ("iperf2-" + stack, false);
-  #endif
+    pointToPoint.EnablePcapAll ("iperf3-" + stack, false);
+  }
+  else {
+    /* By default iperf2 listens on port 5001 */
+    oss.str("");
+    oss << "--window=" << windowSize;
+
+    // Launch iperf client on node 0
+    dce.SetBinary ("iperf");
+    dce.ResetArguments ();
+    dce.ResetEnvironment ();
+    dce.AddArgument ("--client=10.1.1.2");
+    dce.AddArgument ("-i");
+    dce.AddArgument ("1");
+    dce.AddArgument ("--time");
+    dce.AddArgument (iperfDuration);
+  //  dce.AddArgument ("--bind=10.1.1.1");  // TODO get address from clientNode
+    dce.AddArgument ("--reportstyle=C");  // export as CSV
+    dce.AddArgument (oss.str());   // size of Rcv or send buffer
+
+    apps = dce.Install ( clientNode );
+    apps.Start (Seconds (5.0));
+    apps.Stop (simMaxDuration);
+
+    // Launch iperf server on node 1
+    dce.SetBinary ("iperf");
+    dce.ResetArguments ();
+    dce.ResetEnvironment ();
+    dce.AddArgument ("-s");
+    dce.AddArgument ("--bind=10.1.1.2");  //TODO get address programmatacilly from clientNode
+    dce.AddArgument ("--parallel=1");
+    dce.AddArgument (oss.str());   // size of Rcv or send buffer
+    if (useUdp)
+      {
+        dce.AddArgument ("--udp");
+      }
+
+    apps = dce.Install (serverNode);
+
+    pointToPoint.EnablePcapAll ("iperf2-" + stack, false);
+  }
+
   apps.Start (Seconds (0.6));
 
-
-  
 
   setPos (clientNode, 1, 10, 0);
   setPos (serverNode, 50,10, 0);
