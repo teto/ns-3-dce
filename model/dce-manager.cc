@@ -168,8 +168,11 @@ DceManager::EnsureDirectoryExists (struct Thread *current, std::string dirName)
 int
 DceManager::CreatePidFile (struct Thread *current, std::string filename)
 {
+  // TODO move those elsewhere
   EnsureDirectoryExists (current, "/var");
   EnsureDirectoryExists (current, "/var/log");
+  EnsureDirectoryExists (current, "/tmp");
+
   std::ostringstream oss;
   oss << "/var/log/" << current->process->pid;
   std::string pidDirName = oss.str ();

@@ -613,6 +613,7 @@ NATIVE (lrintl)
 NATIVE (llrintl)
 NATIVE (ceil)
 NATIVE (floor)
+NATIVE (pow)
 
 // dlfcn.h
 DCE_WITH_ALIAS2 (dlopen, __dlopen)

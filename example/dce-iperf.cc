@@ -157,7 +157,7 @@ int main (int argc, char *argv[])
     dce.ResetEnvironment ();
     dce.AddArgument ("--verbose");
   //  dce.AddArgument ("--json");   // export to json
-  //  dce.AddArgument ("--logfile=server.res");  // into this file
+    dce.AddArgument ("--logfile=server.res");  // into this file
     dce.AddArgument ("--bind=10.1.1.2");  //TODO get address programmatacilly from clientNode
     dce.AddArgument ("--server");
     if (useUdp)
