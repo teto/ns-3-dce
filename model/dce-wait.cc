@@ -13,7 +13,7 @@ NS_LOG_COMPONENT_DEFINE ("DceWait");
 
 using namespace ns3;
 
-pid_t dce_wait (void *status)
+pid_t dce_wait (int *status)
 {
   return dce_waitpid (-1, (int*)status, 0);
 }

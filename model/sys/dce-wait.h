@@ -11,7 +11,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-                 pid_t dce_wait (void *stat_loc)  ;
+                 pid_t dce_wait (int *stat_loc)  ;
 
  __pid_t dce_waitpid (__pid_t __pid,int * __stat_loc,int __options)  ;
 

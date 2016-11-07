@@ -1190,7 +1190,7 @@ decltype (clearerr)  __clearerr_unlocked __attribute__ ((weak, alias ("clearerr"
                                      int uname (struct utsname *__name) noexcept {
                                     return dce_uname (__name);
                                     }
-                                     pid_t wait (void *stat_loc)  {
+                                     pid_t wait (int *stat_loc)  {
                                     return dce_wait (stat_loc);
                                     }
                                      __pid_t waitpid (__pid_t __pid,int * __stat_loc,int __options)  {

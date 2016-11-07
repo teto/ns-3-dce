@@ -320,9 +320,10 @@ def build_dce_tests(module, bld):
         bld.install_files('${PREFIX}/bin_dce', 'build/bin_dce/' + name , chmod=0755 )
 
 def build_dce_examples(module, bld):
-    dce_examples = [['udp-server', []],
+    dce_examples = [
+		# ['udp-server', []],
                     ['udp-client', []],
-                    ['udp-perf', ['m']],
+                    # ['udp-perf', ['m']],
                     ['tcp-server', []],
                     ['tcp-client', []],
                     ['tcp-loopback', []],

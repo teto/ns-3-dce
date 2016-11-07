@@ -16,7 +16,7 @@ import sys
 
 """
 Must be able to generate:
-    - 
+    -
 
 todo do same for dl/pthread/rt
 """
@@ -45,10 +45,9 @@ double_type = declarations.cpptypes.double_t()
 # specifier = noexcept
 ExplicitFn = namedtuple('ExplicitFn', ["rtype", "fullargs", "arg_names", "location", "specifier"])
 exceptions = {
-    "sysinfo": ExplicitFn("int", ["struct sysinfo *info"], ["info"],"/usr/include/x86_64-linux-gnu/sys/sysinfo.h", "noexcept"),
-    "sigaction": ExplicitFn("int", ["int signum", "const struct sigaction *act", "struct sigaction *oldact"], 
-        "signum, act, oldact","/usr/include/signal.h", "noexcept"),
-    "wait": ExplicitFn("pid_t", "void *stat_loc", "stat_loc", "/usr/include/x86_64-linux-gnu/sys/wait.h", ""),
+    # "sysinfo": ExplicitFn("int", ["struct sysinfo *info"], ["info"],"/usr/include/x86_64-linux-gnu/sys/sysinfo.h", "noexcept"),
+    # "sigaction": ExplicitFn("int", ["int signum", "const struct sigaction *act", "struct sigaction *oldact"], "signum, act, oldact","/usr/include/signal.h", "noexcept"),
+    "wait": ExplicitFn("pid_t", "int *stat_loc", "stat_loc", "/usr/include/x86_64-linux-gnu/sys/wait.h", ""),
     "__fpurge": ExplicitFn("void", "FILE *fd", "fd", "/usr/include/stdio.h", ""),
     "__fpending": ExplicitFn("size_t", "FILE *fd", "fd", "/usr/include/stdio.h", ""),
     "__cxa_atexit": ExplicitFn("int", "void (*func)(void *), void *arg, void *d", "func, arg, d", "/usr/include/stdlib.h", ""),
@@ -98,7 +97,7 @@ def gen_variadic_wrapper(rtype, wrapper_symbol, wrapped_symbol, decl_args : List
     """
 
     content = gen_declaration(rtype, wrapper_symbol, decl_args, specifier, append_column=False)
-    # tpl = """{extern} {ret} {wrapper_symbol} ({fullargs}) {throw} {{ 
+    # tpl = """{extern} {ret} {wrapper_symbol} ({fullargs}) {throw} {{
     content += """ {{
         va_list __dce_va_list;
         va_start (__dce_va_list, {justbeforelastarg});
@@ -119,7 +118,7 @@ def gen_variadic_wrapper(rtype, wrapper_symbol, wrapped_symbol, decl_args : List
 class Generator:
     def __init__(self):
         pass
- 
+
     def parse(self, filename, regen_cache: bool):
         """
         cache parsing
@@ -138,7 +137,7 @@ class Generator:
             # asked on tracker to generate va_list but not ok
             # flags= ["f1"]
             )
-        # config.flags = 
+        # config.flags =
         # The c++ file we want to parse
         # printf is declared in stdio.h
         # filename = "/home/teto/glibc/libio/stdio.h"
@@ -163,14 +162,131 @@ class Generator:
 
 
     def lookup(self, toto):
-    
+
         log.info("Looking for %s" % toto)
 
         global_namespace = declarations.get_global_namespace(self.decls)
-        criteria = declarations.calldef_matcher(name=toto)
-        results = declarations.matcher.find(criteria, global_namespace) 
+        criteria = declarations.calldef_matcher(name=toto, decl_type=declarations.free_function_t)
+        results = declarations.matcher.find(criteria, global_namespace)
         print("resultats=", results)
+        for res in results:
+            print("resultat:", res)
         return results[0]
+
+    def generate_decl_string(self, name, dce: bool=False):
+        """
+        """
+
+        log.debug("Generating decl string for name,")
+        has_ellipsis = False
+        # look for a match
+        # Search for the function by name
+
+
+        res = ""
+        # hack around https://github.com/gccxml/pygccxml/issues/62
+        if name in exceptions.keys():
+            log.debug("Exception [%s] found " % name)
+            extern=""
+            rtype, libc_fullargs , arg_names, location, specifier = exceptions[name]
+            print("Values:", rtype, libc_fullargs, arg_names, location)
+        else:
+
+            decl= self.lookup(name)
+
+            # print("decl", results)
+            # decl = results[0]
+            # print( "islist ? len",len(func1))
+            qname = declaration_utils.full_name(decl)
+            if qname[:2] == "::":
+                qname = qname[2:]
+            log.info("Parsing function %s" % name)
+            # Add the arguments...
+            # default_value', 'ellipsis', 'name', 'type'
+            # print(dir(decl.arguments[0]))
+            # TODO we should record the location
+            # locations.update ({ decl.location })
+            # {ret} {name} ({args})
+            # proto = "{extern} {ret} {name} ({args})".format(
+
+            extern="extern" if decl.has_extern else ""
+            rtype = "%s" % (decl.return_type if decl.return_type is not None else "void")
+
+
+
+            # for a in decl.arguments:
+            #     print(dir(a ))
+            #     print("a", a )
+            # print("decl=", decl.create_decl_type )
+            # print("decl=", decl.calling_convention )
+            # print("=", decl.does_throw )
+            if decl.has_ellipsis:
+                print("HAS ELLIPSIS")
+
+            # some hacks to workaround pygccxml/castxml flaws:
+            # va_list is not_recognized and function pointer badly displayed
+
+            # temp is a list of types
+            decl_args = []
+            for arg in decl.arguments:
+                s = str(arg.decl_type)
+                print("decl_type", type(arg.decl_type))
+                print("decl_string", arg.decl_type.decl_string)
+                if isinstance(arg.decl_type, declarations.cpptypes.pointer_t):
+                    print("ISINSTANCE")
+                    log.debug("this is a pointer")
+                    new_type = declarations.remove_pointer(arg.decl_type)
+                    print("type after removal ", type(new_type))
+                    print("type after removal ", new_type)
+                if s.startswith("?unknown?"):
+                    # handles variables list
+                    log.debug("UNKNOWN => variadic")
+                    s = "va_list " + decl.arguments[-1].name
+                elif "(" in s:
+                    # check if it's a function_pointer
+                    log.debug ("looks like function pointer %s" % s)
+                    s= s.rstrip("*")
+                else:
+                    s += " " + arg.name
+                    print("saved as s=%s" % s)
+                decl_args.append(s)
+
+            for arg in decl_args:
+                print("arg=%s"% arg)
+
+
+
+            libc_fullargs = ",".join(decl_args) # only types
+            location = decl.location.file_name
+            arg_names = [arg.name for arg in decl.arguments]
+            specifier = "" if decl.does_throw else "noexcept"
+            has_ellipsis = decl.has_ellipsis
+
+
+        # if "..." in libc_fullargs:
+        if has_ellipsis:
+            # DCE overrides that accept a va_list are suffixed with "_v" while
+            # libc functions are prefix with "v"
+            wrapped_symbol = "dce_" + name + "_v" if dce else "v" + name
+            content = gen_variadic_wrapper(rtype, name,
+                    wrapped_symbol,
+                    decl_args,
+                    arg_names,
+                    specifier
+                    )
+        else:
+            content = gen_declaration(rtype, name, libc_fullargs,
+                    specifier, append_column=False)
+            content += """{{
+                        {retfinalstmt} {instruction} ({arg_names});
+                        }}
+                        """.format(
+                        name=name,
+                        instruction="dce_" + name if "dce" else "g_libc.%s_fn" % name,
+                        retfinalstmt="return" if rtype is not "void" else "",
+                        arg_names=",".join(arg_names) if isinstance(arg_names, list) else arg_names,
+                    )
+        return content
 
     def generate_wrappers(self, input_filename, libc_filename,
             write_headers : bool,
@@ -192,102 +308,9 @@ class Generator:
                 # for line in src:
                 for row in reader:
                     # function_name = line.rstrip()
+                    print('row["name"]=', row["name"], "extra=", row["extra"])
 
-                    has_ellipsis = False
-                    # look for a match
-                    print('row["name"]=', row["name"], "extra=", row["extra"])    
-                    # Search for the function by name
-
-
-                    res = ""
-                    # hack around https://github.com/gccxml/pygccxml/issues/62
-                    if row["name"] in exceptions.keys():
-                        name = row["name"]
-                        log.debug("Exception [%s] found " % name)
-                        extern=""
-                        rtype, libc_fullargs , arg_names, location, specifier = exceptions[name]
-                        print("Values:", rtype, libc_fullargs, arg_names, location)
-                    else:
-
-                        decl= self.lookup(row["name"])
-
-                        # print("decl", results)
-                        # decl = results[0]
-                        # print( "islist ? len",len(func1))
-                        name = declaration_utils.full_name(decl)
-                        if name[:2] == "::":
-                            name = name[2:]
-                        log.info("Parsing function %s" % name)
-                        # Add the arguments...
-                        # default_value', 'ellipsis', 'name', 'type'
-                        # print(dir(decl.arguments[0]))
-                        # TODO we should record the location
-                        # locations.update ({ decl.location })
-                        # {ret} {name} ({args}) 
-                        # proto = "{extern} {ret} {name} ({args})".format(
-
-                        extern="extern" if decl.has_extern else ""
-                        rtype = "%s" % (decl.return_type if decl.return_type is not None else "void")
-
-                        # for a in decl.arguments:
-                        #     print(dir(a ))
-                        #     print("a", a )
-                        # print("decl=", decl.create_decl_type )
-                        print("decl=", decl.calling_convention )
-                        print("decl=", decl.does_throw )
-                        if decl.has_ellipsis:
-                            print("HAS ELLIPSIS")
-
-                        # some hacks to workaround pygccxml/castxml flaws:
-                        # va_list is not_recognized and function pointer badly displayed
-
-                        # temp is a list of types
-                        decl_args = []
-                        for arg in decl.arguments:
-                            s = str(arg.decl_type)
-                            if s.startswith("?unknown?"):
-                                print("UNKNOWN")
-                                s = "va_list " + decl.arguments[-1].name
-                            elif "(" in s:
-                                print ("TOTO")
-                                s= s.rstrip("*")
-                            else:
-                                s += " " + arg.name
-                            decl_args.append(s)
-
-                        for arg in decl_args:
-                            print("arg=%s"% arg)
-                        libc_fullargs = ",".join(decl_args) # only types
-                        location = decl.location.file_name
-                        arg_names = [arg.name for arg in decl.arguments]
-                        specifier = "" if decl.does_throw else "noexcept"
-                        has_ellipsis = decl.has_ellipsis
-
-
-                    # if "..." in libc_fullargs:
-                    if has_ellipsis:
-                        # DCE overrides that accept a va_list are suffixed with "_v" while
-                        # libc functions are prefix with "v"
-                        wrapped_symbol = "dce_" + name + "_v" if row["type"] == "dce" else "v"+ name
-                        content = gen_variadic_wrapper(rtype, name, 
-                                wrapped_symbol,
-                                decl_args,
-                                arg_names,
-                                specifier
-                                )
-                    else:
-                        content = gen_declaration(rtype, name, libc_fullargs,
-                                specifier, append_column=False)
-                        content += """{{
-                                    {retfinalstmt} {instruction} ({arg_names});
-                                    }}
-                                    """.format(
-                                    name=name,
-                                    instruction="dce_" + name if row["type"] == "dce" else "g_libc.%s_fn" % name,
-                                    retfinalstmt="return" if rtype is not "void" else "",
-                                    arg_names=",".join(arg_names) if isinstance(arg_names, list) else arg_names,
-                                )
-
+                    # self.generate_decl_string("")
 
                     # then generate aliases for both natives and dce
                     for aliasname in row["extra"]:
@@ -305,24 +328,25 @@ class Generator:
 
                             # extern __typeof (name) aliasname __attribute__ ((weak, alias (# name)));
 
+                    log.debug(content)
                     libc_fd.write(content)
 
                     # now we generate dce-<FILE>.h content
-                    #  
+                    #
                     # generate only the dce overrides
                     content = ""
                     if row["type"] == "dce":
-                        
+
                         # declaration of dce_{libcfunc}
-                        # TODO 
+                        # TODO
 
                         if has_ellipsis:
                             # then we need to declare the variant accepting va_list
-                            content = gen_declaration(rtype, "dce_"+ name + "_v",  
+                            content = gen_declaration(rtype, "dce_"+ name + "_v",
                                     decl_args[:-1] + ["va_list"],
                                     specifier,
                                 )
-                            # implement an inline variadic function 
+                            # implement an inline variadic function
                             # and a variant accepting va_list
                             content += "inline "+ gen_variadic_wrapper(rtype, "dce_"+name,
                                     "dce_"+name +"_v",
@@ -332,7 +356,7 @@ class Generator:
                                     )
 
                         else:
-                            content = gen_declaration(rtype, "dce_"+ name,  
+                            content = gen_declaration(rtype, "dce_"+ name,
                                 libc_fullargs,
                                 specifier,
                                 )
@@ -340,7 +364,7 @@ class Generator:
 
                     items = locations.setdefault(location, [])
                     items.append(content)
-            
+
 # TODO
             # if write_headers:
             self.generate_headers(locations, write_headers)
@@ -355,7 +379,7 @@ class Generator:
                 # filename = os.path.basename()
                 # filename = "model"
                 header = ""
-                
+
                 subfolder = ""
                 for folder in ["sys", "net", "arpa"]:
                     if head.endswith(folder):
@@ -366,7 +390,7 @@ class Generator:
                 filename = os.path.join("model", subfolder, "dce-" + tail)
                 header=os.path.join(subfolder, tail)
                 print(filename)
-                # TODO 
+                # TODO
 # + ".generated.h"
                 # header = "model/dce-" + filename
                 print("Header name=", filename)
@@ -408,23 +432,23 @@ def main():
     libc_filename = "model/libc.generated.cc"
 
     parser  = argparse.ArgumentParser()
-    parser.add_argument('-d','--write-headers', action="store_true", default=False, 
+    parser.add_argument('-p','--write-headers', action="store_true", default=False,
             help="Write model/dce-* to files")
     parser.add_argument('-i','--write-impl', action="store_true", default=False,
             help="write %s" % libc_filename)
     parser.add_argument('-a','--write-all', action="store_true", default=False,
             help="Enables -i and -h")
-    parser.add_argument('-r','--regen', action="store_true", default=False,
+    parser.add_argument('-R','--regen', action="store_true", default=False,
             help="TODO: Disable the cache")
     parser.add_argument('-d','--write-doc', action="store_true", default=False,
             help="Write %s.csv" % API_COVERAGE_CSV)
-    
+
     args, unknown = parser.parse_known_args ()
-    
+
 # TODO call that with subprocess.
     # os.system("./gen_natives.sh")
   # redirect output
-    output ="model/libc-ns3.h.tmp" 
+    output ="model/libc-ns3.h.tmp"
 
 
 
@@ -439,13 +463,13 @@ def main():
     print(unknown)
     if len(unknown) > 0:
         for func in unknown:
-            g.lookup(func)
+            g.generate_decl_string(func)
         exit(0)
 
     # libc-ns3.generated.tmp
-    g.generate_wrappers(output, libc_filename, write_headers=args.write_headers or args.write_all, 
+    g.generate_wrappers(output, libc_filename, write_headers=args.write_headers or args.write_all,
             write_impl=args.write_impl or args.write_all)
-    # if args.write_headers or args.write_all: 
+    # if args.write_headers or args.write_all:
     # if args.write_impl or args.write_all:
 
 if __name__ == "__main__":
