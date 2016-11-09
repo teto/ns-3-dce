@@ -22,65 +22,65 @@ using namespace ns3;
 
 namespace {
 
-struct my_IO_jump_t
-{
-  size_t dummy0;
-  size_t dummy1;
-  void *functions[12];
-  void *__read;
-  void *__write;
-  void *__seek;
-  void *__close;
-  void *__stat;
-  void *__showmanyc;
-  void *__imbue;
-};
-struct my_IO_FILE_plus
-{
-  _IO_FILE file;
-  struct my_IO_jump_t *vtable;
-};
+/* struct my_IO_jump_t */
+/* { */
+/*   size_t dummy0; */
+/*   size_t dummy1; */
+/*   void *functions[12]; */
+/*   void *__read; */
+/*   void *__write; */
+/*   void *__seek; */
+/*   void *__close; */
+/*   void *__stat; */
+/*   void *__showmanyc; */
+/*   void *__imbue; */
+/* }; */
+/* struct my_IO_FILE_plus */
+/* { */
+/*   _IO_FILE file; */
+/*   struct my_IO_jump_t *vtable; */
+/* }; */
 
-ssize_t my_read (_IO_FILE *file, void *buffer, ssize_t size)
-{
-  ssize_t data_read = dce_read (file->_fileno, buffer, size);
-  if (data_read == -1)
-    {
-      errno = Current ()->err;
-    }
-  return data_read;
-}
-ssize_t my_write (_IO_FILE *file, const void *buffer, ssize_t size)
-{
-  ssize_t data_written = dce_write (file->_fileno, buffer, size);
-  if (data_written == -1)
-    {
-      errno = Current ()->err;
-    }
-  if (file->_offset >= 0)
-    {
-      file->_offset += data_written;
-    }
-  return data_written;
-}
-off64_t my_seek (_IO_FILE *file, off64_t where, int whence)
-{
-  off64_t result = dce_lseek (file->_fileno, where, whence);
-  if (result == -1)
-    {
-      errno = Current ()->err;
-    }
-  return result;
-}
-int my_close (_IO_FILE *file)
-{
-  int result = dce_close (file->_fileno);
-  if (result == -1)
-    {
-      errno = Current ()->err;
-    }
-  return result;
-}
+/* ssize_t my_read (_IO_FILE *file, void *buffer, ssize_t size) */
+/* { */
+/*   ssize_t data_read = dce_read (file->_fileno, buffer, size); */
+/*   if (data_read == -1) */
+/*     { */
+/*       errno = Current ()->err; */
+/*     } */
+/*   return data_read; */
+/* } */
+/* ssize_t my_write (_IO_FILE *file, const void *buffer, ssize_t size) */
+/* { */
+/*   ssize_t data_written = dce_write (file->_fileno, buffer, size); */
+/*   if (data_written == -1) */
+/*     { */
+/*       errno = Current ()->err; */
+/*     } */
+/*   if (file->_offset >= 0) */
+/*     { */
+/*       file->_offset += data_written; */
+/*     } */
+/*   return data_written; */
+/* } */
+/* off64_t my_seek (_IO_FILE *file, off64_t where, int whence) */
+/* { */
+/*   off64_t result = dce_lseek (file->_fileno, where, whence); */
+/*   if (result == -1) */
+/*     { */
+/*       errno = Current ()->err; */
+/*     } */
+/*   return result; */
+/* } */
+/* int my_close (_IO_FILE *file) */
+/* { */
+/*   int result = dce_close (file->_fileno); */
+/*   if (result == -1) */
+/*     { */
+/*       errno = Current ()->err; */
+/*     } */
+/*   return result; */
+/* } */
 int my_close_unconditional (_IO_FILE *file)
 {
   return 0;
@@ -94,15 +94,15 @@ off64_t my_seek_unconditional (_IO_FILE *file, off64_t where, int whence)
 {
   return -1;
 }
-int my_stat (_IO_FILE *file, void *buf)
-{
-  int result = dce_fstat64 (file->_fileno, (struct stat64 *)buf);
-  if (result == -1)
-    {
-      errno = Current ()->err;
-    }
-  return result;
-}
+/* int my_stat (_IO_FILE *file, void *buf) */
+/* { */
+/*   int result = dce_fstat64 (file->_fileno, (struct stat64 *)buf); */
+/*   if (result == -1) */
+/*     { */
+/*       errno = Current ()->err; */
+/*     } */
+/*   return result; */
+/* } */
 bool mode_seek_start (const char *mode)
 {
   return *mode != 'a';

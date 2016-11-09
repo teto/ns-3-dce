@@ -13,6 +13,9 @@ extern "C" {
 int * dce___errno_location (void);
 int * dce___h_errno_location (void);
 
+
+#define __set_errno(_errno) errno = Current()->err = _errno
+
 #ifdef __cplusplus
 }
 #endif
