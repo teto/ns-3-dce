@@ -92,14 +92,14 @@ int dce_open (const char *path, int flags, ...)
 
   if (std::string (path) == "")
     {
-      current->err = ENOENT;
+      __dce_set_errno(ENOENT);
       return -1;
     }
 
   int fd = UtilsAllocateFd ();
   if (fd == -1)
     {
-      current->err = EMFILE;
+      __dce_set_errno(EMFILE);
       return -1;
     }
   UnixFd *unixFd = 0;

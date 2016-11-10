@@ -14,7 +14,7 @@ int * dce___errno_location (void);
 int * dce___h_errno_location (void);
 
 
-#define __set_errno(_errno) errno = Current()->err = _errno
+#define __dce_set_errno(_errno) errno = Current()->err = _errno
 
 #ifdef __cplusplus
 }
