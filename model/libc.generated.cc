@@ -1,3 +1,12 @@
+/* after the update, __libc_start_main stopped being exported in libc-ns3.h" 
+ * See https://groups.google.com/forum/#!topic/ns-3-users/JIirultln1o 
+ * thus in examples we have undefined symbols 
+ * */
+int __libc_start_main(int *(main) (int, char * *, char * *), int argc, char * * ubp_av, void (*init) (void), void (*fini) (void), void (*rtld_fini) (void), void (* stack_end))
+{
+	return 0;
+}
+
  void __cxa_finalize (void *d)  {
                                      dce___cxa_finalize (d);
                                     }
