@@ -32,6 +32,7 @@
 #include "file-usage.h"
 #include "dce-stdlib.h"
 #include "pipe-fd.h"
+#include "dce-errno.h" /* for __dce_set_errno */
 #include <cstdarg>
 
 NS_LOG_COMPONENT_DEFINE ("DceFd");
@@ -51,14 +52,14 @@ NS_LOG_COMPONENT_DEFINE ("DceFd");
                                                                         \
     if (std::string (pathname) == std::string (""))                      \
       {                                                                 \
-        current->err = ENOENT;                                          \
+        __dce_set_errno(ENOENT);                                          \
         return -1;                                                      \
       }                                                                 \
     std::string fullpath = UtilsGetRealFilePath (pathname);     \
     int status = ::name (fullpath.c_str (), ## __VA_ARGS__);             \
     if (status == -1)                                                   \
       {                                                                 \
-        current->err = errno;                                           \
+        __dce_set_errno(errno);                                           \
         return -1;                                                      \
       }                                                                 \
     return status;                                                      \
@@ -90,14 +91,14 @@ int dce_open_v (const char *path, int flags, va_list vl)
 
   if (std::string (path) == "")
     {
-      current->err = ENOENT;
+      __dce_set_errno(ENOENT);
       return -1;
     }
 
   int fd = UtilsAllocateFd ();
   if (fd == -1)
     {
-      current->err = EMFILE;
+      __dce_set_errno(EMFILE);
       return -1;
     }
   UnixFd *unixFd = 0;
@@ -116,7 +117,7 @@ int dce_open_v (const char *path, int flags, va_list vl)
       int realFd = ::open (fullpath.c_str (), flags, mode);
       if (realFd == -1)
         {
-          current->err = errno;
+          __dce_set_errno(errno);
           NS_LOG_UNCOND("cwd=" << get_current_dir_name());
           NS_LOG_UNCOND("path " << fullpath 
             << "==" << UtilsGetVirtualFilePath(path) 
@@ -203,7 +204,7 @@ int dce_close (int fd)
 
   if (it == current->process->openFiles.end ())
     {
-      current->err = EBADF;
+      __dce_set_errno(EBADF);
       return -1;
     }
 
@@ -304,7 +305,7 @@ ssize_t dce_writev (int fd, const struct iovec *iov, int iovcnt)
   if (!CheckFdExists (current->process, fd, true))
     {
       NS_LOG_DEBUG ("write error");
-      current->err = EBADF;
+      __dce_set_errno(EBADF);
       return -1;
     }
 
@@ -316,7 +317,7 @@ ssize_t dce_writev (int fd, const struct iovec *iov, int iovcnt)
 
   if (count == 0)
     {
-      current->err = EINVAL;
+      __dce_set_errno(EINVAL);
       return -1;
     }
 
@@ -362,7 +363,7 @@ int dce_socket (int domain, int type, int protocol) noexcept
     {
       if (type != SOCK_DGRAM && type != SOCK_STREAM)
         {
-          current->err = EINVAL;
+          __dce_set_errno(EINVAL);
           return -1;
         }
       factory = manager->GetObject<LocalSocketFdFactory> ();
@@ -371,14 +372,14 @@ int dce_socket (int domain, int type, int protocol) noexcept
   if (!socket)
     {
 
-      current->err = EINVAL;
+      __dce_set_errno(EINVAL);
       return -1;
     }
 
   int fd = UtilsAllocateFd ();
   if (fd == -1)
     {
-      current->err = EMFILE;
+      __dce_set_errno(EMFILE);
       return -1;
     }
   if (!socket)
@@ -397,7 +398,7 @@ ssize_t dce_readv (int fd, const struct iovec *iov, int iovcnt)
 
   if ((0 == iov)||(iovcnt < 0))
     {
-      current->err = EINVAL;
+      __dce_set_errno(EINVAL);
       return -1;
     }
   for (int b = 0; b < iovcnt; b++)
@@ -508,7 +509,7 @@ ssize_t dce_recvfrom (int fd, void *buf, size_t len, int flags,
       if (*fromlen < msg.msg_namelen)
         {
           Thread *current = Current ();
-          current->err = EINVAL;
+          __dce_set_errno(EINVAL);
           return -1;
         }
       else
@@ -569,13 +570,13 @@ int dce_dup (int oldfd) noexcept
 
   if (!CheckFdExists (current->process, oldfd, true))
     {
-      current->err = EBADF;
+      __dce_set_errno(EBADF);
       return -1;
     }
   int fd = UtilsAllocateFd ();
   if (fd == -1)
     {
-      current->err = EMFILE;
+      __dce_set_errno(EMFILE);
       return -1;
     }
 
@@ -593,7 +594,7 @@ int dce_dup2 (int oldfd, int newfd) noexcept
   NS_ASSERT (current != 0);
   if (!CheckFdExists (current->process, oldfd, true) || (newfd > MAX_FDS))
     {
-      current->err = EBADF;
+      __dce_set_errno(EBADF);
       return -1;
     }
 
@@ -605,13 +606,13 @@ int dce_dup2 (int oldfd, int newfd) noexcept
     {
       if (dce_close (newfd))
         {
-          current->err = EBADF;
+          __dce_set_errno(EBADF);
           return -1;
         }
     }
   if (CheckFdExists (current->process, newfd, false))
     {
-      current->err = EBADF;
+      __dce_set_errno(EBADF);
       return -1;
     }
 
@@ -645,7 +646,7 @@ int dce_munmap (void *start, size_t length) noexcept
   int retval = ::munmap (start, length);
   if (retval == -1)
     {
-      current->err = errno;
+      __dce_set_errno(errno);
       return -1;
     }
   return 0;
@@ -694,7 +695,7 @@ int dce_truncate (const char *path, off_t length) noexcept
   int fd = dce_open (path, O_WRONLY, 0);
   if (fd == -1)
     {
-      current->err = errno;
+      __dce_set_errno(errno);
       return -1;
     }
 
@@ -710,7 +711,7 @@ int dce_ftruncate (int fd, off_t length) noexcept
   int index = UtilsSearchOpenFd (fildes);
   if (index == -1)
     {
-      current->err = EBADF;
+      __dce_set_errno(EBADF);
       return -1;
     }
   UnixFd *unixFd = current->process->openFiles[index].second;
@@ -735,20 +736,20 @@ int dce_pipe (int pipefd[2]) noexcept
 
   if (0 == pipefd)
     {
-      current->err = EFAULT;
+      __dce_set_errno(EFAULT);
       return -1;
     }
   int fdRead =  UtilsAllocateFd ();
   if (fdRead == -1)
     {
-      current->err = EMFILE;
+      __dce_set_errno(EMFILE);
       return -1;
     }
   PipeFd *reader = new PipeFd ();
 
   if (!reader)
     {
-      current->err = EMFILE;
+      __dce_set_errno(EMFILE);
       return -1;
     }
   current->process->openFiles[fdRead] = new FileUsage (fdRead, reader);
@@ -759,7 +760,7 @@ int dce_pipe (int pipefd[2]) noexcept
       delete current->process->openFiles[fdRead];
       current->process->openFiles.erase (fdRead);
       delete reader;
-      current->err = EMFILE;
+      __dce_set_errno(EMFILE);
       return -1;
     }
 
@@ -770,7 +771,7 @@ int dce_pipe (int pipefd[2]) noexcept
       delete current->process->openFiles[fdRead];
       current->process->openFiles.erase (fdRead);
       delete reader;
-      current->err = EMFILE;
+      __dce_set_errno(EMFILE);
       return -1;
     }
   current->process->openFiles[fdWrite] = new FileUsage (fdWrite, writer);
@@ -798,7 +799,7 @@ ssize_t dce_pread (int fd, void *buf, size_t count, off_t offset)
   off_t res = dce_lseek (fd, offset, SEEK_SET);
   if (res != offset)
     {
-      current->err = EINVAL;
+      __dce_set_errno(EINVAL);
       return (ssize_t) -1;
     }
   ssize_t ret = dce_read (fd, buf, count);
@@ -828,7 +829,7 @@ ssize_t dce_pwrite (int fd, const void *buf, size_t count, off_t offset)
   off_t res = dce_lseek (fd, offset, SEEK_SET);
   if (res != offset)
     {
-      current->err = EINVAL;
+      __dce_set_errno(EINVAL);
       return (ssize_t) -1;
     }
   ssize_t ret = dce_write (fd, buf, count);

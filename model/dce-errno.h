@@ -13,6 +13,14 @@ extern "C" {
 #endif
                  int * dce___errno_location () noexcept ;
 
+#define dce_errno (*dce___errno_location ())
+#define dce_h_errno (*dce__h_errno_location ())
+
+/* int * dce___errno_location (void); */
+/* int * dce___h_errno_location (void); */
+
+
+#define __dce_set_errno(_errno) errno = Current()->err = _errno
 
 #ifdef __cplusplus
 }

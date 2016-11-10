@@ -5,6 +5,7 @@
 #include "dce-unistd.h"
 #include "dce-stdlib.h"
 #include "dce-misc.h"
+/* #include "dce-errno.h" */
 #include "dce-libio.h"
 #include "sys/dce-stat.h"
 #include "process.h"
@@ -20,6 +21,10 @@
 #include <cstring>
 #include <cstdio>
 #include <stdio_ext.h>
+
+
+
+#define __dce_set_errno(_errno) errno = Current()->err = _errno
 
 NS_LOG_COMPONENT_DEFINE ("DceStdio");
 
@@ -196,20 +201,20 @@ FILE * dce_fdopen (int fildes, const char *mode) noexcept
   FILE *file = fopen ("/dev/null", mode);
   if (file == 0)
     {
-      current->err = errno;
+      __dce_set_errno(errno);
       return 0;
     }
-  struct my_IO_FILE_plus *fp = (struct my_IO_FILE_plus *)file;
-  static struct my_IO_jump_t vtable;
-  memcpy (&vtable, fp->vtable, sizeof(struct my_IO_jump_t));
-  vtable.__read = (void*)my_read;
-  vtable.__write = (void*)my_write;
-  vtable.__seek = (void*)my_seek;
-  vtable.__close = (void*)my_close;
-  vtable.__stat = (void*)my_stat;
-  fp->vtable = &vtable;
-  close (file->_fileno);
-  file->_fileno = fildes;
+  /* struct my_IO_FILE_plus *fp = (struct my_IO_FILE_plus *)file; */
+  /* static struct my_IO_jump_t vtable; */
+  /* memcpy (&vtable, fp->vtable, sizeof(struct my_IO_jump_t)); */
+  /* vtable.__read = (void*)my_read; */
+  /* vtable.__write = (void*)my_write; */
+  /* vtable.__seek = (void*)my_seek; */
+  /* vtable.__close = (void*)my_close; */
+  /* vtable.__stat = (void*)my_stat; */
+  /* fp->vtable = &vtable; */
+  /* close (file->_fileno); */
+  /* file->_fileno = fildes; */
   current->process->openStreams.push_back (file);
   dce_fseek (file, dce_lseek (fildes, 0, SEEK_CUR), SEEK_SET);
 
@@ -223,13 +228,13 @@ FILE * dce_fopen64 (const char *path, const char *mode)
   Thread *current = Current ();
   if (!mode_valid (mode))
     {
-      current->err = EINVAL;
+      __dce_set_errno(EINVAL);
       return 0;
     }
   int fd = dce_open (path, mode_posix_flags (mode) | O_LARGEFILE, 0666 & ~(current->process->uMask));
   if (fd == -1)
     {
-      current->err = errno;
+      __dce_set_errno(errno);
       return 0;
     }
   FILE *file = dce_fdopen (fd, mode);
@@ -247,13 +252,13 @@ FILE * dce_fopen (const char *path, const char *mode)
   Thread *current = Current ();
   if (!mode_valid (mode))
     {
-      current->err = EINVAL;
+      __dce_set_errno(EINVAL);
       return 0;
     }
   int fd = dce_open (path, mode_posix_flags (mode), 0666 & ~(current->process->uMask));
   if (fd == -1)
     {
-      current->err = errno;
+      __dce_set_errno(errno);
       return 0;
     }
   FILE *file = dce_fdopen (fd, mode);
@@ -271,7 +276,7 @@ FILE * dce_freopen (const char *path, const char *mode, FILE *stream)
   Thread *current = Current ();
   if (!mode_valid (mode))
     {
-      current->err = EINVAL;
+      __dce_set_errno(EINVAL);
       return 0;
     }
   int oldFd = stream->_fileno;
@@ -280,7 +285,7 @@ FILE * dce_freopen (const char *path, const char *mode, FILE *stream)
   if (stream == 0)
     {
       stream->_fileno = oldFd;
-      current->err = errno;
+      __dce_set_errno(errno);
       return 0;
     }
   struct my_IO_FILE_plus *fp = (struct my_IO_FILE_plus *)stream;
@@ -298,7 +303,7 @@ FILE * dce_freopen (const char *path, const char *mode, FILE *stream)
     {
       dce_close (oldFd);
       fclose (stream);
-      current->err = errno;
+      __dce_set_errno(errno);
       return 0;
     }
   dce_close (oldFd);
@@ -390,7 +395,7 @@ int dce_fclose (FILE *fp)
   NS_LOG_DEBUG ("fclose=" << status << " errno=" << errno);
   if (status != 0)
     {
-      current->err = errno;
+      __dce_set_errno(errno);
       return status;
     }
   return status;
@@ -425,7 +430,7 @@ int dce_fflush (FILE *stream)
           int status = fflush (*i);
           if (status != 0)
             {
-              current->err = errno;
+              __dce_set_errno(errno);
               return status;
             }
         }
@@ -435,7 +440,7 @@ int dce_fflush (FILE *stream)
       int status = fflush (stream);
       if (status != 0)
         {
-          current->err = errno;
+          __dce_set_errno(errno);
           return status;
         }
     }
@@ -469,7 +474,7 @@ int dce_fileno (FILE *stream) noexcept
   int status = fileno (stream);
   if (status == -1)
     {
-      current->err = errno;
+      __dce_set_errno(errno);
       return -1;
     }
   return status;
@@ -586,7 +591,7 @@ int dce_fseek (FILE *stream, long offset, int whence)
   int status = fseek (stream, offset, whence);
   if (status == -1)
     {
-      current->err = errno;
+      __dce_set_errno(errno);
       return -1;
     }
   return status;
@@ -599,7 +604,7 @@ int dce_fseeko (FILE *stream, off_t offset, int whence)
   int status = fseeko (stream, offset, whence);
   if (status == -1)
     {
-      current->err = errno;
+      __dce_set_errno(errno);
       return -1;
     }
   return status;
@@ -612,7 +617,7 @@ long dce_ftell (FILE *stream)
   long status = ftell (stream);
   if (status == -1)
     {
-      current->err = errno;
+      __dce_set_errno(errno);
       return -1;
     }
   return status;
@@ -625,7 +630,7 @@ off_t dce_ftello (FILE *stream)
   off_t status = ftello (stream);
   if (status == -1)
     {
-      current->err = errno;
+      __dce_set_errno(errno);
       return -1;
     }
   return status;
@@ -638,7 +643,7 @@ int dce_fgetpos (FILE *stream, fpos_t *pos)
   int status = fgetpos (stream, pos);
   if (status == -1)
     {
-      current->err = errno;
+      __dce_set_errno(errno);
       return -1;
     }
   return status;
@@ -651,7 +656,7 @@ int dce_fsetpos (FILE *stream, const fpos_t *pos)
   int status = fsetpos (stream, pos);
   if (status == -1)
     {
-      current->err = errno;
+      __dce_set_errno(errno);
       return -1;
     }
   return status;
@@ -672,7 +677,7 @@ int dce_setvbuf (FILE *stream, char *buf, int mode, size_t size) noexcept
   int status = setvbuf (stream, buf, mode, size);
   if (status == -1)
     {
-      current->err = errno;
+      __dce_set_errno(errno);
       return -1;
     }
   return status;
@@ -700,14 +705,14 @@ int dce_remove (const char *pathname) noexcept
   Thread *current = Current ();
   if (std::string (pathname) == "")
     {
-      current->err = ENOENT;
+      __dce_set_errno(ENOENT);
       return -1;
     }
   std::string fullpath = UtilsGetRealFilePath (pathname);
   int status = ::remove (fullpath.c_str ());
   if (status == -1)
     {
-      current->err = errno;
+      __dce_set_errno(errno);
     }
   return status;
 }
