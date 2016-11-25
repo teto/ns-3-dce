@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include <gnu/lib-names.h>
 
 struct libinfo
 {
@@ -67,11 +68,14 @@ char * seek4Lib (char *libName)
   data.lib2find = libName;
   data.libfound = NULL;
 
+  /* look for loaded libraries */
   dl_iterate_phdr (callback, (void *) &data);
 
   return data.libfound;
 }
 
+/*
+ * Opens prefix in readonly */
 int createversion (const char *input, const char *prefix,  const char *output)
 {
   if (NULL == input)
@@ -206,6 +210,7 @@ main (int argc, char *argv[])
   createversion (seek4Lib ("libpthread.so"), argv[++i], "model/libpthread.version");
   createversion (seek4Lib ("librt.so"), argv[++i], "model/librt.version");
   createversion (seek4Lib ("libm.so"), argv[++i], "model/libm.version");
+  // LIBDL_SO
   createversion (seek4Lib ("libdl.so"), argv[++i], "model/libdl.version");
 
   return 0;
