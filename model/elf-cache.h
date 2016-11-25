@@ -49,6 +49,9 @@ private:
   };
   std::string GetBasename (std::string filename) const;
   void CopyFile (std::string source, std::string destination) const;
+
+  /* Generates a soname based on the uid and save it in WriteString
+   */
   void WriteString (char *str, uint32_t uid) const;
   uint8_t NumberToChar (uint8_t c) const;
   static uint32_t AllocateId (void);

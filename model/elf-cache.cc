@@ -207,6 +207,7 @@ ElfCache::EditBuffer (uint8_t *map, uint32_t selfId) const
 
   // first, Patch the DT_NEEDED, and, DT_SONAME entries
   // and save the DT_INIT entry
+  // you can check it was patched correctly with $ objdump -p elf-cache/0/libc-ns3.so | grep SONAME
   long dt_strtab = GetDtStrTab (dyn, base_address);
   long dt_init = 0;
   ElfW (Dyn) * cur = dyn;
@@ -225,8 +226,8 @@ ElfCache::EditBuffer (uint8_t *map, uint32_t selfId) const
         }
       else if (cur->d_tag == DT_SONAME)
         {
-          NS_LOG_DEBUG("patching soname");
           char *soname = (char *)(map + dt_strtab + cur->d_un.d_val);
+          NS_LOG_DEBUG("patching soname " << soname << " for id " << selfId);
           WriteString (soname, selfId);
         }
       else if (cur->d_tag == DT_INIT)
@@ -296,7 +297,7 @@ ElfCache::AllocateId (void)
 uint32_t
 ElfCache::GetDepId (std::string depname) const
 {
-  // Maps dependancy library name to its final name (in case DCE overries that library
+  // Maps dependancy library name to its final name (in case DCE overries that library)
   for (std::vector<struct Overriden>::const_iterator i = m_overriden.begin (); i != m_overriden.end (); ++i)
     {
       struct Overriden overriden = *i;

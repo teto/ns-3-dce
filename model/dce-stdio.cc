@@ -91,19 +91,19 @@ int my_close (_IO_FILE *file)
     }
   return result;
 }
-int my_close_unconditional (_IO_FILE *file)
-{
-  return 0;
-}
-int my_write_unconditional (_IO_FILE *file)
-{
-  errno = EBADF;
-  return -1;
-}
-off64_t my_seek_unconditional (_IO_FILE *file, off64_t where, int whence)
-{
-  return -1;
-}
+/* int my_close_unconditional (_IO_FILE *file) */
+/* { */
+/*   return 0; */
+/* } */
+/* int my_write_unconditional (_IO_FILE *file) */
+/* { */
+/*   errno = EBADF; */
+/*   return -1; */
+/* } */
+/* off64_t my_seek_unconditional (_IO_FILE *file, off64_t where, int whence) */
+/* { */
+/*   return -1; */
+/* } */
 // weird ?
 int my_stat (_IO_FILE *file, void *buf)
 {
@@ -288,15 +288,15 @@ FILE * dce_freopen (const char *path, const char *mode, FILE *stream)
       __dce_set_errno(errno);
       return 0;
     }
-  struct my_IO_FILE_plus *fp = (struct my_IO_FILE_plus *)stream;
-  static struct my_IO_jump_t vtable;
-  memcpy (&vtable, fp->vtable, sizeof(struct my_IO_jump_t));
-  vtable.__read = (void*)my_read;
-  vtable.__write = (void*)my_write;
-  vtable.__seek = (void*)my_seek;
-  vtable.__close = (void*)my_close;
-  vtable.__stat = (void*)my_stat;
-  fp->vtable = &vtable;
+  /* struct my_IO_FILE_plus *fp = (struct my_IO_FILE_plus *)stream; */
+  /* static struct my_IO_jump_t vtable; */
+  /* memcpy (&vtable, fp->vtable, sizeof(struct my_IO_jump_t)); */
+  /* vtable.__read = (void*)my_read; */
+  /* vtable.__write = (void*)my_write; */
+  /* vtable.__seek = (void*)my_seek; */
+  /* vtable.__close = (void*)my_close; */
+  /* vtable.__stat = (void*)my_stat; */
+  /* fp->vtable = &vtable; */
 
   int fd = dce_open (path, mode_posix_flags (mode), ~0);
   if (fd == -1)
@@ -353,13 +353,13 @@ int dce_fclose_unconditional (FILE *file)
   // Note: it is important here not to call the Current function here
   // because we need to be able to run this function even if there is no context.
   // For example, this is why we have no call to NS_LOG_FUNCTION (Current () ...);
-  struct my_IO_FILE_plus *fp = (struct my_IO_FILE_plus *)file;
-  static struct my_IO_jump_t vtable;
-  memcpy (&vtable, fp->vtable, sizeof(struct my_IO_jump_t));
-  vtable.__close = (void*)my_close_unconditional;
-  vtable.__write = (void*)my_write_unconditional;
-  vtable.__seek = (void*)my_seek_unconditional;
-  fp->vtable = &vtable;
+  /* struct my_IO_FILE_plus *fp = (struct my_IO_FILE_plus *)file; */
+  /* static struct my_IO_jump_t vtable; */
+  /* memcpy (&vtable, fp->vtable, sizeof(struct my_IO_jump_t)); */
+  /* vtable.__close = (void*)my_close_unconditional; */
+  /* vtable.__write = (void*)my_write_unconditional; */
+  /* vtable.__seek = (void*)my_seek_unconditional; */
+  /* fp->vtable = &vtable; */
   fclose (file);
   return 0;
 }
@@ -368,11 +368,11 @@ int dce_fclose_onexec (FILE *file)
   // Note: it is important here not to call the Current function here
   // because we need to be able to run this function even if there is no context.
   // For example, this is why we have no call to NS_LOG_FUNCTION (Current () ...);
-  struct my_IO_FILE_plus *fp = (struct my_IO_FILE_plus *)file;
-  static struct my_IO_jump_t vtable;
-  memcpy (&vtable, fp->vtable, sizeof(struct my_IO_jump_t));
-  vtable.__close = (void*)my_close_unconditional;
-  fp->vtable = &vtable;
+  /* struct my_IO_FILE_plus *fp = (struct my_IO_FILE_plus *)file; */
+  /* static struct my_IO_jump_t vtable; */
+  /* memcpy (&vtable, fp->vtable, sizeof(struct my_IO_jump_t)); */
+  /* vtable.__close = (void*)my_close_unconditional; */
+  /* fp->vtable = &vtable; */
   fclose (file);
   return 0;
 }

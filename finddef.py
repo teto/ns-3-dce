@@ -70,7 +70,7 @@ exceptions = {
 
 
 
-def gen_declaration(rtype, symbol_name:str, decl_args, specifier, append_column: bool=True):
+def gen_declaration(rtype, symbol_name: str, decl_args, specifier, append_column: bool=True):
     """
     TODO tells the types of the variables
     """
@@ -80,16 +80,17 @@ def gen_declaration(rtype, symbol_name:str, decl_args, specifier, append_column:
 
     tpl = "{extern} {ret} {name} ({fullargs}) {throw} {finalizer}"
     content = tpl.format(
-            extern="",
-            ret=rtype,
-            fullargs=decl_args,
-            name=symbol_name,
-            throw=specifier,
-            finalizer=";\n" if append_column else ""
+        extern="",
+        ret=rtype,
+        fullargs=decl_args,
+        name=symbol_name,
+        throw=specifier,
+        finalizer=";\n" if append_column else ""
     )
     return content
 
-def gen_variadic_wrapper(rtype, wrapper_symbol, wrapped_symbol, decl_args : List[str],
+
+def gen_variadic_wrapper(rtype, wrapper_symbol, wrapped_symbol, decl_args: List[str],
         arg_names: List[str], specifier):
     """
     decl_args/arg_names as list
@@ -105,15 +106,16 @@ def gen_variadic_wrapper(rtype, wrapper_symbol, wrapped_symbol, decl_args : List
         va_end (__dce_va_list);
         {retstmt2}
             }};\n
-            """.format(
-            justbeforelastarg=arg_names[-2],
-            wrapped_symbol=wrapped_symbol,
-            fullargs=decl_args,
-            retstmt1 = "auto ret =" if rtype is not "void" else "",
-            retstmt2 = "return ret;" if rtype is not "void" else "",
-            arg_names = ",".join([arg for arg in arg_names[:-1] ]) ,
-        )
+    """.format(
+        justbeforelastarg=arg_names[-2],
+        wrapped_symbol=wrapped_symbol,
+        fullargs=decl_args,
+        retstmt1= "auto ret =" if rtype is not "void" else "",
+        retstmt2= "return ret;" if rtype is not "void" else "",
+        arg_names= ",".join([arg for arg in arg_names[:-1] ]) ,
+    )
     return content
+
 
 class Generator:
     def __init__(self):
@@ -157,11 +159,14 @@ class Generator:
 
     def generate_alias(self, aliasname, decl):
                    #define weak_alias(name, aliasname) \
-  # extern __typeof (name) aliasname __attribute__ ((weak, alias (# name)));
+        # extern __typeof (name) aliasname __attribute__ ((weak, alias (# name)));
         return ""
 
 
     def lookup(self, toto):
+        """
+        returns first result only
+        """
 
         log.info("Looking for %s" % toto)
 
@@ -171,7 +176,7 @@ class Generator:
         print("resultats=", results)
         for res in results:
             print("resultat:", res)
-        return results[0]
+        return results[0] if len(results) else None
 
     def generate_decl_string(self, name, dce: bool=False):
         """
@@ -187,12 +192,15 @@ class Generator:
         # hack around https://github.com/gccxml/pygccxml/issues/62
         if name in exceptions.keys():
             log.debug("Exception [%s] found " % name)
-            extern=""
-            rtype, libc_fullargs , arg_names, location, specifier = exceptions[name]
+            extern = ""
+            rtype, libc_fullargs, arg_names, location, specifier = exceptions[name]
             print("Values:", rtype, libc_fullargs, arg_names, location)
         else:
 
-            decl= self.lookup(name)
+            decl = self.lookup(name)
+            if not decl:
+                return None
+
 
             # print("decl", results)
             # decl = results[0]
@@ -209,7 +217,7 @@ class Generator:
             # {ret} {name} ({args})
             # proto = "{extern} {ret} {name} ({args})".format(
 
-            extern="extern" if decl.has_extern else ""
+            extern = "extern" if decl.has_extern else ""
             rtype = "%s" % (decl.return_type if decl.return_type is not None else "void")
 
 
@@ -244,7 +252,7 @@ class Generator:
                     s = "va_list " + decl.arguments[-1].name
                 elif "(" in s:
                     # check if it's a function_pointer
-                    log.debug ("looks like function pointer %s" % s)
+                    log.debug("looks like function pointer %s" % s)
                     s= s.rstrip("*")
                 else:
                     s += " " + arg.name
@@ -273,7 +281,7 @@ class Generator:
                     decl_args,
                     arg_names,
                     specifier
-                    )
+            )
         else:
             content = gen_declaration(rtype, name, libc_fullargs,
                     specifier, append_column=False)
@@ -299,7 +307,7 @@ class Generator:
             libc_filename = os.devnull
 
         # input_filename = "natives.h.txt"
-        locations = {}
+        locations = {} # Type: Dict[]
         log.debug("Opening %s" % input_filename)
         with open(input_filename, "r") as src:
             # aliasnames = last columns ?
@@ -328,9 +336,11 @@ class Generator:
 
                             # extern __typeof (name) aliasname __attribute__ ((weak, alias (# name)));
 
-                    log.debug(content)
-                    libc_fd.write(content)
+                            log.debug(content)
+                            libc_fd.write(content)
 
+                    # TODO
+                    self.generate_decl_strings()
                     # now we generate dce-<FILE>.h content
                     #
                     # generate only the dce overrides
@@ -365,8 +375,6 @@ class Generator:
                     items = locations.setdefault(location, [])
                     items.append(content)
 
-# TODO
-            # if write_headers:
             self.generate_headers(locations, write_headers)
 
 
@@ -431,30 +439,30 @@ def main():
 
     libc_filename = "model/libc.generated.cc"
 
-    parser  = argparse.ArgumentParser()
-    parser.add_argument('-p','--write-headers', action="store_true", default=False,
-            help="Write model/dce-* to files")
-    parser.add_argument('-i','--write-impl', action="store_true", default=False,
-            help="write %s" % libc_filename)
-    parser.add_argument('-a','--write-all', action="store_true", default=False,
-            help="Enables -i and -h")
-    parser.add_argument('-R','--regen', action="store_true", default=False,
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-p', '--write-headers', action="store_true",
+        default=False, help="Write model/dce-* to files")
+    parser.add_argument('-i', '--write-impl', action="store_true", default=False,
+        help="write %s" % libc_filename)
+    parser.add_argument('-a', '--write-all', action="store_true", default=False,
+        help="Enables -i and -h")
+    parser.add_argument('-R', '--regen', action="store_true", default=False,
             help="TODO: Disable the cache")
-    parser.add_argument('-d','--write-doc', action="store_true", default=False,
+    parser.add_argument('-d', '--write-doc', action="store_true", default=False,
             help="Write %s.csv" % API_COVERAGE_CSV)
 
-    args, unknown = parser.parse_known_args ()
+    args, unknown = parser.parse_known_args()
 
-# TODO call that with subprocess.
+    # TODO call that with subprocess.
     # os.system("./gen_natives.sh")
-  # redirect output
-    output ="model/libc-ns3.h.tmp"
+    # redirect output
+    output = "model/libc-ns3.h.tmp"
+    list_declarations = "model/libc-ns3.h"
 
-
-
+    # Preprocess libc-ns3.h
     with open(output, "w") as tmp:
-        subprocess.call( [
-            "gcc", "model/libc-ns3.h", "-E", "-P",  "-DNATIVE(name,...)=native,name,__VA_ARGS__",
+        subprocess.call([
+            "gcc", list_declarations, "-E", "-P", "-DNATIVE(name,...)=native,name,__VA_ARGS__",
             "-DDCE(name,...)=dce,name,__VA_ARGS__",
             ], stdout=tmp, stderr=sys.stdout)
 
@@ -463,7 +471,11 @@ def main():
     print(unknown)
     if len(unknown) > 0:
         for func in unknown:
-            g.generate_decl_string(func)
+            res = g.generate_decl_string(func)
+            if not res:
+                print("Could not find %s" % func)
+            else:
+                print(res)
         exit(0)
 
     # libc-ns3.generated.tmp
