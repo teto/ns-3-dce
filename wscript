@@ -238,12 +238,15 @@ def build_netlink(bld):
 
 def dce_kw(**kw):
     """
+    CXXFLAGS for tests and ...
     """
     d = dict(**kw)
     if os.uname()[4] == 'x86_64':
         mcmodel = ['-mcmodel=large']
     else:
         mcmodel = []
+    # MATT: cancel large model
+    mcmodel = []
     nofortify = ['-U_FORTIFY_SOURCE']
     #debug_dl = ['-Wl,--dynamic-linker=/usr/lib/debug/ld-linux-x86-64.so.2']
     debug_dl = []
