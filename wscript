@@ -237,17 +237,23 @@ def build_netlink(bld):
         ]
 
 def dce_kw(**kw):
+    """
+    CXXFLAGS for tests and ...
+    """
     d = dict(**kw)
     if os.uname()[4] == 'x86_64':
         mcmodel = ['-mcmodel=large']
     else:
         mcmodel = []
+    # MATT: cancel large model
+    mcmodel = []
     nofortify = ['-U_FORTIFY_SOURCE']
     #debug_dl = ['-Wl,--dynamic-linker=/usr/lib/debug/ld-linux-x86-64.so.2']
     debug_dl = []
-    d['cxxflags'] = d.get('cxxflags', []) + ['-fpie'] + mcmodel + nofortify
-    d['cflags'] = d.get('cflags', []) + ['-fpie'] + mcmodel + nofortify
-    d['linkflags'] = d.get('linkflags', []) + ['-pie'] + ['-lrt'] + ['-rdynamic'] + debug_dl
+	# ['-pie']
+    d['cxxflags'] = d.get('cxxflags', []) + mcmodel + nofortify
+    d['cflags'] = d.get('cflags', []) + mcmodel + nofortify
+    d['linkflags'] = d.get('linkflags', []) + ['-lrt'] + ['-rdynamic'] + debug_dl
     return d
 
 def build_dce_tests(module, bld):
