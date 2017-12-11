@@ -53,7 +53,8 @@
 #include <unistd.h>
 #include <wchar.h>
 #include <wctype.h>
-#include <xlocale.h>
+// xlocale.h is not provided in newer glibc https://bugs.freedesktop.org/show_bug.cgi?id=102454
+/* #include <xlocale.h> */
 #include <errno.h>
 #include <setjmp.h>
 #include <libintl.h>

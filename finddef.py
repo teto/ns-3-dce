@@ -130,11 +130,15 @@ class Generator:
         # Find the location of the xml generator (castxml or gccxml)
         generator_path, generator_name = utils.find_xml_generator()
 
+        # TODO USE DCE_CFLAGS or pass them at launch
+        cflags = os.getenv("CFLAGS", "")
         # Configure the xml generator
         xml_generator_config = parser.xml_generator_configuration_t(
             xml_generator_path=generator_path,
             xml_generator=generator_name,
-            cflags=" -nostdinc -I/usr/include",
+            # la ca va foirer
+            # get from env
+            cflags=" -nostdinc -I/usr/include" + cflags,
 
             # asked on tracker to generate va_list but not ok
             # flags= ["f1"]
