@@ -7,6 +7,7 @@
 /* #define _STDIO_H */
 // CXXFLAGS= " -D__USE_FORTIFY_LEVEL=2"
 /* we need to set this in order to be able to include functions */
+#include <setjmp.h>
 #include <bits/stdio2.h>
 #include <libgen.h>
 #include <wchar.h>
@@ -56,7 +57,6 @@
 // xlocale.h is not provided in newer glibc https://bugs.freedesktop.org/show_bug.cgi?id=102454
 /* #include <xlocale.h> */
 #include <errno.h>
-#include <setjmp.h>
 #include <libintl.h>
 #include <pwd.h>
 #include <inttypes.h>

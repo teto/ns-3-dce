@@ -129,17 +129,29 @@ class Generator:
 
         # Find the location of the xml generator (castxml or gccxml)
         generator_path, generator_name = utils.find_xml_generator()
+ 
+        # print(generat
 
         # TODO USE DCE_CFLAGS or pass them at launch
         cflags = os.getenv("CFLAGS", "")
         # Configure the xml generator
+        # doc at
+        # http://pygccxml.readthedocs.io/en/develop/apidocs/pygccxml.parser.config.html?highlight=xml_generator_configuration_t
+
         xml_generator_config = parser.xml_generator_configuration_t(
             xml_generator_path=generator_path,
             xml_generator=generator_name,
+            include_paths=[
+                "/nix/store/c30dlkmiyrjxxjv6nv63igjkzcj1fzxi-gcc-6.4.0/lib/gcc/x86_64-unknown-linux-gnu/6.4.0/include",
+                "/nix/store/mqalq0v2laqblw00dp7pwwckj2ra6jyh-glibc-2.26-75-dev/include",
+            ],
             # la ca va foirer
             # get from env
-            cflags=" -nostdinc -I/usr/include" + cflags,
+            # -nostdinc -I/usr/include
+            # -std=c99
+            # cflags=" " + cflags,
 
+            castxml_epic_version=1,
             # asked on tracker to generate va_list but not ok
             # flags= ["f1"]
             )
