@@ -129,8 +129,8 @@ class Generator:
 
         # Find the location of the xml generator (castxml or gccxml)
         generator_path, generator_name = utils.find_xml_generator()
- 
-        # print(generat
+
+        print("generator path=%s" %generator_path)
 
         # TODO USE DCE_CFLAGS or pass them at launch
         cflags = os.getenv("CFLAGS", "")
@@ -149,7 +149,10 @@ class Generator:
             # get from env
             # -nostdinc -I/usr/include
             # -std=c99
-            # cflags=" " + cflags,
+            # invalid argument '-std=c99' not allowed with 'C++'
+            #  -std=c++11 
+            cflags="" + cflags,
+
 
             castxml_epic_version=1,
             # asked on tracker to generate va_list but not ok
