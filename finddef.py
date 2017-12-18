@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 # Example taken out of http://pygccxml.readthedocs.io/en/develop/examples/searching1/example.html
+import pygccxml
 from pygccxml import utils
 from pygccxml import declarations
 from pygccxml import parser
 from pygccxml.declarations import declaration_utils
 from collections import namedtuple
-from typing import List
+from typing import List, Dict, Tuple
 import os
 import argparse
 import csv
@@ -26,14 +27,18 @@ log.setLevel(logging.DEBUG)
 log.addHandler(logging.StreamHandler())
 
 API_COVERAGE_CSV = "doc/source/api_cov.csv"
-
+include_paths = [
+                "/nix/store/c30dlkmiyrjxxjv6nv63igjkzcj1fzxi-gcc-6.4.0/lib/gcc/x86_64-unknown-linux-gnu/6.4.0/include",
+                "/nix/store/mqalq0v2laqblw00dp7pwwckj2ra6jyh-glibc-2.26-75-dev/include",
+]
 # Parse the c++ file
 # decls = parser.parse([filename], xml_generator_config)
 
+HeadersType = Dict[str, List]
 
 
-int_type = declarations.cpptypes.int_t()
-double_type = declarations.cpptypes.double_t()
+# int_type = declarations.cpptypes.int_t()
+# double_type = declarations.cpptypes.double_t()
 
 
 # int dce___cxa_atexit (void (*func)(void *), void *arg, void *d);
@@ -43,12 +48,13 @@ double_type = declarations.cpptypes.double_t()
 # list of exceptions for functions thatp ygccxml fail to identify correctly
 # hack around https://github.com/gccxml/pygccxml/issues/62
 # specifier = noexcept
+# location should be just the visible location, i.e. akin to a pattern
 ExplicitFn = namedtuple('ExplicitFn', ["rtype", "fullargs", "arg_names", "location", "specifier"])
 exceptions = {
     # "sysinfo": ExplicitFn("int", ["struct sysinfo *info"], ["info"],"/usr/include/x86_64-linux-gnu/sys/sysinfo.h", "noexcept"),
     # "sigaction": ExplicitFn("int", ["int signum", "const struct sigaction *act", "struct sigaction *oldact"], "signum, act, oldact","/usr/include/signal.h", "noexcept"),
-    "wait": ExplicitFn("pid_t", "int *stat_loc", "stat_loc", "/usr/include/x86_64-linux-gnu/sys/wait.h", ""),
-    "__fpurge": ExplicitFn("void", "FILE *fd", "fd", "/usr/include/stdio.h", ""),
+    "wait": ExplicitFn("pid_t", "int *stat_loc", "stat_loc", "sys/wait.h", ""),
+    "__fpurge": ExplicitFn("void", "FILE *fd", "fd", "stdio.h", ""),
     "__fpending": ExplicitFn("size_t", "FILE *fd", "fd", "/usr/include/stdio.h", ""),
     "__cxa_atexit": ExplicitFn("int", "void (*func)(void *), void *arg, void *d", "func, arg, d", "/usr/include/stdlib.h", ""),
     "__cxa_finalize": ExplicitFn("void", "void *d", "d", "/usr/include/stdlib.h", ""),
@@ -66,6 +72,7 @@ exceptions = {
     "fstatvfs": ExplicitFn("int", "int __fildes, struct statvfs * __buf", "__fildes, __buf", "/usr/include/x86_64-linux-gnu/sys/statvfs.h", "noexcept"),
     "fstatfs64": ExplicitFn("int", "int __fildes, struct statfs64 * __buf", "__fildes, __buf", "/usr/include/x86_64-linux-gnu/sys/vfs.h", "noexcept"),
 # int dce_fstatfs (int __fildes, struct statfs * __buf) noexcept;
+    "__stack_chk_fail": ExplicitFn("void", "void", "", "/usr/include/x86_64-linux-gnu/sys/vfs.h", "noexcept"),
     }
 
 
@@ -141,16 +148,16 @@ class Generator:
         xml_generator_config = parser.xml_generator_configuration_t(
             xml_generator_path=generator_path,
             xml_generator=generator_name,
-            include_paths=[
-                "/nix/store/c30dlkmiyrjxxjv6nv63igjkzcj1fzxi-gcc-6.4.0/lib/gcc/x86_64-unknown-linux-gnu/6.4.0/include",
-                "/nix/store/mqalq0v2laqblw00dp7pwwckj2ra6jyh-glibc-2.26-75-dev/include",
-            ],
+            include_paths=include_paths,
+            # maybe it misses the
+            # _GNU_SOURCE
+            define_symbols=["_GNU_SOURCE=1"],
             # la ca va foirer
             # get from env
             # -nostdinc -I/usr/include
             # -std=c99
             # invalid argument '-std=c99' not allowed with 'C++'
-            #  -std=c++11 
+            #  -std=c++11
             cflags="" + cflags,
 
 
@@ -182,9 +189,9 @@ class Generator:
         return ""
 
 
-    def lookup(self, toto):
+    def lookup(self, toto: str) -> pygccxml.declarations.declaration_t:
         """
-        returns first result only
+        returns pygccxml result only
         """
 
         log.info("Looking for %s" % toto)
@@ -197,8 +204,13 @@ class Generator:
             print("resultat:", res)
         return results[0] if len(results) else None
 
-    def generate_decl_string(self, name, dce: bool=False):
+    def generate_decl_string(self, name: str, dce: bool=False) -> Tuple[str, str]:
         """
+        name: libc function name
+        dce: true if function is overriden by DCE
+
+        Returns:
+            location, generated string
         """
 
         log.debug("Generating decl string for name,")
@@ -206,8 +218,7 @@ class Generator:
         # look for a match
         # Search for the function by name
 
-
-        res = ""
+        # Some libc functions need to be manually crafted
         # hack around https://github.com/gccxml/pygccxml/issues/62
         if name in exceptions.keys():
             log.debug("Exception [%s] found " % name)
@@ -238,8 +249,6 @@ class Generator:
 
             extern = "extern" if decl.has_extern else ""
             rtype = "%s" % (decl.return_type if decl.return_type is not None else "void")
-
-
 
             # for a in decl.arguments:
             #     print(dir(a ))
@@ -281,19 +290,19 @@ class Generator:
             for arg in decl_args:
                 print("arg=%s"% arg)
 
-
-
             libc_fullargs = ",".join(decl_args) # only types
             location = decl.location.file_name
             arg_names = [arg.name for arg in decl.arguments]
             specifier = "" if decl.does_throw else "noexcept"
             has_ellipsis = decl.has_ellipsis
+            print("found in %s" % location)
 
 
         # if "..." in libc_fullargs:
         if has_ellipsis:
             # DCE overrides that accept a va_list are suffixed with "_v" while
             # libc functions are prefix with "v"
+            # for instance "vprintf" is wrapped via dce_printf_v
             wrapped_symbol = "dce_" + name + "_v" if dce else "v" + name
             content = gen_variadic_wrapper(rtype, name,
                     wrapped_symbol,
@@ -313,33 +322,41 @@ class Generator:
                         retfinalstmt="return" if rtype is not "void" else "",
                         arg_names=",".join(arg_names) if isinstance(arg_names, list) else arg_names,
                     )
-        return content
+        return location, content
 
-    def generate_wrappers(self, input_filename, libc_filename,
-            write_headers : bool,
-            write_impl : bool
-        ):
+
+    def generate_wrappers(self,
+        input_filename,
+        libc_filename,
+        write_headers : bool,
+        write_impl : bool
+    ):
         """
-        Generate wrappers + headers
+        Generate wrappers + headers aka "dce-stdio.h"
         """
         if not write_impl:
             libc_filename = os.devnull
 
         # input_filename = "natives.h.txt"
-        locations = {} # Type: Dict[]
+        # str, array
+        locations = {} # type: HeadersType
+        content = ""
         log.debug("Opening %s" % input_filename)
         with open(input_filename, "r") as src:
             # aliasnames = last columns ?
             reader = csv.DictReader(src, fieldnames=["type","name"], restkey="extra")
             with open(libc_filename, "w+") as libc_fd:
+
                 # for line in src:
                 for row in reader:
+
+                    content = ""
                     # function_name = line.rstrip()
                     print('row["name"]=', row["name"], "extra=", row["extra"])
 
                     # self.generate_decl_string("")
 
-                    # then generate aliases for both natives and dce
+                    # generate aliases for both natives and dce
                     for aliasname in row["extra"]:
                         print("alias=", aliasname)
                         if len(aliasname):
@@ -350,7 +367,7 @@ class Generator:
                             # tpl = "extern __typeof ({name}) {aliasname} __attribute__ ((weak, alias (\"{name}\")));\n"
                             content += tpl.format(
                                     aliasname=aliasname,
-                                    name=name
+                                    name=row["name"]
                                     )
 
                             # extern __typeof (name) aliasname __attribute__ ((weak, alias (# name)));
@@ -359,37 +376,34 @@ class Generator:
                             libc_fd.write(content)
 
                     # TODO
-                    self.generate_decl_strings()
+                    location, decl_str = self.generate_decl_string(row["name"], row["type"] == "dce")
+                    content += decl_str
+
                     # now we generate dce-<FILE>.h content
                     #
                     # generate only the dce overrides
-                    content = ""
-                    if row["type"] == "dce":
-
-                        # declaration of dce_{libcfunc}
-                        # TODO
-
-                        if has_ellipsis:
-                            # then we need to declare the variant accepting va_list
-                            content = gen_declaration(rtype, "dce_"+ name + "_v",
-                                    decl_args[:-1] + ["va_list"],
-                                    specifier,
-                                )
-                            # implement an inline variadic function
-                            # and a variant accepting va_list
-                            content += "inline "+ gen_variadic_wrapper(rtype, "dce_"+name,
-                                    "dce_"+name +"_v",
-                                    decl_args,
-                                    arg_names,
-                                    specifier
-                                    )
-
-                        else:
-                            content = gen_declaration(rtype, "dce_"+ name,
-                                libc_fullargs,
-                                specifier,
-                                )
-
+                    #if row["type"] == "dce":
+                    #    # declaration of dce_{libcfunc}
+                    #    # TODO
+                    #    if has_ellipsis:
+                    #        # then we need to declare the variant accepting va_list
+                    #        content = gen_declaration(rtype, "dce_"+ name + "_v",
+                    #                decl_args[:-1] + ["va_list"],
+                    #                specifier,
+                    #            )
+                    #        # implement an inline variadic function
+                    #        # and a variant accepting va_list
+                    #        content += "inline "+ gen_variadic_wrapper(rtype, "dce_"+name,
+                    #                "dce_"+name +"_v",
+                    #                decl_args,
+                    #                arg_names,
+                    #                specifier
+                    #                )
+                    #    else:
+                    #        content = gen_declaration(rtype, "dce_"+ name,
+                    #            libc_fullargs,
+                    #            specifier,
+                    #            )
 
                     items = locations.setdefault(location, [])
                     items.append(content)
@@ -397,64 +411,69 @@ class Generator:
             self.generate_headers(locations, write_headers)
 
 
-    def generate_headers(self, locations, write_headers: bool=False):
-            # Now we generate the header files
-            for path, functions in locations.items():
-                print("path=", path)
-                (head, tail) = os.path.split(path)
-                print("head/tail", head, "----" , tail)
-                # filename = os.path.basename()
-                # filename = "model"
-                header = ""
+    def generate_headers(self, locations : HeadersType, write_headers: bool=False):
+        """
+        Write all the dce-*.h files
+        """
 
-                subfolder = ""
-                for folder in ["sys", "net", "arpa"]:
-                    if head.endswith(folder):
-                        subfolder = folder
-                        break
+        # Now we generate the header files
+        # TODO move to another function "extract_include_path"
+        for path, functions in locations.items():
+            print("path=", path)
+            (head, tail) = os.path.split(path)
+            print("head/tail", head, "----" , tail)
+            # filename = os.path.basename()
+            # filename = "model"
+            header = ""
 
-                    # tail = os.path.join("sys", tail)
-                filename = os.path.join("model", subfolder, "dce-" + tail)
-                header=os.path.join(subfolder, tail)
-                print(filename)
-                # TODO
-# + ".generated.h"
-                # header = "model/dce-" + filename
-                print("Header name=", filename)
-                content = """
-/* DO NOT MODIFY - GENERATED BY script */
-#ifndef DCE_HEADER_{guard}
-#define DCE_HEADER_{guard}
-// TODO add extern "C" ?
-#include <{header}>
-#include <stdarg.h> // just in case there is an ellipsis
-// TODO temporary hack
-#define __restrict__
+            subfolder = ""
+            for folder in ["sys", "net", "arpa"]:
+                if head.endswith(folder):
+                    subfolder = folder
+                    break
 
-#ifdef __cplusplus
-extern "C" {{
-#endif
-                """.format(guard=header.upper().replace(".","_").replace("/","_"), header=header) #os.path.basename(tail))
+                # tail = os.path.join("sys", tail)
+            filename = os.path.join("model", subfolder, "dce-" + tail)
+            header=os.path.join(subfolder, tail)
+            print(filename)
+            # TODO # + ".generated.h"
+            # header = "model/dce-" + filename
+            print("Header name=", filename)
 
-                for proto in functions:
-                    print(proto)
-                    content += proto + "\n"
+            # TODO strip
+            content = """
+                /* DO NOT MODIFY - GENERATED BY script */
+                #ifndef DCE_HEADER_{guard}
+                #define DCE_HEADER_{guard}
+                // TODO add extern "C" ?
+                #include <{header}>
+                #include <stdarg.h> // just in case there is an ellipsis
+                // TODO temporary hack
+                #define __restrict__
 
-                content += """
-#ifdef __cplusplus
-}
-#endif
-#endif
-"""
-                if write_headers:
-                    with open(filename, 'w+') as dst:
+                #ifdef __cplusplus
+                extern "C" {{
+                #endif
+            """.format(guard=header.upper().replace(".","_").replace("/","_"), header=header) #os.path.basename(tail))
 
-                        # print("content=", content)
-                        dst.write(content)
+            for proto in functions:
+                print(proto)
+                content += proto + "\n"
+
+            content += """
+                #ifdef __cplusplus
+                }
+                #endif
+                #endif
+                """
+            if write_headers:
+                with open(filename, 'w+') as dst:
+
+                    # print("content=", content)
+                    dst.write(content)
 
 
 def main():
-
 
     libc_filename = "model/libc.generated.cc"
 

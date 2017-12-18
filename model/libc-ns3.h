@@ -158,7 +158,9 @@ NATIVE (inet_lnaof)
 NATIVE (inet_netof)
 DCE (inet_ntop)
 NATIVE (inet_pton)
-NATIVE (inet6_opt_find)
+
+/* can' find it yet */
+/* NATIVE (inet6_opt_find) */
 
 // SYS/SOCKET.H
 DCE (socket)
@@ -198,7 +200,7 @@ DCE (seteuid)
 DCE (setegid)
 DCE (setreuid)
 DCE (setregid)
-DCE (setresuid)
+/* DCE (setresuid) */
 DCE (setresgid)
 DCE (dup)
 DCE (dup2)

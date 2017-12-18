@@ -24,6 +24,7 @@
 #include <netdb.h>
 #include <net/if.h>
 #include <netinet/in.h>
+#include <netinet/in.h>
 #include <poll.h>
 #include <semaphore.h>
 #include <signal.h>
