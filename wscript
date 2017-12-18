@@ -1,7 +1,6 @@
 ## -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
 
 import os
-import Options
 import os.path
 import ns3waf
 import sys
@@ -9,7 +8,7 @@ import types
 # local modules
 import wutils
 import subprocess
-import Logs
+from waflib import Utils, Scripting, Configure, Build, Options, TaskGen, Context, Task, Logs, Errors
 from waflib.Errors import WafError
 from waflib import Logs
 
@@ -19,8 +18,23 @@ from waflib import Logs
 # hdlr.setFormatter(formatter)
 # bld.logger.addHandler(hdlr)
 
+def dce_kw(**kw):
+    d = dict(**kw)
+    if os.uname()[4] == 'x86_64':
+        mcmodel = ['-mcmodel=large']
+    else:
+        mcmodel = []
+    nofortify = ['-U_FORTIFY_SOURCE']
+    #debug_dl = ['-Wl,--dynamic-linker=/usr/lib/debug/ld-linux-x86-64.so.2']
+    debug_dl = []  # type: ignore
+    d['cxxflags'] = d.get('cxxflags', []) + ['-fpie'] + mcmodel + nofortify
+    d['cflags'] = d.get('cflags', []) + ['-fpie'] + mcmodel + nofortify
+    d['linkflags'] = d.get('linkflags', []) + ['-pie'] + ['-lrt'] + ['-rdynamic'] + debug_dl
+    return d
+
 def options(opt):
-    opt.tool_options('compiler_cc') 
+    opt.load('compiler_c')
+    opt.load('compiler_cxx')
     ns3waf.options(opt)
     opt.add_option('--enable-kernel-stack',
                    help=('Path to the prefix where the kernel wrapper headers are installed'),
@@ -33,11 +47,11 @@ def options(opt):
     opt.add_option('--enable-opt',
                    help=('Enable use of DCE and NS-3 optimized compilation'),
                    dest='enable_opt', action='store_true',
-                   default=False)    
+                   default=False)
     opt.add_option('--with-ns3',
                    help=('Specify the installed directory of ns-3-dev'),
                    dest='with_ns3', type='string',
-                   default=None)    
+                   default=None)
     opt.add_option('--with-elf-loader',
                    help=('Specify the installed directory of elf-loader'),
                    dest='with_elf_loader', type='string',
@@ -76,7 +90,9 @@ def options(opt):
                    action="store_true", default=False,
                    dest='valgrind')
     opt.recurse('bindings/python')
-                                  
+    opt.recurse('example')
+    opt.recurse('test')
+
 def search_file(files):
     for f in files:
         if os.path.isfile (f):
@@ -84,6 +100,15 @@ def search_file(files):
     return None
 
 def configure(conf):
+
+    conf.load('relocation', tooldir=['waf-tools'])
+    conf.load('compiler_c')
+    cc_string = '.'.join(conf.env['CC_VERSION'])
+    conf.msg('Checking for cc version',cc_string,'GREEN')
+    conf.load('compiler_cxx')
+
+    conf.load('clang_compilation_database', tooldir=['waf-tools'])
+
     if Options.options.with_ns3 is not None and os.path.isdir(Options.options.with_ns3):
         conf.env['NS3_DIR']= os.path.abspath(Options.options.with_ns3)
         if not 'PKG_CONFIG_PATH' in os.environ:
@@ -96,14 +121,13 @@ def configure(conf):
         conf.env.append_value('NS3_EXECUTABLE_PATH', os.path.join(conf.env['NS3_DIR'], 'bin'))
 
     ns3waf.check_modules(conf, ['core', 'network', 'internet'], mandatory = True)
-    ns3waf.check_modules(conf, ['point-to-point', 'tap-bridge', 'netanim'], mandatory = False)
-    ns3waf.check_modules(conf, ['wifi', 'point-to-point', 'csma', 'mobility'], mandatory = False)
-    ns3waf.check_modules(conf, ['point-to-point-layout'], mandatory = False)
-    ns3waf.check_modules(conf, ['mpi', 'lte'], mandatory = False)
-    ns3waf.check_modules(conf, ['visualizer'], mandatory = False)
-    ns3waf.check_modules(conf, ['applications'], mandatory = False)
-    ns3waf.check_modules(conf, ['fd-net-device'], mandatory = False)
-    conf.check_tool('compiler_cc')
+    # ns3waf.check_modules(conf, ['point-to-point', 'tap-bridge', 'netanim'], mandatory = False)
+    # ns3waf.check_modules(conf, ['wifi', 'point-to-point', 'csma', 'mobility'], mandatory = False)
+    # ns3waf.check_modules(conf, ['point-to-point-layout'], mandatory = False)
+    # ns3waf.check_modules(conf, ['mpi', 'lte'], mandatory = False)
+    # ns3waf.check_modules(conf, ['visualizer'], mandatory = False)
+    # ns3waf.check_modules(conf, ['applications'], mandatory = False)
+    # ns3waf.check_modules(conf, ['fd-net-device'], mandatory = False)
     conf.check(header_name='stdint.h', define_name='HAVE_STDINT_H', mandatory=False)
     conf.check(header_name='inttypes.h', define_name='HAVE_INTTYPES_H', mandatory=False)
     conf.check(header_name='sys/inttypes.h', define_name='HAVE_SYS_INT_TYPES_H', mandatory=False)
@@ -111,10 +135,11 @@ def configure(conf):
     conf.check(header_name='sys/stat.h', define_name='HAVE_SYS_STAT_H', mandatory=False)
     conf.check(header_name='dirent.h', define_name='HAVE_DIRENT_H', mandatory=False)
 
+
     if Options.options.enable_mpi:
          conf.env.append_value ('DEFINES', 'DCE_MPI=1')
          conf.env['MPI'] = '1'
-         
+
     conf.env.prepend_value('LINKFLAGS', '-Wl,--no-as-needed')
     conf.env.append_value('LINKFLAGS', '-pthread')
     conf.check (lib='dl', mandatory = True)
@@ -141,7 +166,7 @@ def configure(conf):
         for dir in architectures:
             dir = os.path.join(Options.options.kernel_stack, dir)
             if os.path.isdir(dir):
-                kernel_stack_dir = dir 
+                kernel_stack_dir = dir
                 break
 
         if not kernel_stack_dir:
@@ -157,7 +182,7 @@ def configure(conf):
     conf.env['EXAMPLE_DIRECTORIES'] = '.'
     conf.env['NS3_ENABLED_MODULES'] = []
     conf_myscripts(conf)
-    
+
     if Options.options.with_elf_loader is not None and os.path.isdir(Options.options.with_elf_loader):
          if os.path.exists(Options.options.with_elf_loader + '/ldso'):
              conf.env['ELF_LOADER_PATH'] = Options.options.with_elf_loader
@@ -200,7 +225,7 @@ def configure(conf):
         pass
 
     # sctp-tools check
-    have_sctp_tools = conf.check(header_name='netinet/sctp.h', 
+    have_sctp_tools = conf.check(header_name='netinet/sctp.h',
                                 define_name='HAVE_SCTP_H', mandatory=False)
     conf.env['SCTP_TOOLS_FOUND'] = True
     if have_sctp_tools is None:
@@ -209,10 +234,13 @@ def configure(conf):
                                     have_sctp_tools,
                                     "sctp-tools (netinet/sctp.h) not found")
 
+    if Options.options.enable_examples:
+        conf.recurse(os.path.join('example', dir))
+
     conf.recurse(os.path.join('utils'))
     conf.recurse('bindings/python')
     ns3waf.print_feature_summary(conf)
-    
+
 def build_netlink(bld):
     module_source = [
         'netlink/netlink-socket.cc',
@@ -226,7 +254,7 @@ def build_netlink(bld):
         'netlink/netlink-socket-factory.h',
         'netlink/netlink-socket-address.h',
         ]
-    module = ns3waf.create_module(bld, 
+    module = ns3waf.create_module(bld,
                                   name='netlink',
                                   needed = ['internet', 'core'],
                                   source=module_source,
@@ -258,7 +286,7 @@ def dce_kw(**kw):
 
 def build_dce_tests(module, bld):
     tests_source = [
-        'test/dce-manager-test.cc', 
+        'test/dce-manager-test.cc',
         ]
     if bld.env['KERNEL_STACK']:
         tests_source += [
@@ -275,9 +303,9 @@ def build_dce_tests(module, bld):
     module.add_runner_test(needed=['core', 'dce', 'internet', 'applications'],
                            source=tests_source)
 
-    module.add_test(features='cxx cxxshlib', source=['test/test-macros.cc'], 
-                    target='lib/test', linkflags=[ '-Wl,-soname=libtest.so'])
-    bld.install_files('${PREFIX}/lib', 'lib/libtest.so', chmod=0755 )
+    module.add_test(features='cxx cxxshlib', source=['test/test-macros.cc'],
+                    target='lib/test', linkflags=['-Wl,-soname=libtest.so'])
+    bld.install_files('${PREFIX}/lib', 'lib/libtest.so', chmod=0o755 )
 
     tests = [['test-empty', []],
              ['test-sleep', []],
@@ -323,113 +351,15 @@ def build_dce_tests(module, bld):
     for name,uselib in tests:
         module.add_test(**dce_kw(target='bin_dce/' + name, source = ['test/' + name + '.cc'],
                                  use = uselib + ['lib/test']))
-        bld.install_files('${PREFIX}/bin_dce', 'build/bin_dce/' + name , chmod=0755 )
+        bld.install_files('${PREFIX}/bin_dce', 'build/bin_dce/' + name , chmod=0o755 )
 
-def build_dce_examples(module, bld):
-    dce_examples = [
-		# ['udp-server', []],
-                    ['udp-client', []],
-                    # ['udp-perf', ['m']],
-                    ['tcp-server', []],
-                    ['tcp-client', []],
-                    ['tcp-loopback', []],
-                    ['unix-server', []],
-                    ['unix-client', []],
-                    ['udp-echo-server', []],
-                    ['udp-echo-client', []],
-                    ['dccp-server', []],
-                    ['dccp-client', []],
-                    ['freebsd-iproute', []],
-#                    ['little-cout', []],
-                    ]
 
-    if bld.env['SCTP_TOOLS_FOUND']:
-        dce_examples += [
-                    ['sctp-server', ['sctp']],
-                    ['sctp-client', ['sctp']],
-        ]
-
-    for name,lib in dce_examples:
-        module.add_example(**dce_kw(target = 'bin_dce/' + name, 
-                                    source = ['example/' + name + '.cc'],
-                                    lib = lib))
-        bld.install_files('${PREFIX}/bin_dce', 'bin_dce/' + name , chmod=0755 )        
-
-    module.add_example(needed = ['core', 'internet', 'dce'], 
-                       target='bin/dce-tcp-simple',
-                       source=['example/dce-tcp-simple.cc'])
-
-    module.add_example(needed = ['core', 'internet', 'dce'], 
-                       target='bin/dce-udp-simple',
-                       source=['example/dce-udp-simple.cc'])
-    
-    module.add_example(needed = ['core', 'internet', 'dce'], 
-                       target='bin/dce-ccnd-simple',
-                       source=['example/ccnx/dce-ccnd-simple.cc'])
-                       
-    module.add_example(needed = ['core', 'internet', 'dce'], 
-                       target='bin/dce-ccnd-short-stuff',
-                       source=['example/ccnx/dce-ccnd-short-stuff.cc'])
-                       
-    module.add_example(needed = ['core', 'internet', 'dce', 'tap-bridge', 'point-to-point', 'csma'],
-                       target='bin/dce-tap-udp-echo',
-                       source=['example/ccnx/dce-tap-udp-echo.cc'])                
-
-    module.add_example(needed = ['core', 'internet', 'dce', 'tap-bridge', 'csma' ], 
-                       target='bin/dce-tap-ccnd',
-                       source=['example/ccnx/dce-tap-ccnd.cc'])       
-                       
-    module.add_example(needed = ['core', 'internet', 'dce', 'tap-bridge', 'csma' ], 
-                       target='bin/dce-tap-vlc',
-                       source=['example/ccnx/dce-tap-vlc.cc'])       
-    
-#    module.add_example(needed = ['core', 'internet', 'dce', 'point-to-point', 'netanim'], 
-#                       target='bin/dce-ping',
-#                       source=['example/dce-ping.cc', 'example/ccnx/misc-tools.cc'])
-
-    module.add_example(needed = ['core', 'internet', 'dce' ], 
-                       target='bin/dce-bash-simple',
-                       source=['example/bash/dce-bash-simple.cc'])
-
-    module.add_example(needed = ['core', 'internet', 'dce', 'point-to-point', 'netanim'], 
-                       target='bin/dce-ccn-cache',
-                       source=['example/ccnx/dce-ccn-cache.cc', 'example/ccnx/misc-tools.cc'])
-
-    module.add_example(needed = ['core', 'internet', 'dce', 'point-to-point', 'netanim', 'csma'], 
-                       target='bin/dce-iperf',
-                       source=['example/dce-iperf.cc', 'example/ccnx/misc-tools.cc'])
-
-    module.add_example(needed = ['core', 'internet', 'dce', 'point-to-point', 'netanim', 'csma', 'fd-net-device'], 
-                       target='bin/dce-iperf-emulation',
-                       source=['example/dce-iperf-emulation.cc', 'example/ccnx/misc-tools.cc'])
-                       
-    module.add_example(needed = ['core', 'network', 'internet', 'dce', 'point-to-point', 'csma', 'applications'],
-                       target='bin/linear-udp-perf',
-                       source=['example/linear-udp-perf.cc'])
-
-    if bld.env['LIB_ASPECT_PATH']:
-        module.add_example(needed = ['core', 'network', 'internet', 'dce', 'point-to-point', 'csma', 'applications'],
-                           target='bin/dce-debug-aspect',
-                           use=['ASPECT'],
-                           source=['example/dce-debug-aspect.cc'])
-
-#    module.add_example(needed = ['core', 'internet', 'dce', 'point-to-point', 'netanim'], 
-#                       target='bin/dce-xorp-simple',
-#                       source=['example/xorp/dce-xorp-simple.cc', 'example/ccnx/misc-tools.cc'])
-                                              
-#    module.add_example(needed = ['core', 'internet', 'dce', 'csma' ], 
-#                       target='bin/dce-udp-multicast',
-#                       source=['example/dce-udp-multicast.cc'])
-#    module.add_example(needed = ['core', 'dce', ], 
-#                       target='bin/dce-cout-bug',
-#                       source=['example/dce-cout-bug.cc'])
-                                                                
 def build_dce_kernel_examples(module, bld):
-    module.add_example(needed = ['core', 'internet', 'dce', 'point-to-point'], 
+    module.add_example(needed = ['core', 'internet', 'dce', 'point-to-point'],
                        target='bin/dce-udp-perf',
                        source=['example/dce-udp-perf.cc'])
 
-    module.add_example(needed = ['core', 'network', 'dce'], 
+    module.add_example(needed = ['core', 'network', 'dce'],
                        target='bin/dce-linux-simple',
                        source=['example/dce-linux-simple.cc'])
 
@@ -437,20 +367,20 @@ def build_dce_kernel_examples(module, bld):
                        target='bin/dce-linux',
                        source=['example/dce-linux.cc'])
 
-    module.add_example(needed = ['core', 'network', 'dce', 'csma'], 
+    module.add_example(needed = ['core', 'network', 'dce', 'csma'],
                        target='bin/dce-dccp',
                        source=['example/dce-dccp.cc'])
-    
-    module.add_example(needed = ['core', 'internet', 'dce', 'point-to-point', 'netanim'], 
+
+    module.add_example(needed = ['core', 'internet', 'dce', 'point-to-point', 'netanim'],
                        target='bin/dce-ccnd-udp-2-nodes',
                        source=['example/ccnx/dce-ccnd-udp-2-nodes.cc', 'example/ccnx/misc-tools.cc'])
 
-    module.add_example(needed = ['core', 'internet', 'dce', 'point-to-point', 'netanim'], 
+    module.add_example(needed = ['core', 'internet', 'dce', 'point-to-point', 'netanim'],
                        target='bin/dce-ccnd-linear-multiple',
                        source=['example/ccnx/dce-ccnd-linear-multiple.cc', 'example/ccnx/misc-tools.cc'])
-                       
 
-    module.add_example(needed = ['core', 'network', 'dce', 'point-to-point'], 
+
+    module.add_example(needed = ['core', 'network', 'dce', 'point-to-point'],
                        target='bin/dce-xfrm',
                        source=['example/dce-xfrm.cc'])
 
@@ -512,7 +442,7 @@ def build_dce_kernel_examples(module, bld):
                        source=['example/dce-freebsd.cc'])
 
 
-# Add a script to build system 
+# Add a script to build system
 def build_a_script(bld, name, needed = [], **kw):
     external = [i for i in needed if not i == name]
     if not ns3waf.modules_found(bld, external):
@@ -558,11 +488,11 @@ def add_myscripts(bld):
             scratches.append(dir)
 
     for dir in submodules:
-        bld.add_subdirs(os.path.join('myscripts', dir))
+        bld.recurse(os.path.join('myscripts', dir))
 
     for dir in scratches:
         if os.path.isdir(os.path.join('myscripts', dir)):
-            bld.add_subdirs(os.path.join('myscripts', dir))
+            bld.recurse(os.path.join('myscripts', dir))
         elif dir.endswith(".cc"):
             bld.build_a_script('dce',
                                needed = bld.env['NS3_MODULES_FOUND'] + ['dce'],
@@ -577,13 +507,13 @@ def conf_myscripts(conf):
         if os.path.isdir(os.path.join('myscripts', dir)):
              conf.recurse(os.path.join('myscripts', dir))
 
-	
+
 def _get_all_task_gen(self):
     for group in self.groups:
         for taskgen in group:
             yield taskgen
 
-def build(bld):    
+def build(bld):
     bld.env['NS3_MODULES_WITH_TEST_LIBRARIES'] = []
     bld.env['NS3_ENABLED_MODULE_TEST_LIBRARIES'] = []
     bld.env['NS3_SCRIPT_DEPENDENCIES'] = []
@@ -727,7 +657,7 @@ def build(bld):
         'model/linux/ipv4-linux.h',
         'model/linux/ipv6-linux.h',
         'model/freebsd/ipv4-freebsd.h',
-        'model/process-delay-model.h',        
+        'model/process-delay-model.h',
         'model/exec-utils.h',
         'model/utils.h',
         'model/linux/linux-ipv4-raw-socket-factory.h',
@@ -761,15 +691,21 @@ def build(bld):
                                   lib=['dl'])
 #                                  lib=['dl','efence'])
 
+    # make module available for others to use
+    bld.env.MODULE = module
+
     # make sure submodules built before building examples (that depend submodules)
     bld.build_a_script = types.MethodType(build_a_script, bld)
     add_myscripts(bld)
 
     build_dce_tests(module, bld)
-    build_dce_examples(module, bld)
+
+    # replace with a recurse, can we pass extra
+    # build_dce_examples(module, bld)
+    bld.recurse('example')
 
     # no idea to solve this two-way dependency (dce <-> netlink)
-    module.add_runner_test(needed = ['internet', 'point-to-point', 'core', 'dce'], 
+    module.add_runner_test(needed = ['internet', 'point-to-point', 'core', 'dce'],
                            use=uselib,
                            includes=['netlink'],
                            source=['test/netlink-socket-test.cc'],
@@ -777,13 +713,14 @@ def build(bld):
 
     if bld.env['KERNEL_STACK']:
         build_dce_kernel_examples(module, bld)
-    
+
     # build test-runner
-    module.add_example(target='bin/test-runner',
+    module.build_example(target='bin/test-runner',
                        source = ['utils/test-runner.cc'],
                        use = bld.env['NS3_ENABLED_MODULE_TEST_LIBRARIES'],
                        linkflags = [],
                        needed = bld.env['NS3_MODULES_FOUND'] + ['dce'])
+
     bld.env.append_value('NS3_RUNNABLE_PROGRAMS', 'bin/test-runner')
     if bld.env['ELF_LOADER_PATH']:
         module.add_example(target='bin/test-runner-vdl',
@@ -794,8 +731,8 @@ def build(bld):
 
 
     bld.add_group('dce_version_files')
-    
-    bld.program(source='utils/dcemakeversion.c', 
+
+    bld.program(source='utils/dcemakeversion.c',
                 name='dcemakeversion',
                 target='dcemakeversion', cflags = [ '-g'], linkflags    = ['-lpthread', '-lrt', '-lm', '-ldl'])
 
@@ -867,7 +804,7 @@ def build(bld):
                          '-Wl,--version-script=' + os.path.join('model', 'libdl.version'),
                          '-Wl,-soname=libdl.so.2'])
 
-    bld.add_subdirs(['utils'])
+    bld.recurse(['utils'])
     bld.recurse('bindings/python')
 
     # Write the build status file.
@@ -900,7 +837,7 @@ def build(bld):
         for gen in bld.all_task_gen:
             if type(gen).__name__ in ['task_gen', 'ns3header_taskgen', 'ns3moduleheader_taskgen']:
                 gen.post()
-        bld.env['PRINT_BUILT_MODULES_AT_END'] = False 
+        bld.env['PRINT_BUILT_MODULES_AT_END'] = False
 
 
 
@@ -915,7 +852,7 @@ def _doxygen(bld):
 
     # try:
     #     program_obj = wutils.find_program('print-introspected-doxygen', env)
-    # except ValueError: 
+    # except ValueError:
     #     Logs.warn("print-introspected-doxygen does not exist")
     #     raise SystemExit(1)
     #     return
@@ -955,10 +892,10 @@ class Ns3ShellContext(Context.Context):
     def execute(self):
 
         # first we execute the build
-	bld = Context.create_context("build")
-	bld.options = Options.options # provided for convenience
-	bld.cmd = "build"
-	bld.execute()
+        bld = Context.create_context("build")
+        bld.options = Options.options # provided for convenience
+        bld.cmd = "build"
+        bld.execute()
 
         # Set this so that the lists won't be printed when the user
         # exits the shell.
@@ -981,21 +918,21 @@ class Ns3DoxygenContext(Context.Context):
     cmd = 'doxygen'
     def execute(self):
         # first we execute the build
-	bld = Context.create_context("build")
-	bld.options = Options.options # provided for convenience
-	bld.cmd = "build"
-	bld.execute()
+        bld = Context.create_context("build")
+        bld.options = Options.options # provided for convenience
+        bld.cmd = "build"
+        bld.execute()
         _doxygen(bld)
 
 from waflib import Context, Build
 class Ns3SphinxContext(Context.Context):
     """build the Sphinx documentation: manual, tutorial, models"""
-    
+
     cmd = 'sphinx'
 
     def sphinx_build(self, path):
-        print
-        print "[waf] Building sphinx docs for " + path
+        print()
+        print("[waf] Building sphinx docs for " + path)
         if path == './doc':
             dir_opt = "BUILDDIR=" + os.getcwd () + "/doc/build/"
         else:
@@ -1012,18 +949,18 @@ class Ns3SphinxContext(Context.Context):
         import glob
         for sphinxdir in ["./doc"] + glob.glob('myscripts/*/doc') :
             self.sphinx_build(sphinxdir)
-     
+
 
 from waflib import Context, Build
 class Ns3DocContext(Context.Context):
     """build all the documentation: doxygen, manual, tutorial, models"""
-    
+
     cmd = 'docs'
 
     def execute(self):
         steps = ['doxygen', 'sphinx']
         Options.commands = steps + Options.commands
-        
+
 
 def shutdown(ctx):
     bld = wutils.bld

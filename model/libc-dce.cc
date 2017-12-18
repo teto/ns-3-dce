@@ -42,17 +42,109 @@
 #include "sys/dce-syslog.h"
 #include "dce-pwd.h"
 #include "dce-dirent.h"
-#include "sys/dce-vfs.h"
-#include "dce-termios.h"
-#include "dce-dlfcn.h"
-#include "dce-utime.h"
-#include "sys/dce-sysinfo.h"
-#include "sys/dce-wait.h"
-#include "sys/dce-uio.h"
-#include "dce-ifaddrs.h"
-#include "sys/dce-utsname.h"
-#include "dce-grp.h"
-#include "dce-libio.h"
+#include "dce-vfs.h"
+#include "dce-termio.h"
+#include "dce-dl.h"
+
+#include <arpa/inet.h>
+#include <ctype.h>
+#include <fcntl.h>
+#include <getopt.h>
+#include <grp.h>
+#include <ifaddrs.h>
+#include <sys/uio.h>
+#include <libgen.h>
+#include <locale.h>
+#include <netdb.h>
+#include <net/if.h>
+#include <netinet/in.h>
+#include <poll.h>
+#include <semaphore.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdio_ext.h>
+#include <stddef.h>
+#include <stdarg.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <syslog.h>
+#include <sys/dir.h>
+#include <sys/ioctl.h>
+#include <sys/io.h>
+#include <sys/mman.h>
+#include <sys/timerfd.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/resource.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/utsname.h>
+#include <sys/wait.h>
+#include <pthread.h>
+#include <pwd.h>
+#include <time.h>
+#include <unistd.h>
+#include <wchar.h>
+#include <wctype.h>
+/* #include <xlocale.h> got rmoved in xlocale.h header is no longer existing in glibc version 2.26 */
+#include <errno.h>
+#include <setjmp.h>
+#include <libintl.h>
+#include <pwd.h>
+#include <inttypes.h>
+#include <error.h>
+#include <netinet/ether.h>
+#include <search.h>
+#include <fnmatch.h>
+#include <langinfo.h>
+#include <sys/vfs.h>
+#include <termio.h>
+#include <math.h>
+#include <assert.h>
+#include <dlfcn.h>
+#include <link.h>
+
+extern void __cxa_finalize (void *d);
+extern int __cxa_atexit (void (*func)(void *), void *arg, void *d);
+
+extern int (*__gxx_personality_v0)(int a, int b,
+                                   unsigned c,
+                                   struct _Unwind_Exception *d,
+                                   struct _Unwind_Context *e);
+
+// extern int __gxx_personality_v0 (int a, int b,
+//                                                               unsigned c, struct _Unwind_Exception *d, struct _Unwind_Context *e);
+// extern int __xpg_strerror_r (int __errnum, char *__buf, size_t __buflen);
+extern int __xpg_strerror_r (int __errnum, char *__buf, size_t __buflen);
+
+// from glibc's string.h
+extern char * __strcpy_chk (char *__restrict __dest,
+                            const char *__restrict __src,
+                            size_t __destlen);
+// from glibc's stdio.h
+extern int __sprintf_chk (char *, int, size_t, const char *, ...) __THROW;
+extern int __snprintf_chk (char *, size_t, int, size_t, const char *, ...)
+__THROW;
+extern int __vsprintf_chk (char *, int, size_t, const char *,
+                           _G_va_list) __THROW;
+extern int __vsnprintf_chk (char *, size_t, int, size_t, const char *,
+                            _G_va_list) __THROW;
+extern int __printf_chk (int, const char *, ...);
+extern int __fprintf_chk (FILE *, int, const char *, ...);
+extern int __vprintf_chk (int, const char *, _G_va_list);
+extern int __vfprintf_chk (FILE *, int, const char *, _G_va_list);
+extern char * __fgets_unlocked_chk (char *buf, size_t size, int n, FILE *fp);
+extern char * __fgets_chk (char *buf, size_t size, int n, FILE *fp);
+extern int __asprintf_chk (char **, int, const char *, ...) __THROW;
+extern int __vasprintf_chk (char **, int, const char *, _G_va_list) __THROW;
+extern int __dprintf_chk (int, int, const char *, ...);
+extern int __vdprintf_chk (int, int, const char *, _G_va_list);
+extern int __obstack_printf_chk (struct obstack *, int, const char *, ...)
+__THROW;
+extern int __obstack_vprintf_chk (struct obstack *, int, const char *,
+                                  _G_va_list) __THROW;
+extern void __stack_chk_fail (void);
 
 
 

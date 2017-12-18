@@ -13,6 +13,7 @@ import csv
 import subprocess
 import logging
 import sys
+import textwrap
 
 
 """
@@ -53,7 +54,7 @@ ExplicitFn = namedtuple('ExplicitFn', ["rtype", "fullargs", "arg_names", "locati
 exceptions = {
     # "sysinfo": ExplicitFn("int", ["struct sysinfo *info"], ["info"],"/usr/include/x86_64-linux-gnu/sys/sysinfo.h", "noexcept"),
     # "sigaction": ExplicitFn("int", ["int signum", "const struct sigaction *act", "struct sigaction *oldact"], "signum, act, oldact","/usr/include/signal.h", "noexcept"),
-    "wait": ExplicitFn("pid_t", "int *stat_loc", "stat_loc", "sys/wait.h", ""),
+    "wait": ExplicitFn("pid_t", "int *stat_lo", "stat_loc", "sys/wait.h", ""),
     "__fpurge": ExplicitFn("void", "FILE *fd", "fd", "stdio.h", ""),
     "__fpending": ExplicitFn("size_t", "FILE *fd", "fd", "/usr/include/stdio.h", ""),
     "__cxa_atexit": ExplicitFn("int", "void (*func)(void *), void *arg, void *d", "func, arg, d", "/usr/include/stdlib.h", ""),
@@ -106,6 +107,7 @@ def gen_variadic_wrapper(rtype, wrapper_symbol, wrapped_symbol, decl_args: List[
 
     content = gen_declaration(rtype, wrapper_symbol, decl_args, specifier, append_column=False)
     # tpl = """{extern} {ret} {wrapper_symbol} ({fullargs}) {throw} {{
+    # textwrap.dedent("""
     content += """ {{
         va_list __dce_va_list;
         va_start (__dce_va_list, {justbeforelastarg});
@@ -208,6 +210,7 @@ class Generator:
         """
         name: libc function name
         dce: true if function is overriden by DCE
+        generates structure Libc wrapper, i.e, it will call the correct
 
         Returns:
             location, generated string
@@ -291,7 +294,7 @@ class Generator:
                 print("arg=%s"% arg)
 
             libc_fullargs = ",".join(decl_args) # only types
-            location = decl.location.file_name
+            # location = decl.location.file_name
             arg_names = [arg.name for arg in decl.arguments]
             specifier = "" if decl.does_throw else "noexcept"
             has_ellipsis = decl.has_ellipsis
@@ -322,7 +325,7 @@ class Generator:
                         retfinalstmt="return" if rtype is not "void" else "",
                         arg_names=",".join(arg_names) if isinstance(arg_names, list) else arg_names,
                     )
-        return location, content
+        return decl, content
 
 
     def generate_wrappers(self,
@@ -373,37 +376,40 @@ class Generator:
                             # extern __typeof (name) aliasname __attribute__ ((weak, alias (# name)));
 
                             log.debug(content)
+                            # why do i need to write them to libc
                             libc_fd.write(content)
 
                     # TODO
-                    location, decl_str = self.generate_decl_string(row["name"], row["type"] == "dce")
-                    content += decl_str
 
                     # now we generate dce-<FILE>.h content
                     #
                     # generate only the dce overrides
-                    #if row["type"] == "dce":
-                    #    # declaration of dce_{libcfunc}
-                    #    # TODO
-                    #    if has_ellipsis:
-                    #        # then we need to declare the variant accepting va_list
-                    #        content = gen_declaration(rtype, "dce_"+ name + "_v",
-                    #                decl_args[:-1] + ["va_list"],
-                    #                specifier,
-                    #            )
-                    #        # implement an inline variadic function
-                    #        # and a variant accepting va_list
-                    #        content += "inline "+ gen_variadic_wrapper(rtype, "dce_"+name,
-                    #                "dce_"+name +"_v",
-                    #                decl_args,
-                    #                arg_names,
-                    #                specifier
-                    #                )
-                    #    else:
-                    #        content = gen_declaration(rtype, "dce_"+ name,
-                    #            libc_fullargs,
-                    #            specifier,
-                    #            )
+                    if row["type"] == "dce":
+
+                        decl, decl_str = self.generate_decl_string(row["name"], row["type"] == "dce")
+                        content += decl_str
+                        # declaration of dce_{libcfunc}
+                        # TODO
+                        # if has_ellipsis:
+                        #     # then we need to declare the variant accepting va_list
+                        #     content = gen_declaration(rtype, "dce_"+ name + "_v",
+                        #             decl_args[:-1] + ["va_list"],
+                        #             specifier,
+                        #         )
+                        #     # implement an inline variadic function
+                        #     # and a variant accepting va_list
+                        #     content += "inline "+ gen_variadic_wrapper(rtype, "dce_"+name,
+                        #             "dce_"+name +"_v",
+                        #             decl_args,
+                        #             arg_names,
+                        #             specifier
+                        #             )
+                        # else:
+                        #     content += gen_declaration(rtype, "dce_"+ name,
+                        #         libc_fullargs,
+                        #         specifier,
+                        #         )
+                    location = decl.location.file_name
 
                     items = locations.setdefault(location, [])
                     items.append(content)
@@ -441,7 +447,7 @@ class Generator:
             print("Header name=", filename)
 
             # TODO strip
-            content = """
+            content = textwrap.dedent("""
                 /* DO NOT MODIFY - GENERATED BY script */
                 #ifndef DCE_HEADER_{guard}
                 #define DCE_HEADER_{guard}
@@ -454,18 +460,20 @@ class Generator:
                 #ifdef __cplusplus
                 extern "C" {{
                 #endif
-            """.format(guard=header.upper().replace(".","_").replace("/","_"), header=header) #os.path.basename(tail))
+            """).format(guard=header.upper().replace(".","_").replace("/","_"), header=header) 
+            #os.path.basename(tail))
 
             for proto in functions:
                 print(proto)
                 content += proto + "\n"
 
-            content += """
+            content += textwrap.dedent("""
                 #ifdef __cplusplus
                 }
                 #endif
                 #endif
-                """
+                """)
+
             if write_headers:
                 with open(filename, 'w+') as dst:
 
