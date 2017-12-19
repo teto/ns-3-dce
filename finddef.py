@@ -220,6 +220,7 @@ class Generator:
         has_ellipsis = False
         # look for a match
         # Search for the function by name
+        location = "WRONG LOCATION"
 
         # Some libc functions need to be manually crafted
         # hack around https://github.com/gccxml/pygccxml/issues/62
@@ -294,7 +295,7 @@ class Generator:
                 print("arg=%s"% arg)
 
             libc_fullargs = ",".join(decl_args) # only types
-            # location = decl.location.file_name
+            location = decl.location.file_name
             arg_names = [arg.name for arg in decl.arguments]
             specifier = "" if decl.does_throw else "noexcept"
             has_ellipsis = decl.has_ellipsis
@@ -325,7 +326,7 @@ class Generator:
                         retfinalstmt="return" if rtype is not "void" else "",
                         arg_names=",".join(arg_names) if isinstance(arg_names, list) else arg_names,
                     )
-        return decl, content
+        return location, content
 
 
     def generate_wrappers(self,
@@ -386,7 +387,7 @@ class Generator:
                     # generate only the dce overrides
                     if row["type"] == "dce":
 
-                        decl, decl_str = self.generate_decl_string(row["name"], row["type"] == "dce")
+                        location, decl_str = self.generate_decl_string(row["name"], row["type"] == "dce")
                         content += decl_str
                         # declaration of dce_{libcfunc}
                         # TODO
@@ -409,7 +410,7 @@ class Generator:
                         #         libc_fullargs,
                         #         specifier,
                         #         )
-                    location = decl.location.file_name
+                    # location = decl.location.file_name
 
                     items = locations.setdefault(location, [])
                     items.append(content)
