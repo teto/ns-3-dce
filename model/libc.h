@@ -15,7 +15,7 @@ struct Libc
 #define NATIVET(rtype, name) NATIVE (name)
 
 #define DCE_EXPLICIT(name,rtype,...) rtype (*name ## _fn) (__VA_ARGS__);
-#include "libc-ns3.h"
+/* #include "libc-ns3.h" */
 
   char* (*strpbrk_fn)(const char *s, const char *accept);
   char* (*strstr_fn)(const char *a, const char *b);

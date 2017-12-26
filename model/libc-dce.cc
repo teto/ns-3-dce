@@ -143,7 +143,7 @@ extern int __obstack_vprintf_chk (struct obstack *, int, const char *,
                                   _G_va_list) __THROW;
 extern void __stack_chk_fail (void);
 
-typedef void (*func_t)(...);
+/* typedef void (*func_t)(...); */
 
 extern "C" {
 
@@ -162,7 +162,7 @@ void libc_dce (struct Libc **libc)
 #define NATIVE_EXPLICIT(name, type)                             \
   (*libc)->name ## _fn = (func_t)((type)name);
 
-#include "libc-ns3.h"
+/* #include "libc-ns3.h" */
 
   (*libc)->strpbrk_fn = dce_strpbrk;
   (*libc)->strstr_fn = dce_strstr;
