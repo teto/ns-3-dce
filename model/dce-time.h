@@ -1,4 +1,5 @@
 // SIMU_TIME_H
+#ifndef SIMU_TIME_H
 #define SIMU_TIME_H
 
 #include "sys/dce-time.h"

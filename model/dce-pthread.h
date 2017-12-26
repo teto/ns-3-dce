@@ -7,6 +7,8 @@
 extern "C" {
 #endif
 
+// returns thread caller id, never fails
+pid_t dce_gettid (void);
 int dce_pthread_create (pthread_t * thread,
                         const pthread_attr_t * attr,
                         void *(*start_routine)(void*),
@@ -15,6 +17,7 @@ void dce_pthread_exit (void *arg);
 int dce_pthread_join (pthread_t thread, void **value_ptr);
 int dce_pthread_detach (pthread_t thread);
 int dce_pthread_cancel (pthread_t thread);
+int dce_pthread_equal (pthread_t t1, pthread_t t2);
 pthread_t dce_pthread_self (void);
 
 int dce_pthread_mutex_init (pthread_mutex_t *mutex,

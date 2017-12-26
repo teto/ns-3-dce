@@ -66,6 +66,12 @@ CleanupPthreadKeys (void)
     }
   current->keyValues.clear ();
 }
+pid_t dce_gettid (void)
+{
+  Thread *current = Current ();
+
+  return current->tid;
+}
 
 void dce_exit (int status)
 {
@@ -248,6 +254,13 @@ int dce_pthread_cancel (pthread_t thread)
 {
   // XXX
   return 0;
+}
+pthread_t dce_pthread_equal (pthread_t t1, pthread_t t2)
+{
+  Thread *current = Current ();
+  NS_LOG_FUNCTION (current << UtilsGetNodeId ());
+  NS_ASSERT (current != 0);
+  return t1 == t2;
 }
 pthread_t dce_pthread_self (void)
 {
