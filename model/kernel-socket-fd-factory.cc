@@ -13,7 +13,6 @@
 #include "sys/dce-stat.h"
 #include "dce-fcntl.h"
 #include "dce-stdio.h"
-#include "include/sim-init.h"
 #include "ns3/log.h"
 #include "ns3/string.h"
 #include "ns3/double.h"
@@ -33,6 +32,14 @@
 #include <errno.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <lkl_host.h>
+
+// where SimExported est defini
+#include "include/sim-init.h"
+// alias it with lkl_host_ops
+struct SimExported *m_exported;
+
+extern struct lkl_host_operations lkl_host_ops;
 
 NS_LOG_COMPONENT_DEFINE ("DceKernelSocketFdFactory");
 
@@ -102,6 +109,7 @@ KernelSocketFdFactory::~KernelSocketFdFactory ()
       // Note: we don't really destroy devices from here
       // because calling destroy requires a task context
       // m_exported->dev_destroy(m_devices[i].second);
+	  lkl_netdev_free (m_devices[i].second);
     }
   delete m_exported;
   delete m_loader;
@@ -378,7 +386,9 @@ KernelSocketFdFactory::SendMain (bool *r, NetDevice *dev, Ptr<Packet> p, const A
   *r = dev->Send (p, d, pro);
 }
 void
-KernelSocketFdFactory::DevXmit (struct SimKernel *kernel, struct SimDevice *dev, unsigned char *data, int len)
+KernelSocketFdFactory::DevXmit (
+	struct SimKernel *kernel, struct SimDevice *dev, unsigned char *data, int len
+)
 {
   NS_LOG_FUNCTION (dev);
   KernelSocketFdFactory *self = (KernelSocketFdFactory *)kernel;
@@ -511,6 +521,9 @@ KernelSocketFdFactory::NotifyAddDeviceTask (Ptr<NetDevice> device)
 {
   NS_LOG_FUNCTION (device);
   int flags = 0;
+  char ifName[20];
+  // TODO FIX THIS HACK LATER
+  sprintf(ifName, "sim%d", 1);
   //NS_ASSERT (!device->IsPointToPoint ());
   //NS_ASSERT (device->NeedsArp ());
   //NS_ASSERT (device->IsMulticast ());
@@ -527,18 +540,28 @@ KernelSocketFdFactory::NotifyAddDeviceTask (Ptr<NetDevice> device)
     {
       flags |= SIM_DEV_NOARP;
     }
-  m_loader->NotifyStartExecute (); // Restore the memory of the kernel before access it !
-#if ((LIBOS_API_VERSION == 2))
-  struct SimDevice *dev = m_exported->dev_create ("sim%d", PeekPointer (device), (enum SimDevFlags)flags);
-#else
-  struct SimDevice *dev = m_exported->dev_create (PeekPointer (device), (enum SimDevFlags)flags);
-#endif  // LIBOS_API_VERSION
-  m_loader->NotifyEndExecute ();
+  /* m_loader->NotifyStartExecute (); // Restore the memory of the kernel before access it ! */
+/* #if ((LIBOS_API_VERSION == 2)) */
+/*   struct SimDevice *dev = m_exported->dev_create ("sim%d", PeekPointer (device), (enum SimDevFlags)flags); */
+/* #else */
+/*   struct SimDevice *dev = m_exported->dev_create (PeekPointer (device), (enum SimDevFlags)flags); */
+/* #endif  // LIBOS_API_VERSION */
+  /* m_loader->NotifyEndExecute (); */
+
+  /* lkl_register_netdev_fd */
+/* lkl_netdev_add (Must be called before calling lkl_start_kernel) */
+/* int lkl_netdev_add(struct lkl_netdev *nd, struct lkl_netdev_args* args); */
+/* lkl_netdev_pipe_create */
+/* lkl_netdev_raw_create */
+/* struct lkl_netdev *dev = lkl_netdev_raw_create(const char *ifname); */
+NS_ASSERT (dev);
+
+
   Ptr<KernelDeviceStateListener> listener = Create <KernelDeviceStateListener> (device, this);
   m_listeners.push_back (listener);
   device->AddLinkChangeCallback (MakeCallback (&KernelDeviceStateListener::NotifyDeviceStateChange, listener));
 
-  m_devices.push_back (std::make_pair (device,dev));
+  m_devices.push_back (std::make_pair (device, dev));
   Ptr<Node> node = GetObject<Node> ();
   if (device->GetInstanceTypeId () == m_lteUeTid)
     {
@@ -575,42 +598,49 @@ KernelSocketFdFactory::InitializeStack (void)
       NS_FATAL_ERROR ("Oops. Can't find initialization function");
     }
   m_exported = new struct SimExported ();
+
+	/* struct lkl_host_operations lkl_host_ops = { */
   struct SimImported imported;
-  imported.vprintf = &KernelSocketFdFactory::Vprintf;
-  imported.malloc = &KernelSocketFdFactory::Malloc;
-  imported.free = &KernelSocketFdFactory::Free;
-  imported.memcpy = &KernelSocketFdFactory::Memcpy;
-  imported.memset = &KernelSocketFdFactory::Memset;
-  imported.atexit = &KernelSocketFdFactory::AtExit;
-  imported.access = &KernelSocketFdFactory::Access;
-  imported.getenv = &KernelSocketFdFactory::Getenv;
-  imported.mkdir = &KernelSocketFdFactory::Mkdir;
-  imported.open = &KernelSocketFdFactory::Open;
-  imported.__fxstat = &KernelSocketFdFactory::__Fxstat;
-  imported.fseek = &KernelSocketFdFactory::Fseek;
-  imported.setbuf = &KernelSocketFdFactory::Setbuf;
-  imported.ftell = &KernelSocketFdFactory::Ftell;
-  imported.fdopen = &KernelSocketFdFactory::FdOpen;
-  imported.fread = &KernelSocketFdFactory::Fread;
-  imported.fwrite = &KernelSocketFdFactory::Fwrite;
-  imported.fclose = &KernelSocketFdFactory::Fclose;
-  imported.random = &KernelSocketFdFactory::Random;
-  imported.event_schedule_ns = &KernelSocketFdFactory::EventScheduleNs;
-  imported.event_cancel = &KernelSocketFdFactory::EventCancel;
-  imported.current_ns = &CurrentNs;
-  imported.task_start = &KernelSocketFdFactory::TaskStart;
-  imported.task_wait = &KernelSocketFdFactory::TaskWait;
-  imported.task_current = &KernelSocketFdFactory::TaskCurrent;
-  imported.task_wakeup = &KernelSocketFdFactory::TaskWakeup;
-  imported.task_yield = &KernelSocketFdFactory::TaskYield;
-  imported.dev_xmit = &KernelSocketFdFactory::DevXmit;
-  imported.signal_raised = &KernelSocketFdFactory::SignalRaised;
-  imported.poll_event = &KernelSocketFdFactory::PollEvent;
+  /* imported.vprintf = &KernelSocketFdFactory::Vprintf; */
+  /* imported.malloc = &KernelSocketFdFactory::Malloc; */
+  /* imported.free = &KernelSocketFdFactory::Free; */
+  /* imported.memcpy = &KernelSocketFdFactory::Memcpy; */
+  /* imported.memset = &KernelSocketFdFactory::Memset; */
+  /* imported.atexit = &KernelSocketFdFactory::AtExit; */
+  /* imported.access = &KernelSocketFdFactory::Access; */
+  /* imported.getenv = &KernelSocketFdFactory::Getenv; */
+  /* imported.mkdir = &KernelSocketFdFactory::Mkdir; */
+  /* imported.open = &KernelSocketFdFactory::Open; */
+  /* imported.__fxstat = &KernelSocketFdFactory::__Fxstat; */
+  /* imported.fseek = &KernelSocketFdFactory::Fseek; */
+  /* imported.setbuf = &KernelSocketFdFactory::Setbuf; */
+  /* imported.ftell = &KernelSocketFdFactory::Ftell; */
+  /* imported.fdopen = &KernelSocketFdFactory::FdOpen; */
+  /* imported.fread = &KernelSocketFdFactory::Fread; */
+  /* imported.fwrite = &KernelSocketFdFactory::Fwrite; */
+  /* imported.fclose = &KernelSocketFdFactory::Fclose; */
+  /* imported.random = &KernelSocketFdFactory::Random; */
+  /* imported.event_schedule_ns = &KernelSocketFdFactory::EventScheduleNs; */
+  /* imported.event_cancel = &KernelSocketFdFactory::EventCancel; */
+  /* imported.current_ns = &CurrentNs; */
+  /* imported.task_start = &KernelSocketFdFactory::TaskStart; */
+  /* imported.task_wait = &KernelSocketFdFactory::TaskWait; */
+  /* imported.task_current = &KernelSocketFdFactory::TaskCurrent; */
+  /* imported.task_wakeup = &KernelSocketFdFactory::TaskWakeup; */
+  /* imported.task_yield = &KernelSocketFdFactory::TaskYield; */
+  /* imported.dev_xmit = &KernelSocketFdFactory::DevXmit; */
+  /* imported.signal_raised = &KernelSocketFdFactory::SignalRaised; */
+  /* imported.poll_event = &KernelSocketFdFactory::PollEvent; */
   // create internal process
   Ptr<DceManager> manager = this->GetObject<DceManager> ();
   m_pid = manager->StartInternalTask ();
 
-  init (m_exported, &imported, (struct SimKernel *)this);
+  //
+  init (
+	m_exported,
+	&lkl_host_ops, // replacing 		  &imported,
+	(struct SimKernel *)this
+	);
 
   // update the kernel device list with simulation device list
   Ptr<Node> node = GetObject<Node> ();
@@ -618,6 +648,9 @@ KernelSocketFdFactory::InitializeStack (void)
                                                       this));
   NS_LOG_FUNCTION (this << "m_exported " << m_exported);
 }
+
+/* TODO define lkl_host_operations and pass it via sim_init to lkl_kernel */
+/* struct lkl_host_operations lkl_host_ops = { */
 
 UnixFd *
 KernelSocketFdFactory::CreateSocket (int domain, int type, int protocol)

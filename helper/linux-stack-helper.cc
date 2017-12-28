@@ -28,6 +28,7 @@
 #include "ns3/ipv4-list-routing-helper.h"
 #include "ns3/ipv4-static-routing-helper.h"
 #include "ns3/ipv4-global-routing-helper.h"
+#include <lkl.h>
 
 namespace ns3 {
 LinuxStackHelper::LinuxStackHelper ()
@@ -46,6 +47,9 @@ LinuxStackHelper::Initialize ()
   listRouting.Add (staticRouting, 0);
   listRouting.Add (globalRouting, -10);
   SetRoutingHelper (listRouting);
+
+  // we night need to wrap ns3 devices
+  // or for instance
 }
 
 LinuxStackHelper::~LinuxStackHelper ()
@@ -53,7 +57,7 @@ LinuxStackHelper::~LinuxStackHelper ()
   delete m_routing;
 }
 
-void 
+void
 LinuxStackHelper::SetRoutingHelper (const Ipv4RoutingHelper &routing)
 {
   delete m_routing;
@@ -175,22 +179,26 @@ LinuxStackHelper::SysctlGet (Ptr<Node> node, Time at, std::string path,
 void
 LinuxStackHelper::SysctlSet (NodeContainer c, std::string path, std::string value)
 {
-#ifdef KERNEL_STACK
   for (NodeContainer::Iterator i = c.Begin (); i != c.End (); ++i)
     {
       Ptr<Node> node = *i;
-      Ptr<LinuxSocketFdFactory> sock = node->GetObject<LinuxSocketFdFactory> ();
-      if (!sock)
-        {
-          NS_ASSERT_MSG (0, "No LinuxSocketFdFactory is installed. "
-                         "You may need to do it via DceManagerHelper::Install ()");
-        }
+	  // TODO replace with a check that it's a LinuxNode ?
+      /* Ptr<LinuxSocketFdFactory> sock = node->GetObject<LinuxSocketFdFactory> (); */
+      /* if (!sock) */
+      /*   { */
+      /*     NS_ASSERT_MSG (0, "No LinuxSocketFdFactory is installed. " */
+      /*                    "You may need to do it via DceManagerHelper::Install ()"); */
+      /*   } */
       // i.e., TaskManager::Current() needs it.
-      Simulator::ScheduleWithContext (node->GetId (), Seconds (0.1),
-                                      MakeEvent (&LinuxSocketFdFactory::Set, sock,
-                                                 path, value));
+
+	 lkl_sysctl(path.c_str(), value.c_str());
+	 /* lkl_sysctl_parse_write */
+
+	  // TODO use sysctl binary instead ?
+      /* Simulator::ScheduleWithContext (node->GetId (), Seconds (0.1), */
+      /*                                 MakeEvent (&LinuxSocketFdFactory::Set, sock, */
+      /*                                            path, value)); */
     }
-#endif
 }
 
 } // namespace ns3

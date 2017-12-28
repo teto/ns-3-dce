@@ -13,14 +13,14 @@
 #include <stdio.h>
 #include "linux/types.h"
 
-extern "C" {
-struct SimExported;
-struct SimDevice;
-struct SimSocket;
-struct SimTask;
-struct SimKernel;
-struct SimSysFile;
-}
+/* extern "C" { */
+/* struct SimExported; */
+/* struct SimDevice; */
+/* struct SimSocket; */
+/* struct SimTask; */
+/* struct SimKernel; */
+/* struct SimSysFile; */
+/* } */
 
 class KingsleyAlloc;
 
@@ -140,7 +140,7 @@ private:
                         Ptr<EventIdHolder> event);
   static void SendMain (bool *r, NetDevice *d, Ptr<Packet> packet, const Address& dest, uint16_t protocolNumber);
 
-  std::vector<std::pair<Ptr<NetDevice>,struct SimDevice *> > m_devices;
+  std::vector<std::pair<Ptr<NetDevice>,struct lkl_netdev *> > m_devices;
   std::list<Task *> m_kernelTasks;
   Ptr<UniformRandomVariable> m_variable;
   KingsleyAlloc *m_alloc;
