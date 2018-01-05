@@ -33,11 +33,12 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <lkl_host.h>
+#include <lkl_exports.generated.h>
 
 // where SimExported est defini
-#include "include/sim-init.h"
+/* #include "include/sim-init.h" */
 // alias it with lkl_host_ops
-struct SimExported *m_exported;
+/* struct SimExported *m_exported; */
 
 extern struct lkl_host_operations lkl_host_ops;
 
