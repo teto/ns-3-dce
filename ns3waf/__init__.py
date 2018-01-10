@@ -370,7 +370,7 @@ def _build_headers(bld, name, headers):
             print(guard, file=outfile)
 
             print(file=outfile)
-            print(" Module headers:", file=outfile)
+            print("// Module headers:", file=outfile)
             for header in [src.abspath() for src in task.inputs]:
                 print("#include \"%s\"" % (os.path.basename(header),), file=outfile)
 

@@ -29,11 +29,14 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
+/* #include <errno.h> */
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <lkl_host.h>
-#include <lkl_exports.generated.h>
+
+// TODO this one has no extern
+#include <lkl_exports.h>
+/* #include <lkl_exports.generated.h> */
 
 // where SimExported est defini
 /* #include "include/sim-init.h" */

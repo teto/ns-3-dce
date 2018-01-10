@@ -1,5 +1,5 @@
-#ifndef ERRNO_H
-#define ERRNO_H
+#ifndef DCE_ERRNO_H
+#define DCE_ERRNO_H
 
 #include <errno.h>
 

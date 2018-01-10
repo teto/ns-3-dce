@@ -32,7 +32,7 @@
 #include "ns3/uinteger.h"
 #include "ns3/boolean.h"
 #include "ns3/simulator.h"
-#include "ns3/netlink-socket-address.h"
+/* #include "ns3/netlink-socket-address.h" */
 #include "ns3/inet6-socket-address.h"
 #include <fcntl.h>
 #include <errno.h>

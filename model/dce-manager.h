@@ -29,6 +29,7 @@
 #include "ns3/simulator.h"
 #include "task-manager.h"
 
+// TODO might be able to remove that
 extern "C" struct Libc;
 
 namespace ns3 {

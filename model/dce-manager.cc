@@ -21,8 +21,8 @@
 #include "process.h"
 #include "task-manager.h"
 #include "libc-dce.h"
-#include "unix-fd.h"
-#include "unix-file-fd.h"
+/* #include "unix-fd.h" */
+/* #include "unix-file-fd.h" */
 #include "utils.h"
 #include "kingsley-alloc.h"
 #include "dce-stdio.h"
@@ -50,7 +50,7 @@
 #include "dce-dirent.h"
 #include "exec-utils.h"
 
-#include <errno.h>
+#include <cerrno>
 #include <dlfcn.h>
 #include <arpa/inet.h>
 #include <sys/types.h>
@@ -145,24 +145,24 @@ DceManager::GetLibc (void)
 void
 DceManager::EnsureDirectoryExists (struct Thread *current, std::string dirName)
 {
-  int fd = dce_open (dirName.c_str (), O_DIRECTORY | O_RDONLY, 0);
-  if (fd != -1)
-    {
-      dce_close (fd);
-    }
-  else if (current->err == ENOENT)
-    {
-      int status = dce_mkdir (dirName.c_str (), S_IRWXU | S_IRWXG);
-      if (status == -1)
-        {
-          NS_FATAL_ERROR ("Could not create directory " << dirName
-                                                        << ": " << strerror (current->err));
-        }
-    }
-  else
-    {
-      NS_FATAL_ERROR ("Could not open \"" << dirName << "\"");
-    }
+  /* int fd = dce_open (dirName.c_str (), O_DIRECTORY | O_RDONLY, 0); */
+  /* if (fd != -1) */
+  /*   { */
+  /*     dce_close (fd); */
+  /*   } */
+  /* else if (current->err == ENOENT) */
+  /*   { */
+  /*     int status = dce_mkdir (dirName.c_str (), S_IRWXU | S_IRWXG); */
+  /*     if (status == -1) */
+  /*       { */
+  /*         NS_FATAL_ERROR ("Could not create directory " << dirName */
+  /*                                                       << ": " << strerror (current->err)); */
+  /*       } */
+  /*   } */
+  /* else */
+  /*   { */
+  /*     NS_FATAL_ERROR ("Could not open \"" << dirName << "\""); */
+  /*   } */
 }
 
 int

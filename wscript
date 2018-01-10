@@ -136,8 +136,8 @@ def configure(conf):
     conf.env.prepend_value('LINKFLAGS', '-Wl,--no-as-needed')
     conf.env.append_value('LINKFLAGS', '-pthread')
     conf.check (lib='dl', mandatory = True)
-    conf.check_cc(fragment='int main() {__get_cpu_features();}\n', msg='Checking for glibc get_cpu_features', define_name='HAVE_GETCPUFEATURES', mandatory=False)
-    conf.check_cc(fragment='int main() {__secure_getenv("test");}\n', msg='Checking for glibc __secure_getenv', define_name='HAVE___SECURE_GETENV', mandatory=False)
+    # conf.check_cc(fragment='int main() {__get_cpu_features();}\n', msg='Checking for glibc get_cpu_features', define_name='HAVE_GETCPUFEATURES', mandatory=False)
+    # conf.check_cc(fragment='int main() {__secure_getenv("test");}\n', msg='Checking for glibc __secure_getenv', define_name='HAVE___SECURE_GETENV', mandatory=False)
 
     vg_h = conf.check(header_name='valgrind/valgrind.h', mandatory=False)
     vg_memcheck_h = conf.check(header_name='valgrind/memcheck.h', mandatory=False)
@@ -146,7 +146,7 @@ def configure(conf):
 
 
     # Enable C++-11 support
-    conf.env.append_value('CXXFLAGS', '-std=c++11')
+    # conf.env.append_value('CXXFLAGS', '-std=c++11')
 
     if Options.options.kernel_stack:
         if not os.path.isdir(Options.options.kernel_stack):
@@ -495,7 +495,7 @@ def build(bld):
 
     bld.add_group('ns3moduleheader')
     bld.add_group('ns3modulebuild')
-    build_netlink(bld)
+    # build_netlink(bld)
 
     if bld.env['KERNEL_STACK']:
         kernel_source = [
@@ -522,33 +522,34 @@ def build(bld):
         'model/dce-application.cc',
         'model/dce.cc',
         'model/dce-signal.cc',
-        'model/libc-dce.cc',
+        # 'model/libc-dce.cc',
         'model/utils.cc',
         'model/unix-fd.cc',
         'model/unix-file-fd.cc',
-        'model/unix-socket-fd.cc',
-        'model/unix-datagram-socket-fd.cc',
-        'model/unix-stream-socket-fd.cc',
-        'model/unix-timer-fd.cc',
-        'model/dce-fd.cc',
+        # 'model/unix-socket-fd.cc',
+        # 'model/unix-datagram-socket-fd.cc',
+        # 'model/unix-stream-socket-fd.cc',
+        # 'model/unix-timer-fd.cc',
+        # 'model/dce-fd.cc',
         'model/dce-stdio.cc',
         'model/dce-pthread.cc',
-        'model/dce-stdlib.cc',
+        # 'model/dce-stdlib.cc',
         'model/dce-debug.cc',
         'model/dce-semaphore.cc',
         'model/dce-pthread-mutex.cc',
         'model/dce-cxa.cc',
-        'model/dce-netdb.cc',
+        # 'model/dce-netdb.cc',
         'model/dce-string.cc',
-        'model/dce-env.cc',
+        # 'model/dce-env.cc',
         'model/dce-pthread-cond.cc',
         'model/dce-timerfd.cc',
         'model/dce-time.cc',
-        'model/dce-stat.cc',
-        'model/dce-syslog.cc',
+        # 'model/dce-stat.cc',
+        # 'model/dce-syslog.cc',
         'model/dce-dl.cc',
-        'model/dce-global-variables.cc',
-        'model/cmsg.cc',
+        # fix stdin etc
+        # 'model/dce-global-variables.cc',
+        # 'model/cmsg.cc',
         'model/waiter.cc',
         'model/kingsley-alloc.cc',
         'model/dce-alloc.cc',
@@ -563,14 +564,14 @@ def build(bld):
         'model/elf-cache.cc',
         'model/cooja-loader-factory.cc',
         'model/dlm-loader-factory.cc',
-        'model/socket-fd-factory.cc',
-        'model/ns3-socket-fd-factory.cc',
-        'model/local-socket-fd.cc',
-        'model/local-stream-socket-fd.cc',
-        'model/local-datagram-socket-fd.cc',
-        'model/local-socket-fd-factory.cc',
+        # 'model/socket-fd-factory.cc',
+        # 'model/ns3-socket-fd-factory.cc',
+        # 'model/local-socket-fd.cc',
+        # 'model/local-stream-socket-fd.cc',
+        # 'model/local-datagram-socket-fd.cc',
+        # 'model/local-socket-fd-factory.cc',
         'model/dce-umask.cc',
-        'model/dce-misc.cc',
+        # 'model/dce-misc.cc',
         'model/dce-node-context.cc',
         'model/dce-wait.cc',
         'model/wait-queue.cc',
@@ -578,7 +579,7 @@ def build(bld):
         'model/dce-poll.cc',
         'model/ipv4-dce-routing.cc',
         'model/dce-credentials.cc',
-        'model/dce-pwd.cc',
+        # 'model/dce-pwd.cc',
         'model/pipe-fd.cc',
         'model/fifo-buffer.cc',
         'model/dce-dirent.cc',
@@ -586,38 +587,38 @@ def build(bld):
         'model/exec-utils.cc',
         'model/linux/ipv4-linux.cc',
         'model/linux/ipv6-linux.cc',
-        'model/freebsd/ipv4-freebsd.cc',
-        'model/dce-vfs.cc',
+        # 'model/freebsd/ipv4-freebsd.cc',
+        # 'model/dce-vfs.cc',
         'model/elf-ldd.cc',
-        'model/dce-termio.cc',
+        # 'model/dce-termio.cc',
         'model/process-delay-model.cc',
-        'model/linux/linux-ipv4-raw-socket-factory.cc',
-        'model/linux/linux-ipv4-raw-socket-factory-impl.cc',
-        'model/linux/linux-ipv6-raw-socket-factory.cc',
-        'model/linux/linux-ipv6-raw-socket-factory-impl.cc',
-        'model/linux/linux-udp-socket-factory.cc',
-        'model/linux/linux-udp-socket-factory-impl.cc',
-        'model/linux/linux-udp6-socket-factory.cc',
-        'model/linux/linux-udp6-socket-factory-impl.cc',
-        'model/linux/linux-tcp-socket-factory.cc',
-        'model/linux/linux-tcp-socket-factory-impl.cc',
-        'model/linux/linux-tcp6-socket-factory.cc',
-        'model/linux/linux-tcp6-socket-factory-impl.cc',
-        'model/linux/linux-dccp-socket-factory.cc',
-        'model/linux/linux-dccp-socket-factory-impl.cc',
-        'model/linux/linux-dccp6-socket-factory.cc',
-        'model/linux/linux-dccp6-socket-factory-impl.cc',
-        'model/linux/linux-sctp-socket-factory.cc',
-        'model/linux/linux-sctp-socket-factory-impl.cc',
-        'model/linux/linux-sctp6-socket-factory.cc',
-        'model/linux/linux-sctp6-socket-factory-impl.cc',
+        # 'model/linux/linux-ipv4-raw-socket-factory.cc',
+        # 'model/linux/linux-ipv4-raw-socket-factory-impl.cc',
+        # 'model/linux/linux-ipv6-raw-socket-factory.cc',
+        # 'model/linux/linux-ipv6-raw-socket-factory-impl.cc',
+        # 'model/linux/linux-udp-socket-factory.cc',
+        # 'model/linux/linux-udp-socket-factory-impl.cc',
+        # 'model/linux/linux-udp6-socket-factory.cc',
+        # 'model/linux/linux-udp6-socket-factory-impl.cc',
+        # 'model/linux/linux-tcp-socket-factory.cc',
+        # 'model/linux/linux-tcp-socket-factory-impl.cc',
+        # 'model/linux/linux-tcp6-socket-factory.cc',
+        # 'model/linux/linux-tcp6-socket-factory-impl.cc',
+        # 'model/linux/linux-dccp-socket-factory.cc',
+        # 'model/linux/linux-dccp-socket-factory-impl.cc',
+        # 'model/linux/linux-dccp6-socket-factory.cc',
+        # 'model/linux/linux-dccp6-socket-factory-impl.cc',
+        # 'model/linux/linux-sctp-socket-factory.cc',
+        # 'model/linux/linux-sctp-socket-factory-impl.cc',
+        # 'model/linux/linux-sctp6-socket-factory.cc',
+        # 'model/linux/linux-sctp6-socket-factory-impl.cc',
         # helper.
         'helper/ipv4-dce-routing-helper.cc',
         'helper/dce-manager-helper.cc',
         'helper/dce-application-helper.cc',
         'helper/ccn-client-helper.cc',
         'helper/linux-stack-helper.cc',
-        'helper/freebsd-stack-helper.cc',
+        # 'helper/freebsd-stack-helper.cc',
         ]
     module_headers = [
         'model/dce-manager.h',
@@ -628,27 +629,27 @@ def build(bld):
         'model/dce-application.h',
         'model/ipv4-dce-routing.h',
         'model/linux/ipv4-linux.h',
-        'model/linux/ipv6-linux.h',
-        'model/freebsd/ipv4-freebsd.h',
+        # 'model/linux/ipv6-linux.h',
+        # 'model/freebsd/ipv4-freebsd.h',
         'model/process-delay-model.h',
         'model/exec-utils.h',
         'model/utils.h',
-        'model/linux/linux-ipv4-raw-socket-factory.h',
-        'model/linux/linux-ipv6-raw-socket-factory.h',
-        'model/linux/linux-udp-socket-factory.h',
-        'model/linux/linux-udp6-socket-factory.h',
-        'model/linux/linux-tcp-socket-factory.h',
-        'model/linux/linux-tcp6-socket-factory.h',
-        'model/linux/linux-dccp-socket-factory.h',
-        'model/linux/linux-dccp6-socket-factory.h',
-        'model/linux/linux-sctp-socket-factory.h',
-        'model/linux/linux-sctp6-socket-factory.h',
+        # 'model/linux/linux-ipv4-raw-socket-factory.h',
+        # 'model/linux/linux-ipv6-raw-socket-factory.h',
+        # 'model/linux/linux-udp-socket-factory.h',
+        # 'model/linux/linux-udp6-socket-factory.h',
+        # 'model/linux/linux-tcp-socket-factory.h',
+        # 'model/linux/linux-tcp6-socket-factory.h',
+        # 'model/linux/linux-dccp-socket-factory.h',
+        # 'model/linux/linux-dccp6-socket-factory.h',
+        # 'model/linux/linux-sctp-socket-factory.h',
+        # 'model/linux/linux-sctp6-socket-factory.h',
         'helper/dce-manager-helper.h',
         'helper/dce-application-helper.h',
-        'helper/ccn-client-helper.h',
+        # 'helper/ccn-client-helper.h',
         'helper/ipv4-dce-routing-helper.h',
-        'helper/linux-stack-helper.h',
-        'helper/freebsd-stack-helper.h',
+        # 'helper/linux-stack-helper.h',
+        # 'helper/freebsd-stack-helper.h',
         ]
 
     module_source = module_source + kernel_source
@@ -669,21 +670,21 @@ def build(bld):
     bld.build_a_script = types.MethodType(build_a_script, bld)
     add_myscripts(bld)
 
-    build_dce_tests(module, bld)
+    # build_dce_tests(module, bld)
 
     # replace with a recurse, can we pass extra
     # build_dce_examples(module, bld)
-    bld.recurse('example')
+    # bld.recurse('example')
 
     # no idea to solve this two-way dependency (dce <-> netlink)
-    module.add_runner_test(needed = ['internet', 'point-to-point', 'core', 'dce'],
-                           use=uselib,
-                           includes=['netlink'],
-                           source=['test/netlink-socket-test.cc'],
-                           name='netlink')
+    # module.add_runner_test(needed = ['internet', 'point-to-point', 'core', 'dce'],
+    #                        use=uselib,
+    #                        includes=['netlink'],
+    #                        source=['test/netlink-socket-test.cc'],
+    #                        name='netlink')
 
-    if bld.env['KERNEL_STACK']:
-        build_dce_kernel_examples(module, bld)
+    # if bld.env['KERNEL_STACK']:
+    #     build_dce_kernel_examples(module, bld)
 
     # build test-runner
     module.build_example(target='bin/test-runner',
@@ -701,62 +702,63 @@ def build(bld):
                            needed = bld.env['NS3_MODULES_FOUND'] + ['dce'])
 
 
-    bld.add_group('dce_version_files')
+    # bld.add_group('dce_version_files')
 
-    bld.program(source='utils/dcemakeversion.c',
-                name='dcemakeversion',
-                target='dcemakeversion', cflags = [ '-g'], linkflags    = ['-lpthread', '-lrt', '-lm', '-ldl'])
+    # bld.program(source='utils/dcemakeversion.c',
+    #             name='dcemakeversion',
+    #             target='dcemakeversion', cflags = [ '-g'], linkflags    = ['-lpthread', '-lrt', '-lm', '-ldl'])
 
-    bld(source=['dcemakeversion','model/libc-ns3.version' , 'model/libpthread-ns3.version' ,
-                'model/librt-ns3.version', 'model/libm-ns3.version', 'model/libdl-ns3.version'],
-        target=['model/libc.version','model/libpthread.version','model/librt.version','model/libm.version','model/libdl.version'],
-        rule='${SRC[0].abspath()} ${SRC[1].abspath()}  ${SRC[2].abspath()}  ${SRC[3].abspath()} ${SRC[4].abspath()}  ${SRC[5].abspath()}')
+    # bld(source=['dcemakeversion','model/libc-ns3.version' , 'model/libpthread-ns3.version' ,
+    #             'model/librt-ns3.version', 'model/libm-ns3.version', 'model/libdl-ns3.version'],
+    #     target=['model/libc.version','model/libpthread.version','model/librt.version','model/libm.version','model/libdl.version'],
+    #     rule='${SRC[0].abspath()} ${SRC[1].abspath()}  ${SRC[2].abspath()}  ${SRC[3].abspath()} ${SRC[4].abspath()}  ${SRC[5].abspath()}')
 
-    bld.add_group('dce_use_version_files')
+    # bld.add_group('dce_use_version_files')
 
     # The very small libc used to replace the glibc
     # and forward to the dce_* code
-    bld.shlib(source = ['model/libc.cc', 'model/libc-setup.cc', 'model/libc-global-variables.cc'],
-              target='lib/c-ns3', cxxflags=['-g', '-fno-profile-arcs', '-fno-test-coverage'],
-              defines=['LIBSETUP=libc_setup'],
-              linkflags=['-nostdlib', '-fno-profile-arcs',
-                         '-Wl,--version-script=' + os.path.join('model', 'libc.version'),
-                         '-Wl,-soname=libc.so.6'])
+    # bld.shlib(source = ['model/libc.cc', 'model/libc-setup.cc', 'model/libc-global-variables.cc'],
+    #           target='lib/c-ns3', cxxflags=['-g', '-fno-profile-arcs', '-fno-test-coverage'],
+    #           defines=['LIBSETUP=libc_setup'],
+    #           linkflags=['-nostdlib', '-fno-profile-arcs',
+    #                      '-Wl,--version-script=' + os.path.join('model', 'libc.version'),
+    #                      '-Wl,-soname=libc.so.6'])
+
     # The very small libpthread used to replace the glibc
     # and forward to the dce_* code
-    bld.shlib(source = ['model/libc.cc', 'model/libc-setup.cc'],
-              target='lib/pthread-ns3', cxxflags=['-g', '-fno-profile-arcs', '-fno-test-coverage'],
-              defines=['LIBSETUP=libpthread_setup'],
-              linkflags=['-nostdlib', '-fno-profile-arcs',
-                         '-Wl,--version-script=' + os.path.join('model', 'libpthread.version'),
-                         '-Wl,-soname=libpthread.so.0'])
+    # bld.shlib(source = ['model/libc.cc', 'model/libc-setup.cc'],
+    #           target='lib/pthread-ns3', cxxflags=['-g', '-fno-profile-arcs', '-fno-test-coverage'],
+    #           defines=['LIBSETUP=libpthread_setup'],
+    #           linkflags=['-nostdlib', '-fno-profile-arcs',
+    #                      '-Wl,--version-script=' + os.path.join('model', 'libpthread.version'),
+    #                      '-Wl,-soname=libpthread.so.0'])
 
     # The very small librt used to replace the glibc
     # and forward to the dce_* code
-    bld.shlib(source = ['model/libc.cc', 'model/libc-setup.cc'],
-              target='lib/rt-ns3', cxxflags=['-g', '-fno-profile-arcs', '-fno-test-coverage'],
-              defines=['LIBSETUP=librt_setup'],
-              linkflags=['-nostdlib', '-fno-profile-arcs',
-                         '-Wl,--version-script=' + os.path.join('model', 'librt.version'),
-                         '-Wl,-soname=librt.so.1'])
+    # bld.shlib(source = ['model/libc.cc', 'model/libc-setup.cc'],
+    #           target='lib/rt-ns3', cxxflags=['-g', '-fno-profile-arcs', '-fno-test-coverage'],
+    #           defines=['LIBSETUP=librt_setup'],
+    #           linkflags=['-nostdlib', '-fno-profile-arcs',
+    #                      '-Wl,--version-script=' + os.path.join('model', 'librt.version'),
+    #                      '-Wl,-soname=librt.so.1'])
 
     # The very small libm used to replace the glibc
     # and forward to the dce_* code
-    bld.shlib(source = ['model/libc.cc', 'model/libc-setup.cc'],
-              target='lib/m-ns3', cxxflags=['-g', '-fno-profile-arcs', '-fno-test-coverage'],
-              defines=['LIBSETUP=libm_setup'],
-              linkflags=['-nostdlib', '-fno-profile-arcs',
-                         '-Wl,--version-script=' + os.path.join('model', 'libm.version'),
-                         '-Wl,-soname=libm.so.6'])
+    # bld.shlib(source = ['model/libc.cc', 'model/libc-setup.cc'],
+    #           target='lib/m-ns3', cxxflags=['-g', '-fno-profile-arcs', '-fno-test-coverage'],
+    #           defines=['LIBSETUP=libm_setup'],
+    #           linkflags=['-nostdlib', '-fno-profile-arcs',
+    #                      '-Wl,--version-script=' + os.path.join('model', 'libm.version'),
+    #                      '-Wl,-soname=libm.so.6'])
 
     # The very small libdl used to replace the glibc
     # and forward to the dce_* code
-    bld.shlib(source = ['model/libc.cc', 'model/libc-setup.cc'],
-              target='lib/dl-ns3', cxxflags=['-g', '-fno-profile-arcs', '-fno-test-coverage'],
-              defines=['LIBSETUP=libdl_setup'],
-              linkflags=['-nostdlib', '-fno-profile-arcs',
-                         '-Wl,--version-script=' + os.path.join('model', 'libdl.version'),
-                         '-Wl,-soname=libdl.so.2'])
+    # bld.shlib(source = ['model/libc.cc', 'model/libc-setup.cc'],
+    #           target='lib/dl-ns3', cxxflags=['-g', '-fno-profile-arcs', '-fno-test-coverage'],
+    #           defines=['LIBSETUP=libdl_setup'],
+    #           linkflags=['-nostdlib', '-fno-profile-arcs',
+    #                      '-Wl,--version-script=' + os.path.join('model', 'libdl.version'),
+    #                      '-Wl,-soname=libdl.so.2'])
 
     bld.recurse(['utils'])
     bld.recurse('bindings/python')

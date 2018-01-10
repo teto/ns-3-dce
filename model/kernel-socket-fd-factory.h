@@ -11,7 +11,7 @@
 #include <utility>
 #include <stdarg.h>
 #include <stdio.h>
-#include "linux/types.h"
+/* #include "linux/types.h" */
 
 /* extern "C" { */
 /* struct SimExported; */
