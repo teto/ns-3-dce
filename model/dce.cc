@@ -13,7 +13,7 @@
 #include "dce-stdio.h"
 #include "dce-stdarg.h"
 #include "dce-stdlib.h"
-#include "dce-locale.h"
+/* #include "dce-locale.h" */
 #include "sys/dce-ioctl.h"
 #include "dce-sched.h"
 #include "arpa/dce-inet.h"
@@ -940,26 +940,26 @@ int dce_execle (const char *path, const char *arg, ...)
   return retval;
 }
 
-char * dce_setlocale (int category, const char *locale)
-{
-  static char loc[] = "";
-  return loc;
-}
-int dce_sysinfo (struct sysinfo *info)
-{
-  Thread *current = Current ();
-  NS_LOG_FUNCTION (current << UtilsGetNodeId ());
-  NS_ASSERT (current != 0);
-  if (!info)
-    {
-      current->err = ENAMETOOLONG;
-      return -1;
-    }
+/* char * dce_setlocale (int category, const char *locale) */
+/* { */
+/*   static char loc[] = ""; */
+/*   return loc; */
+/* } */
+/* int dce_sysinfo (struct sysinfo *info) */
+/* { */
+/*   Thread *current = Current (); */
+/*   NS_LOG_FUNCTION (current << UtilsGetNodeId ()); */
+/*   NS_ASSERT (current != 0); */
+/*   if (!info) */
+/*     { */
+/*       current->err = ENAMETOOLONG; */
+/*       return -1; */
+/*     } */
 
-  info->uptime = (long)UtilsSimulationTimeToTime (Now ()).GetSeconds ();
-  // XXX
-  return 0;
-}
+/*   info->uptime = (long)UtilsSimulationTimeToTime (Now ()).GetSeconds (); */
+/*   // XXX */
+/*   return 0; */
+/* } */
 int dce_daemon (int nochdir, int noclose)
 {
   return 0;

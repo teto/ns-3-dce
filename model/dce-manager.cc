@@ -130,17 +130,17 @@ DceManager::DoDispose (void)
   Object::DoDispose ();
 }
 
-struct ::Libc *
-DceManager::GetLibc (void)
-{
-  static struct ::Libc *libc = 0;
-  if (libc != 0)
-    {
-      return libc;
-    }
-  libc_dce (&libc);
-  return libc;
-}
+/* struct ::Libc * */
+/* DceManager::GetLibc (void) */
+/* { */
+/*   static struct ::Libc *libc = 0; */
+/*   if (libc != 0) */
+/*     { */
+/*       return libc; */
+/*     } */
+/*   libc_dce (&libc); */
+/*   return libc; */
+/* } */
 
 void
 DceManager::EnsureDirectoryExists (struct Thread *current, std::string dirName)
@@ -176,7 +176,8 @@ DceManager::CreatePidFile (struct Thread *current, std::string filename)
   EnsureDirectoryExists (current, oss.str ());
   oss << "/" << filename;
   std::string s = oss.str ();
-  int fd = dce_creat (s.c_str (), S_IWUSR | S_IRUSR);
+  int fd = ::creat (s.c_str (), S_IWUSR | S_IRUSR);
+  /* int fd = -1; */
   return fd;
 }
 int (*DceManager::PrepareDoStartProcess (Thread * current)) (int, char **, char **)
@@ -187,8 +188,9 @@ int (*DceManager::PrepareDoStartProcess (Thread * current)) (int, char **, char 
   //        after the main call !
   int err = 0;
   int (*main)(int, char **, char **) = 0;
-  GetLibc ();
-  UnixFd *unixFd = 0;
+  /* GetLibc (); */
+  /* UnixFd *unixFd = 0; */
+  int fd = -1;
 
   if (current->process->stdinFilename.length () > 0)
     {
@@ -199,25 +201,25 @@ int (*DceManager::PrepareDoStartProcess (Thread * current)) (int, char **, char 
         {
           NS_FATAL_ERROR ("Unable to open stdin file : " << current->process->stdinFilename);
         }
-      unixFd = new UnixFileFd (realFd);
+      /* unixFd = new UnixFileFd (realFd); */
     }
   else
     {
-      unixFd = new TermUnixFileFd (0);
+      /* unixFd = new TermUnixFileFd (0); */
     }
-  // create fd 0
-  unixFd->IncFdCount ();
-  current->process->openFiles[0] = new FileUsage (0, unixFd);
+  /* // create fd 0 */
+  /* unixFd->IncFdCount (); */
+  /* current->process->openFiles[0] = new FileUsage (0, unixFd); */
 
-  // create fd 1
-  int fd = CreatePidFile (current, "stdout");
-  NS_ASSERT (fd == 1);
-  // create fd 2
+  /* // create fd 1 */
+  fd = CreatePidFile (current, "stdout");
+  /* NS_ASSERT (fd == 1); */
+  /* // create fd 2 */
   fd = CreatePidFile (current, "stderr");
-  NS_ASSERT (fd == 2);
+  /* NS_ASSERT (fd == 2); */
 
   fd = CreatePidFile (current, "cmdline");
-  NS_ASSERT (fd == 3);
+  /* NS_ASSERT (fd == 3); */
   for (int i = 0; i < current->process->originalArgc; i++)
     {
       char *cur = current->process->originalArgv[i];
@@ -233,7 +235,7 @@ int (*DceManager::PrepareDoStartProcess (Thread * current)) (int, char **, char 
   dce_close (fd);
 
   fd = CreatePidFile (current, "status");
-  NS_ASSERT (fd == 3);
+  /* NS_ASSERT (fd == 3); */
   {
     std::ostringstream oss;
     oss << "Start Time: " << GetTimeStamp () << std::endl;
@@ -1208,12 +1210,16 @@ DceManager::CopyEnv (char *const envp[], std::vector<std::pair<std::string,std::
 
   return 0;
 }
+
+
 void*
 DceManager::LoadMain (Loader *ld, std::string filename, Process *proc, int &err)
 {
-  void *h = ld->Load ("libc-ns3.so", RTLD_GLOBAL);
+	/* we don't have to load a per-app libc, as it is shared across
+	 * applications should load rump-lkl instead */
+  void *h = 0; /* ld->Load ("lklrump.so", RTLD_GLOBAL); */
   void *symbol = 0;
-  struct ::Libc *libc = GetLibc ();
+  /* struct ::Libc *libc = GetLibc (); */
 
   if (h == 0)
     {
@@ -1222,81 +1228,82 @@ DceManager::LoadMain (Loader *ld, std::string filename, Process *proc, int &err)
     }
   else
     {
-      symbol = ld->Lookup (h, "libc_setup");
-      if (symbol == 0)
-        {
-          NS_FATAL_ERROR ("This is not our fake libc !");
-        }
-      // construct the libc now
-      void (*libc_setup)(const struct Libc *fn);
-      libc_setup = (void (*) (const struct Libc *))(symbol);
-      libc_setup (libc);
+	  // TODO use sthg specific like sim_init
+      /* symbol = ld->Lookup (h, "libc_setup"); */
+      /* if (symbol == 0) */
+      /*   { */
+      /*     NS_FATAL_ERROR ("This is not our fake libc !"); */
+      /*   } */
+      /* // construct the libc now */
+      /* void (*libc_setup)(const struct Libc *fn); */
+      /* libc_setup = (void (*) (const struct Libc *))(symbol); */
+      /* libc_setup (libc); */
 
-      h = ld->Load ("libpthread-ns3.so", RTLD_GLOBAL);
-      if (h == 0)
-        {
-          err = ENOMEM;
-          return 0;
-        }
-      else
-        {
-          symbol = ld->Lookup (h, "libpthread_setup");
-          if (symbol == 0)
-            {
-              NS_FATAL_ERROR ("This is not our fake libpthread !");
-            }
-          // construct libpthread now
-          void (*libpthread_setup)(const struct Libc *fn);
-          libpthread_setup = (void (*) (const struct Libc *))(symbol);
-          libpthread_setup (libc);
+      /* h = ld->Load ("libpthread-ns3.so", RTLD_GLOBAL); */
+      /* if (h == 0) */
+      /*   { */
+      /*     err = ENOMEM; */
+      /*     return 0; */
+      /*   } */
+      /* else */
+      /*   { */
+      /*     symbol = ld->Lookup (h, "libpthread_setup"); */
+      /*     if (symbol == 0) */
+      /*       { */
+      /*         NS_FATAL_ERROR ("This is not our fake libpthread !"); */
+      /*       } */
+      /*     // construct libpthread now */
+      /*     void (*libpthread_setup)(const struct Libc *fn); */
+      /*     libpthread_setup = (void (*) (const struct Libc *))(symbol); */
+      /*     libpthread_setup (libc); */
 
-          h = ld->Load ("librt-ns3.so", RTLD_GLOBAL);
-          if (h == 0)
-            {
-              err = ENOMEM;
-              return 0;
-            }
-          symbol = ld->Lookup (h, "librt_setup");
-          if (symbol == 0)
-            {
-              NS_FATAL_ERROR ("This is not our fake librt !");
-            }
-          // construct librt now
-          void (*librt_setup)(const struct Libc *fn);
-          librt_setup = (void (*) (const struct Libc *))(symbol);
-          librt_setup (libc);
+      /*     h = ld->Load ("librt-ns3.so", RTLD_GLOBAL); */
+      /*     if (h == 0) */
+      /*       { */
+      /*         err = ENOMEM; */
+      /*         return 0; */
+      /*       } */
+      /*     symbol = ld->Lookup (h, "librt_setup"); */
+      /*     if (symbol == 0) */
+      /*       { */
+      /*         NS_FATAL_ERROR ("This is not our fake librt !"); */
+      /*       } */
+      /*     // construct librt now */
+      /*     void (*librt_setup)(const struct Libc *fn); */
+      /*     librt_setup = (void (*) (const struct Libc *))(symbol); */
+      /*     librt_setup (libc); */
 
-          h = ld->Load ("libm-ns3.so", RTLD_GLOBAL);
-          if (h == 0)
-            {
-              err = ENOMEM;
-              return 0;
-            }
-          symbol = ld->Lookup (h, "libm_setup");
-          if (symbol == 0)
-            {
-              NS_FATAL_ERROR ("This is not our fake libm !");
-            }
-          // construct libm now
-          void (*libm_setup)(const struct Libc *fn);
-          libm_setup = (void (*) (const struct Libc *))(symbol);
-          libm_setup (libc);
+      /*     h = ld->Load ("libm-ns3.so", RTLD_GLOBAL); */
+      /*     if (h == 0) */
+      /*       { */
+      /*         err = ENOMEM; */
+      /*         return 0; */
+      /*       } */
+      /*     symbol = ld->Lookup (h, "libm_setup"); */
+      /*     if (symbol == 0) */
+      /*       { */
+      /*         NS_FATAL_ERROR ("This is not our fake libm !"); */
+      /*       } */
+      /*     // construct libm now */
+      /*     void (*libm_setup)(const struct Libc *fn); */
+      /*     libm_setup = (void (*) (const struct Libc *))(symbol); */
+      /*     libm_setup (libc); */
 
-          h = ld->Load ("libdl-ns3.so", RTLD_GLOBAL);
-          if (h == 0)
-            {
-              err = ENOMEM;
-              return 0;
-            }
-          symbol = ld->Lookup (h, "libdl_setup");
-          if (symbol == 0)
-            {
-              NS_FATAL_ERROR ("This is not our fake libdl !");
-            }
-          // construct libm now
-          void (*libdl_setup)(const struct Libc *fn);
-          libdl_setup = (void (*) (const struct Libc *))(symbol);
-          libdl_setup (libc);
+      /*     h = ld->Load ("libdl-ns3.so", RTLD_GLOBAL); */
+      /*     if (h == 0) */
+      /*       { */
+      /*         err = ENOMEM; */
+      /*         return 0; */
+      /*       } */
+      /*     symbol = ld->Lookup (h, "libdl_setup"); */
+      /*     if (symbol == 0) */
+      /*       { */
+      /*         NS_FATAL_ERROR ("This is not our fake libdl !"); */
+      /*       } */
+      /*     // construct libm now */
+      /*     void (*libdl_setup)(const struct Libc *fn); */
+      /*     libdl_setup = (void (*) (const struct Libc *))(symbol); */
+      /*     libdl_setup (libc); */
 
           // finally, call into 'main'.
           h = ld->Load (filename, RTLD_GLOBAL);
@@ -1313,7 +1320,7 @@ DceManager::LoadMain (Loader *ld, std::string filename, Process *proc, int &err)
               err = (0 != symbol) ? 0 : ENOEXEC;
             }
         }
-    }
+    /* } */
   return symbol;
 }
 void

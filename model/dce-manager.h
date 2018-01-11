@@ -139,7 +139,7 @@ private:
   static void SigkillHandler (int signal);
   static void SigabrtHandler (int signal);
   bool ThreadExists (Thread *thread);
-  static struct ::Libc * GetLibc (void);
+  /* static struct ::Libc * GetLibc (void); */
   void SetArgv (struct Process *process, std::string filename, std::vector<std::string> args);
   void SetEnvp (struct Process *process, std::vector<std::pair<std::string,std::string> > envp);
   static void EnsureDirectoryExists (struct Thread *current, std::string dirName);

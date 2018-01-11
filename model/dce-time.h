@@ -18,7 +18,7 @@ struct tm * dce_localtime (const time_t *timep);
 char * dce_ctime (const time_t *timep);
 char * dce_asctime (const struct tm *tm);
 int dce_clock_gettime (clockid_t which_clock, struct timespec *tp);
-int dce_sysinfo (struct sysinfo *info);
+/* int dce_sysinfo (struct sysinfo *info); */
 void dce_tzset (void);
 int dce_clock_getres (clockid_t c, struct timespec *r);
 int dce_clock_gettime (clockid_t c, struct timespec *t);

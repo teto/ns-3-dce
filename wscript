@@ -616,7 +616,7 @@ def build(bld):
         'helper/ipv4-dce-routing-helper.cc',
         'helper/dce-manager-helper.cc',
         'helper/dce-application-helper.cc',
-        'helper/ccn-client-helper.cc',
+        # 'helper/ccn-client-helper.cc',
         'helper/linux-stack-helper.cc',
         # 'helper/freebsd-stack-helper.cc',
         ]
@@ -648,7 +648,8 @@ def build(bld):
         'helper/dce-application-helper.h',
         # 'helper/ccn-client-helper.h',
         'helper/ipv4-dce-routing-helper.h',
-        # 'helper/linux-stack-helper.h',
+        # we need to keep it to install the rumprun lkl
+        'helper/linux-stack-helper.h',
         # 'helper/freebsd-stack-helper.h',
         ]
 
@@ -668,7 +669,9 @@ def build(bld):
 
     # make sure submodules built before building examples (that depend submodules)
     bld.build_a_script = types.MethodType(build_a_script, bld)
-    add_myscripts(bld)
+
+    # TODO reestablish ?
+    # add_myscripts(bld)
 
     # build_dce_tests(module, bld)
 

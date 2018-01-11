@@ -145,28 +145,28 @@ extern void __stack_chk_fail (void);
 
 /* typedef void (*func_t)(...); */
 
-extern "C" {
+/* extern "C" { */
 
-void libc_dce (struct Libc **libc)
-{
-  *libc = new Libc;
+/* void libc_dce (struct Libc **libc) */
+/* { */
+/*   *libc = new Libc; */
 
-#define DCE(name) (*libc)->name ## _fn = (func_t)(__typeof (&name))dce_ ## name;
-#define DCET(rtype,name) DCE (name)
-#define DCE_EXPLICIT(name,rtype,...) (*libc)->name ## _fn = dce_ ## name;
+/* #define DCE(name) (*libc)->name ## _fn = (func_t)(__typeof (&name))dce_ ## name; */
+/* #define DCET(rtype,name) DCE (name) */
+/* #define DCE_EXPLICIT(name,rtype,...) (*libc)->name ## _fn = dce_ ## name; */
 
-#define NATIVE(name)                                                    \
-  (*libc)->name ## _fn = (func_t)name;
-#define NATIVET(rtype, name) NATIVE(name)
+/* #define NATIVE(name)                                                    \ */
+/*   (*libc)->name ## _fn = (func_t)name; */
+/* #define NATIVET(rtype, name) NATIVE(name) */
 
-#define NATIVE_EXPLICIT(name, type)                             \
-  (*libc)->name ## _fn = (func_t)((type)name);
+/* #define NATIVE_EXPLICIT(name, type)                             \ */
+/*   (*libc)->name ## _fn = (func_t)((type)name); */
 
-/* #include "libc-ns3.h" */
+/* /1* #include "libc-ns3.h" *1/ */
 
-  (*libc)->strpbrk_fn = dce_strpbrk;
-  (*libc)->strstr_fn = dce_strstr;
-  (*libc)->vsnprintf_fn = dce_vsnprintf;
-}
+/*   (*libc)->strpbrk_fn = dce_strpbrk; */
+/*   (*libc)->strstr_fn = dce_strstr; */
+/*   (*libc)->vsnprintf_fn = dce_vsnprintf; */
+/* } */
 } // extern "C"
 
