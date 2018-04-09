@@ -174,7 +174,7 @@ def _check_dependencies(conf, required, mandatory):
             
         #if conf.env['NS3_ENABLE_STATIC']: => --static 
         retval = conf.check_cfg(package = libname,
-            args='--cflags --libs' + ' --static' if conf.env['NS3_ENABLE_STATIC'] else '',
+            args='--cflags --libs' + (' --static' if conf.env['NS3_ENABLE_STATIC'] else ''),
             mandatory=mandatory,
             msg="Checking for %s (%s)" % (libname, "mandatory" if mandatory else "optional"), # module.lower(),),
             uselib_store='NS3_%s' % module.upper())
