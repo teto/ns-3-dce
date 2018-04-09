@@ -1,30 +1,31 @@
-#!/usr/bin/env python
+#! /usr/bin/env python
 
 import sys
-import os, errno
+import os.path
 
-import pybindgen
-from pybindgen import FileCodeSink
 import pybindgen.settings
 from pybindgen.gccxmlparser import ModuleParser, PygenClassifier, PygenSection, WrapperWarning
 from pybindgen.typehandlers.codesink import FileCodeSink
 from pygccxml.declarations import templates
 from pygccxml.declarations.class_declaration import class_t
-from pygccxml.declarations.calldef import free_function_t, member_function_t, constructor_t, calldef_t
+from pygccxml.declarations.free_calldef import free_function_t
+from pygccxml.declarations.calldef_members import constructor_t, member_function_t
+from pygccxml.declarations.calldef import calldef_t
+
 
 ## we need the smart pointer type transformation to be active even
 ## during gccxml scanning.
 import ns3modulegen_core_customizations
 
-includes_dce = [
-  #'dce-application.h',
-  #'dce-application-helper.h',
-  #'dce-manager-helper.h',
-  #'ipv4-dce-routing-helper.h',
-  #'linux-stack-helper.h',
-  'ccn-client-helper.h'
-]
 
+## silence gccxmlparser errors; we only want error handling in the
+## generated python script, not while scanning.
+class ErrorHandler(pybindgen.settings.ErrorHandler):
+    def handle_error(self, dummy_wrapper, dummy_exception, dummy_traceback_):
+        return True
+pybindgen.settings.error_handler = ErrorHandler()
+import warnings
+warnings.filterwarnings(category=WrapperWarning, action='ignore')
 
 type_annotations = {
     '::ns3::AttributeChecker': {
@@ -108,108 +109,25 @@ type_annotations = {
     '::ns3::TestSuite': {
         'ignore': 'true', # we don't need to write test cases in Python
         },
-
-
-    '::ns3::Ptr': {
-        'import_from_module': 'ns.core', # Already defined in ns-3 bindings
-        },
-    '::ns3::ProcStatus::ProcStatus(int n, int e, int p, int64_t ns, int64_t ne, long rs, long re, double nd, long rd, std::string cmd)  [constructor]': {
-        'ignore': None,
-        },
-    '::DceApplication::SetEnvironment (std::vector<std::pair<std::string,std::string>> envs)  [member function]': {
-        'params': {'envs':{'direction':'in'}}
-        },
-
-    # Classes from ns-3
-    '::ns3::Object': {
-        'import_from_module': 'ns.core', # Already defined in ns-3 bindings
-        },
-    '::ns3::AttributeValue': {
-        'import_from_module': 'ns.core', # Already defined in ns-3 bindings
-        },
-                    
-
-    '::ns3::Node': {
-        'import_from_module': 'ns.network', # Already defined in ns-3 bindings
-        },
-    '::ns3::NodeContainer': {
-        'import_from_module': 'ns.network', # Already defined in ns-3 bindings
-        },
-    '::ns3::Ipv4Address': {
-        'import_from_module': 'ns.network', # Already defined in ns-3 bindings
-        },
-    '::ns3::Ipv4Mask': {
-        'import_from_module': 'ns.network', # Already defined in ns-3 bindings
-        },
-    '::ns3::Address': {
-        'import_from_module': 'ns.network', # Already defined in ns-3 bindings
-        },
-    '::ns3::Application': {
-        'import_from_module': 'ns.network', # Already defined in ns-3 bindings
-        #'ignore': 'true',
-        },
-    '::ns3::ApplicationContainer': {
-        'import_from_module': 'ns.network', # Already defined in ns-3 bindings
-        },
-    '::ns3::EmptyAttributeValue': {
-        'ignore': 'true',
-        },
-                    
-    '::ns3::Ipv4AddressHash': {
-        'ignore': 'true', # we don't need to write test cases in Python
-        },
-    '::ns3::Ipv6AddressHash': {
-        'ignore': 'true', # we don't need to write test cases in Python
-        },
-    '::ns3::Ipv4StaticRoutingHelper': {
-        'import_from_module': 'ns.network', # Already defined in ns-3 bindings
-        #'ignore': 'true',
-        },
-    '::ns3::Ipv4RoutingProtocol': {
-        'import_from_module': 'ns.network', # Already defined in ns-3 bindings
-        #'ignore': 'true',
-        },
-                    
-                    
-    'void ns3::DceApplicationHelper::InstallInNode(Ptr<Node> node) [member function]': {
-        'params': {'node':{'direction':'in'}},
-        },                    
-
+    
     }
 
-DCE_INCLUDE_PATH = "."
+def get_ns3_relative_path(path):
+    l = []
+    head = path
+    while head:
+        head, tail = os.path.split(head)
+        if tail == 'ns3':
+            return os.path.join(*l)
+        l.insert(0, tail)
+    raise AssertionError("is the path %r inside ns3?!" % path)
 
 
-'''
-'''
 def pre_scan_hook(dummy_module_parser,
                   pygccxml_definition,
                   global_annotations,
                   parameter_annotations):
-    #ns3_header = get_ns3_relative_path(pygccxml_definition.location.file_name)
-    ns3_header = DCE_INCLUDE_PATH + "/" +pygccxml_definition.location.file_name
-    '''
-    print " ********";
-    print " ** [pre_scan_hook] pygccxml_definition:"+str(pygccxml_definition);
-    attrs = vars(pygccxml_definition)
-    print '\n   - '.join("%s: %s" % item for item in attrs.items())
-
-    attrs = vars(pygccxml_definition.location)
-    print '  **** pygccxml_definition.location'
-    print '\n      + '.join("%s: %s" % item for item in attrs.items())
-
-    #attrs = vars(pygccxml_definition.arguments)
-    #print '      pygccxml_definition.arguments'
-    #print '\n      | '.join("%s: %s" % item for item in attrs.items())
-    
-    #print " ** [pre_scan_hook] pygccxml_definition:"+pygccxml_definition;
-    #print " ** [pre_scan_hook] pygccxml_definition.demangled_name:"+str(pygccxml_definition.demangled_name);
-    print " ** [pre_scan_hook] pygccxml_definition.location:"+str(pygccxml_definition.location);
-    
-    print " ** [pre_scan_hook] ns3_header:"+ns3_header;
-    print " ** [pre_scan_hook] global_annotations:"+str(global_annotations);
-    print " ** [pre_scan_hook] parameter_annotations:"+str(parameter_annotations);
-    '''
+    ns3_header = get_ns3_relative_path(pygccxml_definition.location.file_name)
 
     ## Note: we don't include line numbers in the comments because
     ## those numbers are very likely to change frequently, which would
@@ -309,86 +227,109 @@ def pre_scan_hook(dummy_module_parser,
             global_annotations.update(annotations)
 
 
+# def post_scan_hook(dummy_module_parser, dummy_pygccxml_definition, pybindgen_wrapper):
+#     ## classes
+#     if isinstance(pybindgen_wrapper, CppClass):
+#         if pybindgen_wrapper.name.endswith('Checker'):
+#             print >> sys.stderr, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", pybindgen_wrapper
+#             #pybindgen_wrapper.set_instance_creation_function(AttributeChecker_instance_creation_function)
 
-def dcepy_module_gen( binddir, ns3path, dcepath ):
-    DCE_INCLUDE_PATH=dcepath
-    '''
-    print "************************* dcepy_module_gen"
-    print "* binddir = " + binddir
-    print "* ns3path = " + ns3path
-    print "* dcepath = " + dcepath
-    print "******************************************"
-    '''
-    
-    cflags = ''
-    
-    bldpath = 'bindings/python'
-    try:
-        os.makedirs(bldpath)
-    except OSError as exc:
-        if exc.errno == errno.EEXIST and os.path.isdir(bldpath):
-            pass
-        else: raise
 
-    ref_header_dir = binddir+"/refh"
+def scan_callback_classes(module_parser, callback_classes_file):
+    callback_classes_file.write("callback_classes = [\n")
+    for cls in module_parser.module_namespace.classes(function=module_parser.location_filter,
+                                                      recursive=False):
+        if not cls.name.startswith("Callback<"):
+            continue
+        assert templates.is_instantiation(cls.decl_string), "%s is not a template instantiation" % cls
+        dummy_cls_name, template_parameters = templates.split(cls.decl_string)
+        callback_classes_file.write("    %r,\n" % template_parameters)
+    callback_classes_file.write("]\n")
+
+
+class MyPygenClassifier(PygenClassifier):
+    def __init__(self, headers_map, section_precendences):
+        self.headers_map = headers_map
+        self.section_precendences = section_precendences
+
+    def classify(self, pygccxml_definition):
+        name = os.path.basename(pygccxml_definition.location.file_name)
+        try:
+            return self.headers_map[name]
+        except KeyError:
+            return '__main__'
+
+    def get_section_precedence(self, section_name):
+        if section_name == '__main__':
+            return -1
+        return self.section_precendences[section_name]
+
+
+def ns3_module_scan(top_builddir, pygen_file_name, everything_h, cflags):
+
+    ns3_modules = eval(sys.stdin.readline())
+
+    ## do a topological sort on the modules graph
+    from topsort import topsort
+    graph = []
+    module_names = ns3_modules.keys()
+    module_names.sort()
+    for ns3_module_name in module_names:
+        ns3_module_deps = list(ns3_modules[ns3_module_name][0])
+        ns3_module_deps.sort()
+        for dep in ns3_module_deps:
+            graph.append((dep, ns3_module_name))
+    sorted_ns3_modules = topsort(graph)
+    #print >> sys.stderr, "******* topological sort: ", sorted_ns3_modules
+
+    sections = [PygenSection('__main__', FileCodeSink(open(pygen_file_name, "wt")))]
+    headers_map = {} # header_name -> section_name
+    section_precendences = {} # section_name -> precedence
+    for prec, ns3_module in enumerate(sorted_ns3_modules):
+        section_name = "ns3_module_%s" % ns3_module.replace('-', '_')
+        file_name = os.path.join(os.path.dirname(pygen_file_name), "%s.py" % section_name)
+        sections.append(PygenSection(section_name, FileCodeSink(open(file_name, "wt")),
+                                     section_name + "__local"))
+        for header in ns3_modules[ns3_module][1]:
+            headers_map[header] = section_name
+        section_precendences[section_name] = prec
+
+    module_parser = ModuleParser('ns3', 'ns3')
+
+    module_parser.add_pre_scan_hook(pre_scan_hook)
+    #module_parser.add_post_scan_hook(post_scan_hook)
+
     gccxml_options = dict(
-        #include_paths=[ns3path, dcepath+"/model", dcepath + "/helper"],
-        include_paths=[ref_header_dir, ns3path ],
-        define_symbols={
+        include_paths=[top_builddir],
+         define_symbols={
             #'NS3_ASSERT_ENABLE': None,
             #'NS3_LOG_ENABLE': None,
             },
-	    cflags=('--gccxml-cxxflags "%s -DPYTHON_SCAN"' % cflags)
-    )
-    
-    inclfiles = []
-    for hf in includes_dce:
-      inclfiles.append( ref_header_dir+"/"+hf  )
-      #inclfiles.append( dcepath+"/model/"+hf  )
-      
-      
-    #whitelist_paths=[ dcepath+"/model", dcepath + "/helper", ns3path  ]
-    whitelist_paths=[ ref_header_dir  ]
+        cflags=('--gccxml-cxxflags "%s -DPYTHON_SCAN"' % cflags)
+        )
 
-    module_parser = ModuleParser('dce', 'ns3')
-    module_parser.enable_anonymous_containers = True
-    module_parser.add_pre_scan_hook(pre_scan_hook)
+    module_parser.parse_init([everything_h],
+                             None, whitelist_paths=[top_builddir, os.path.dirname(everything_h)],
+                             #includes=['"ns3/everything.h"'],
+                             pygen_sink=sections,
+                             pygen_classifier=MyPygenClassifier(headers_map, section_precendences),
+                             gccxml_options=gccxml_options)
+    module_parser.scan_types()
 
-    generatepyintermediate = True
-    if generatepyintermediate:
-        # Test with intermediate file
-        fname = bldpath + '/temp_dce_bindings.py'
-        print "Generating python pygendbind intermediate file: "+str(fname)
-        py_file = open( fname, "wt")
-        includes = ['"ns3/dce-module.h"', '"ns3/dce-manager-helper.h"', '"ns3/dce-application.h"', '"ns3/ipv4-dce-routing-helper.h"']
-        pysink = FileCodeSink(py_file)
-        module_parser.parse_init(inclfiles, whitelist_paths=whitelist_paths, pygen_sink=pysink, gccxml_options=gccxml_options, includes=includes)
-        module_parser.scan_types()
-        module_parser.scan_methods()
-        module_parser.scan_functions()
-        module_parser.parse_finalize()          
-
-    else:
-        # Test with cpp
-        fname = bldpath + '/temp_dce_bindings.cpp'
-        #fname = 'dce_bindings.cpp'
-        print "Generating python bindings c++ file: "+str(fname)
-        pygen_file = open( fname, "wt")
-        module_parser.parse_init(inclfiles, whitelist_paths=whitelist_paths, gccxml_options=gccxml_options)
-
-        module_parser.scan_types()
-        module_parser.scan_methods()
-        module_parser.scan_functions()
-        module_parser.parse_finalize()	      
-        module_parser.module.add_include('<ns3/dce-module.h>')
-        module_parser.module.add_include('<ns3/dce-manager-helper.h>')
-        module_parser.module.add_include('<ns3/dce-application.h>')
-        module_parser.module.add_include('<ns3/ipv4-dce-routing-helper.h>')
-        module_parser.module.add_include('<ns3/linux-stack-helper.h>')
-        pybindgen.write_preamble(FileCodeSink(pygen_file))
-        module_parser.module.generate(FileCodeSink(pygen_file))
-    
+    callback_classes_file = open(os.path.join(os.path.dirname(pygen_file_name), "callbacks_list.py"), "wt")
+    scan_callback_classes(module_parser, callback_classes_file)
+    callback_classes_file.close()
 
 
-                                                                                                                                                               
+    module_parser.scan_methods()
+    module_parser.scan_functions()
+    module_parser.parse_finalize()
+
+    for section in sections:
+        section.code_sink.file.close()
+
+
+
+if __name__ == '__main__':
+    ns3_module_scan(sys.argv[1], sys.argv[3], sys.argv[2], sys.argv[4])
 

@@ -69,12 +69,22 @@ def options(opt):
                    action="store_true", default=False,
                    dest='valgrind')
     opt.recurse('bindings/python')
+    opt.recurse('example')
                                   
 def search_file(files):
     for f in files:
         if os.path.isfile (f):
             return f
     return None
+
+# starting with waf 1.6, conf.check() becomes fatal by default if the
+# test fails, this alternative method makes the test non-fatal, as it
+# was in waf <= 1.5
+def _check_nonfatal(conf, *args, **kwargs):
+    try:
+        return conf.check(*args, **kwargs)
+    except conf.errors.ConfigurationError:
+        return None
 
 def configure(conf):
 
@@ -83,6 +93,9 @@ def configure(conf):
     cc_string = '.'.join(conf.env['CC_VERSION'])
     conf.msg('Checking for cc version',cc_string,'GREEN')
     conf.load('compiler_cxx')
+    conf.check_nonfatal = types.MethodType(_check_nonfatal, conf)
+    conf.check_compilation_flag = types.MethodType(_check_compilation_flag, conf)
+    conf.report_optional_feature = types.MethodType(report_optional_feature, conf)
 
     conf.load('clang_compilation_database', tooldir=['waf-tools'])
 
@@ -273,7 +286,7 @@ def build_dce_tests(module, bld):
 
     module.add_test(features='cxx cxxshlib', source=['test/test-macros.cc'],
                     target='lib/test', linkflags=['-Wl,-soname=libtest.so'])
-    bld.install_files('${PREFIX}/lib', 'lib/libtest.so', chmod=0o755 )
+    bld.install_files('${PREFIX}/lib', 'lib/libtest.so', chmod=Utils.O755 )
 
     tests = [['test-empty', []],
              ['test-sleep', []],
@@ -319,9 +332,106 @@ def build_dce_tests(module, bld):
     for name,uselib in tests:
         module.add_test(**dce_kw(target='bin_dce/' + name, source = ['test/' + name + '.cc'],
                                  use = uselib + ['lib/test']))
-        bld.install_files('${PREFIX}/bin_dce', 'build/bin_dce/' + name , chmod=Utils.0755 )
+        bld.install_files('${PREFIX}/bin_dce', 'build/bin_dce/' + name , chmod=Utils.O755 )
 
+def build_dce_examples(module, bld):
+    dce_examples = [['udp-server', []],
+                    ['udp-client', []],
+                    ['udp-perf', ['m']],
+                    ['tcp-server', []],
+                    ['tcp-client', []],
+                    ['tcp-loopback', []],
+                    ['unix-server', []],
+                    ['unix-client', []],
+                    ['udp-echo-server', []],
+                    ['udp-echo-client', []],
+                    ['dccp-server', []],
+                    ['dccp-client', []],
+                    ['freebsd-iproute', []],
+#                    ['little-cout', []],
+                    ]
 
+    if bld.env['SCTP_TOOLS_FOUND']:
+        dce_examples += [
+                    ['sctp-server', ['sctp']],
+                    ['sctp-client', ['sctp']],
+        ]
+
+    for name,lib in dce_examples:
+        module.add_example(**dce_kw(target = 'bin_dce/' + name, 
+                                    source = ['example/' + name + '.cc'],
+                                    lib = lib))
+        bld.install_files('${PREFIX}/bin_dce', 'bin_dce/' + name , chmod=Utils.O755 )        
+
+    module.add_example(needed = ['core', 'internet', 'dce'], 
+                       target='bin/dce-tcp-simple',
+                       source=['example/dce-tcp-simple.cc'])
+
+    module.add_example(needed = ['core', 'internet', 'dce'], 
+                       target='bin/dce-udp-simple',
+                       source=['example/dce-udp-simple.cc'])
+    
+    module.add_example(needed = ['core', 'internet', 'dce'], 
+                       target='bin/dce-ccnd-simple',
+                       source=['example/ccnx/dce-ccnd-simple.cc'])
+                       
+    module.add_example(needed = ['core', 'internet', 'dce'], 
+                       target='bin/dce-ccnd-short-stuff',
+                       source=['example/ccnx/dce-ccnd-short-stuff.cc'])
+                       
+    module.add_example(needed = ['core', 'internet', 'dce', 'tap-bridge', 'point-to-point', 'csma'],
+                       target='bin/dce-tap-udp-echo',
+                       source=['example/ccnx/dce-tap-udp-echo.cc'])                
+
+    module.add_example(needed = ['core', 'internet', 'dce', 'tap-bridge', 'csma' ], 
+                       target='bin/dce-tap-ccnd',
+                       source=['example/ccnx/dce-tap-ccnd.cc'])       
+                       
+    module.add_example(needed = ['core', 'internet', 'dce', 'tap-bridge', 'csma' ], 
+                       target='bin/dce-tap-vlc',
+                       source=['example/ccnx/dce-tap-vlc.cc'])       
+    
+#    module.add_example(needed = ['core', 'internet', 'dce', 'point-to-point', 'netanim'], 
+#                       target='bin/dce-ping',
+#                       source=['example/dce-ping.cc', 'example/ccnx/misc-tools.cc'])
+
+    module.add_example(needed = ['core', 'internet', 'dce' ], 
+                       target='bin/dce-bash-simple',
+                       source=['example/bash/dce-bash-simple.cc'])
+
+    module.add_example(needed = ['core', 'internet', 'dce', 'point-to-point', 'netanim'], 
+                       target='bin/dce-ccn-cache',
+                       source=['example/ccnx/dce-ccn-cache.cc', 'example/ccnx/misc-tools.cc'])
+
+    module.add_example(needed = ['core', 'internet', 'dce', 'point-to-point', 'netanim', 'csma'], 
+                       target='bin/dce-iperf',
+                       source=['example/dce-iperf.cc', 'example/ccnx/misc-tools.cc'])
+
+    module.add_example(needed = ['core', 'internet', 'dce', 'point-to-point', 'netanim', 'csma', 'fd-net-device'], 
+                       target='bin/dce-iperf-emulation',
+                       source=['example/dce-iperf-emulation.cc', 'example/ccnx/misc-tools.cc'])
+                       
+    module.add_example(needed = ['core', 'network', 'internet', 'dce', 'point-to-point', 'csma', 'applications'],
+                       target='bin/linear-udp-perf',
+                       source=['example/linear-udp-perf.cc'])
+
+    if bld.env['LIB_ASPECT_PATH']:
+        module.add_example(needed = ['core', 'network', 'internet', 'dce', 'point-to-point', 'csma', 'applications'],
+                           target='bin/dce-debug-aspect',
+                           use=['ASPECT'],
+                           source=['example/dce-debug-aspect.cc'])
+
+#    module.add_example(needed = ['core', 'internet', 'dce', 'point-to-point', 'netanim'], 
+#                       target='bin/dce-xorp-simple',
+#                       source=['example/xorp/dce-xorp-simple.cc', 'example/ccnx/misc-tools.cc'])
+                                              
+#    module.add_example(needed = ['core', 'internet', 'dce', 'csma' ], 
+#                       target='bin/dce-udp-multicast',
+#                       source=['example/dce-udp-multicast.cc'])
+#    module.add_example(needed = ['core', 'dce', ], 
+#                       target='bin/dce-cout-bug',
+#                       source=['example/dce-cout-bug.cc'])
+                                                                
 def build_dce_kernel_examples(module, bld):
     module.add_example(needed = ['core', 'internet', 'dce', 'point-to-point'], 
                        target='bin/dce-udp-perf',
@@ -475,7 +585,7 @@ def conf_myscripts(conf):
         if os.path.isdir(os.path.join('myscripts', folder)):
              conf.recurse(os.path.join('myscripts', folder))
 
-
+	
 def _get_all_task_gen(self):
     for group in self.groups:
         for taskgen in group:
@@ -663,8 +773,7 @@ def build(bld):
     add_myscripts(bld)
 
     build_dce_tests(module, bld)
-    # TODO load example wscript ?
-    # build_dce_examples(module, bld)
+    build_dce_examples(module, bld)
 
     # no idea to solve this two-way dependency (dce <-> netlink)
     module.add_runner_test(needed = ['internet', 'point-to-point', 'core', 'dce'],
@@ -861,6 +970,56 @@ class Ns3ShellContext(Context.Context):
             'NS3_EXECUTABLE_PATH': os.pathsep.join(env['NS3_EXECUTABLE_PATH']),
             }
         wutils.run_argv([shell], env, os_env)
+
+
+def _check_compilation_flag(conf, flag, mode='cxx', linkflags=None):
+    """
+    Checks if the C++ compiler accepts a certain compilation flag or flags
+    flag: can be a string or a list of strings
+    """
+    l = []
+    if flag:
+        l.append(flag)
+    if isinstance(linkflags, list):
+        l.extend(linkflags)
+    else:
+        if linkflags:
+            l.append(linkflags)
+    if len(l) > 1:
+        flag_str = 'flags ' + ' '.join(l)
+    else:
+        flag_str = 'flag ' + ' '.join(l)
+    if len(flag_str) > 28:
+        flag_str = flag_str[:28] + "..."
+
+    conf.start_msg('Checking for compilation %s support' % (flag_str,))
+    env = conf.env.derive()
+
+    retval = False
+    if mode == 'cc':
+        mode = 'c'
+
+    if mode == 'cxx':
+        env.append_value('CXXFLAGS', flag)
+    else:
+        env.append_value('CFLAGS', flag)
+
+    if linkflags is not None:
+        env.append_value("LINKFLAGS", linkflags)
+
+    try:
+        retval = conf.check(compiler=mode, fragment='int main() { return 0; }', features='c', env=env)
+    except Errors.ConfigurationError:
+        ok = False
+    else:
+        ok = (retval == True)
+    conf.end_msg(ok)
+    return ok
+
+
+def report_optional_feature(conf, name, caption, was_enabled, reason_not_enabled):
+    conf.env.append_value('NS3_OPTIONAL_FEATURES', [(name, caption, was_enabled, reason_not_enabled)])
+
 
 class Ns3DoxygenContext(Context.Context):
     """do a full build, generate the introspected doxygen and then the doxygen"""

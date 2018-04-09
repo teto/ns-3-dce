@@ -143,7 +143,7 @@ def _check_win32(conf):
                 env['WL_SONAME_SUPPORTED'] = True
 
 
-ns3_versions = ['3-dev', '3.27', '3.26', '3.25', '3.24', '3.23', '3.22', '3.21', '3.20', '3.19', '3.18', '3.17']
+ns3_versions = ['3-dev', '3.28', '3.27', '3.26', '3.25', '3.24', '3.23', '3.22', '3.21', '3.20', '3.19', '3.18', '3.17']
 def _check_dependencies(conf, required, mandatory):
     found = []
     # match_pkg = None
@@ -180,15 +180,15 @@ def _check_dependencies(conf, required, mandatory):
             uselib_store='NS3_%s' % module.upper())
 
         # TODO fix the missing match_pkg
-        print("retval=%s", retval)
-        # if retval is not None:
-        #     # XXX pkg-config doesn't give the proper order of whole-archive option..
-        #     if conf.env['NS3_ENABLE_STATIC']:
-        #         libname = 'STLIB_ST_NS3_%s' % module.upper()
-        #         conf.env[libname] = '-l%s' % (match_pkg.replace('libns3', 'ns3'))
-        #         for lib in conf.env['LIB_NS3_%s' % module.upper()]:
-        #             if 'ns3' in lib:
-        #                 conf.env.append_value(libname, '-l%s' % lib)
+        print("retval=%s" % retval)
+        if retval is not None:
+            # XXX pkg-config doesn't give the proper order of whole-archive option..
+            if conf.env['NS3_ENABLE_STATIC']:
+                libname = 'STLIB_ST_NS3_%s' % module.upper()
+                conf.env[libname] = '-l%s' % (match_pkg.replace('libns3', 'ns3'))
+                for lib in conf.env['LIB_NS3_%s' % module.upper()]:
+                    if 'ns3' in lib:
+                        conf.env.append_value(libname, '-l%s' % lib)
 
         if not retval is None:
             found.append(module)
