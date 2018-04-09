@@ -171,18 +171,24 @@ def _check_dependencies(conf, required, mandatory):
         # ca ca marche
         # libns3-dev-core-debug
         libname= "libns3-dev-" +module + "-debug"
+            
+        #if conf.env['NS3_ENABLE_STATIC']: => --static 
         retval = conf.check_cfg(package = libname,
-                                args='--cflags --libs', mandatory=mandatory,
-                                msg="Checking for %s (%s)" % (libname, "mandatory" if mandatory else "optional"), # module.lower(),),
-                                uselib_store='NS3_%s' % module.upper())
-        if retval is not None:
-            # XXX pkg-config doesn't give the proper order of whole-archive option..
-            if conf.env['NS3_ENABLE_STATIC']:
-                libname = 'STLIB_ST_NS3_%s' % module.upper()
-                conf.env[libname] = '-l%s' % (match_pkg.replace('libns3', 'ns3'))
-                for lib in conf.env['LIB_NS3_%s' % module.upper()]:
-                    if 'ns3' in lib:
-                        conf.env.append_value(libname, '-l%s' % lib)
+            args='--cflags --libs' + ' --static' if conf.env['NS3_ENABLE_STATIC'] else '',
+            mandatory=mandatory,
+            msg="Checking for %s (%s)" % (libname, "mandatory" if mandatory else "optional"), # module.lower(),),
+            uselib_store='NS3_%s' % module.upper())
+
+        # TODO fix the missing match_pkg
+        print("retval=%s", retval)
+        # if retval is not None:
+        #     # XXX pkg-config doesn't give the proper order of whole-archive option..
+        #     if conf.env['NS3_ENABLE_STATIC']:
+        #         libname = 'STLIB_ST_NS3_%s' % module.upper()
+        #         conf.env[libname] = '-l%s' % (match_pkg.replace('libns3', 'ns3'))
+        #         for lib in conf.env['LIB_NS3_%s' % module.upper()]:
+        #             if 'ns3' in lib:
+        #                 conf.env.append_value(libname, '-l%s' % lib)
 
         if not retval is None:
             found.append(module)
