@@ -189,26 +189,26 @@ def pre_scan_hook(dummy_module_parser,
     #ns3_header = get_ns3_relative_path(pygccxml_definition.location.file_name)
     ns3_header = DCE_INCLUDE_PATH + "/" +pygccxml_definition.location.file_name
     '''
-    print " ********";
-    print " ** [pre_scan_hook] pygccxml_definition:"+str(pygccxml_definition);
+    print( " ********");
+    print( " ** [pre_scan_hook] pygccxml_definition:"+str(pygccxml_definition));
     attrs = vars(pygccxml_definition)
-    print '\n   - '.join("%s: %s" % item for item in attrs.items())
+    print( '\n   - '.join("%s: %s" % item for item in attrs.items()))
 
     attrs = vars(pygccxml_definition.location)
-    print '  **** pygccxml_definition.location'
-    print '\n      + '.join("%s: %s" % item for item in attrs.items())
+    print( '  **** pygccxml_definition.location')
+    print( '\n      + '.join("%s: %s" % item for item in attrs.items()))
 
     #attrs = vars(pygccxml_definition.arguments)
-    #print '      pygccxml_definition.arguments'
-    #print '\n      | '.join("%s: %s" % item for item in attrs.items())
+    #print( '      pygccxml_definition.arguments')
+    #print( '\n      | '.join("%s: %s" % item for item in attrs.items()))
     
-    #print " ** [pre_scan_hook] pygccxml_definition:"+pygccxml_definition;
-    #print " ** [pre_scan_hook] pygccxml_definition.demangled_name:"+str(pygccxml_definition.demangled_name);
-    print " ** [pre_scan_hook] pygccxml_definition.location:"+str(pygccxml_definition.location);
+    #print( " ** [pre_scan_hook] pygccxml_definition:"+pygccxml_definition;
+    #print( " ** [pre_scan_hook] pygccxml_definition.demangled_name:"+str(pygccxml_definition.demangled_name);
+    print( " ** [pre_scan_hook] pygccxml_definition.location:"+str(pygccxml_definition.location))
     
-    print " ** [pre_scan_hook] ns3_header:"+ns3_header;
-    print " ** [pre_scan_hook] global_annotations:"+str(global_annotations);
-    print " ** [pre_scan_hook] parameter_annotations:"+str(parameter_annotations);
+    print( " ** [pre_scan_hook] ns3_header:"+ns3_header)
+    print( " ** [pre_scan_hook] global_annotations:"+str(global_annotations))
+    print( " ** [pre_scan_hook] parameter_annotations:"+str(parameter_annotations))
     '''
 
     ## Note: we don't include line numbers in the comments because
@@ -313,11 +313,11 @@ def pre_scan_hook(dummy_module_parser,
 def dcepy_module_gen( binddir, ns3path, dcepath ):
     DCE_INCLUDE_PATH=dcepath
     '''
-    print "************************* dcepy_module_gen"
-    print "* binddir = " + binddir
-    print "* ns3path = " + ns3path
-    print "* dcepath = " + dcepath
-    print "******************************************"
+    print( "************************* dcepy_module_gen"
+    print( "* binddir = " + binddir
+    print( "* ns3path = " + ns3path
+    print( "* dcepath = " + dcepath
+    print( "******************************************"
     '''
     
     cflags = ''
@@ -358,7 +358,7 @@ def dcepy_module_gen( binddir, ns3path, dcepath ):
     if generatepyintermediate:
         # Test with intermediate file
         fname = bldpath + '/temp_dce_bindings.py'
-        print "Generating python pygendbind intermediate file: "+str(fname)
+        print("Generating python pygendbind intermediate file: "+str(fname))
         py_file = open( fname, "wt")
         includes = ['"ns3/dce-module.h"', '"ns3/dce-manager-helper.h"', '"ns3/dce-application.h"', '"ns3/ipv4-dce-routing-helper.h"']
         pysink = FileCodeSink(py_file)
@@ -372,7 +372,7 @@ def dcepy_module_gen( binddir, ns3path, dcepath ):
         # Test with cpp
         fname = bldpath + '/temp_dce_bindings.cpp'
         #fname = 'dce_bindings.cpp'
-        print "Generating python bindings c++ file: "+str(fname)
+        print( "Generating python bindings c++ file: "+str(fname))
         pygen_file = open( fname, "wt")
         module_parser.parse_init(inclfiles, whitelist_paths=whitelist_paths, gccxml_options=gccxml_options)
 
