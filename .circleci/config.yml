@@ -27,23 +27,24 @@ do_steps: &do_steps
         fi
         git reset --hard $CIRCLE_SHA1
 
-  - run:
-      name: enable python3
-      command: |
-        python3 -m venv venv
-        . venv/bin/activate
+  # - run:
+  #     name: enable python3
+  #     command: |
+  #       python3 -m venv venv
+  #       . venv/bin/activate
 
   - run:
       name: download bake and codes
       environment:
+          python: python3
       command: |
         if [ -z "${BAKE_BRANCH}" ] ; then export BAKE_BRANCH="master" ; fi
         if [ -z "${BAKE_MOD_VERSION}" ] ; then export BAKE_MOD_VERSION="dev" ; fi
 
         # we clone a fork of bake
         cd "$HOME" && git clone -b ${BAKE_BRANCH} git://github.com/direct-code-execution/bake ./bake
-        cd "$HOME" && ./bake/bake.py configure -e dce-umip-${BAKE_MOD_VERSION} -e dce-linux-${BAKE_MOD_VERSION}
-        cd "$HOME" && ./bake/bake.py download -vvv && ./bake/bake.py update -vvv
+        cd "$HOME" && python3 ./bake/bake.py configure -e dce-umip-${BAKE_MOD_VERSION} -e dce-linux-${BAKE_MOD_VERSION}
+        cd "$HOME" && python3 ./bake/bake.py download -vvv && ./bake/bake.py update -vvv
 
   - save_cache:
       key: code-tree-shallow-{{ epoch }}
