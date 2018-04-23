@@ -128,10 +128,10 @@ workflows:
   build:
     jobs:
      - ubuntu14.04
-     - ubuntu16.04
-     - ubuntu17.04
-     - fedora26
-     - fedora27
+     # - ubuntu16.04
+     # - ubuntu17.04
+     # - fedora26
+     # - fedora27
   nightly_workflow:
     triggers:
       - schedule:
