@@ -28,6 +28,12 @@ do_steps: &do_steps
         git reset --hard $CIRCLE_SHA1
 
   - run:
+      name: enable python3
+      command: |
+        python3 -m venv venv
+        . venv/bin/activate
+
+  - run:
       name: download bake and codes
       environment:
       command: |
