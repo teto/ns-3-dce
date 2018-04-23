@@ -1,6 +1,8 @@
 version: 2
 general:
   artifacts:
+  environment:
+    python: python3
 
 machine:
   python:
@@ -35,8 +37,6 @@ do_steps: &do_steps
 
   - run:
       name: download bake and codes
-      environment:
-          python: python3
       command: |
         if [ -z "${BAKE_BRANCH}" ] ; then export BAKE_BRANCH="master" ; fi
         if [ -z "${BAKE_MOD_VERSION}" ] ; then export BAKE_MOD_VERSION="dev" ; fi
