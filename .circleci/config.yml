@@ -2,7 +2,7 @@ version: 2
 general:
   artifacts:
   environment:
-    python: python3
+    PYTHON: python3
 
 machine:
   python:
@@ -43,8 +43,8 @@ do_steps: &do_steps
 
         # we clone a fork of bake
         cd "$HOME" && git clone -b ${BAKE_BRANCH} git://github.com/direct-code-execution/bake ./bake
-        cd "$HOME" && python3 ./bake/bake.py configure -e dce-umip-${BAKE_MOD_VERSION} -e dce-linux-${BAKE_MOD_VERSION}
-        cd "$HOME" && python3 ./bake/bake.py download -vvv && ./bake/bake.py update -vvv
+        cd "$HOME" && $PYTHON ./bake/bake.py configure -e dce-umip-${BAKE_MOD_VERSION} -e dce-linux-${BAKE_MOD_VERSION}
+        cd "$HOME" && $PYTHON ./bake/bake.py download -vvv && $PYTHON ./bake/bake.py update -vvv
 
   - save_cache:
       key: code-tree-shallow-{{ epoch }}
@@ -66,7 +66,7 @@ do_steps: &do_steps
         # bake installs the master branch hence DCE will be install $CIRCLE_BRANCH
         cd ${HOME}/source/ns-3-dce && git remote add local "$HOME/project" && \
             git fetch local -a && git reset --hard $CIRCLE_SHA1
-        cd "$HOME" && ./bake/bake.py build -j1 -vvv
+        cd "$HOME" && $PYTHON ./bake/bake.py build -j1 -vvv
 
   - save_cache:
      paths:
