@@ -2,6 +2,10 @@ version: 2
 general:
   artifacts:
 
+machine:
+  python:
+    version: 3.4.3
+
 do_steps: &do_steps
  steps:
   - restore_cache:
