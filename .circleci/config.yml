@@ -2,9 +2,8 @@ version: 2
 general:
   artifacts:
 
-machine:
-  post:
-  - sudo apt-get install python3-venv
+# machine:
+#   post:
   # - pyenv global 3.6.0
 
 
@@ -32,6 +31,7 @@ do_steps: &do_steps
   - run:
       name: enable python3
       command: |
+        sudo apt-get install python3-venv
         python3 -m venv venv
         . venv/bin/activate
         pip install mercurial
