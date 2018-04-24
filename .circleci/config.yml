@@ -31,7 +31,7 @@ do_steps: &do_steps
   - run:
       name: enable python3
       command: |
-        sudo apt-get install python3.4-venv
+        sudo apt-get install -y python3.4-venv
         python3 -m venv venv
         . venv/bin/activate
         # mercurial exists only for python2
