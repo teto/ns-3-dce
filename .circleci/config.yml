@@ -1,14 +1,15 @@
-version: 2
-general:
-  artifacts:
-
-
 # DONT FORGET to add CACHE_VERSION as an envrionment variable in circleci UI
+version: 2
+
+# machine:
+#   post:
+  # - pyenv global 3.6.0
+
 
 do_steps: &do_steps
  steps:
   - restore_cache:
-      key: {{ .Environment.CACHE_VERSION }}-code-tree-shallow 
+      key: {{ .Environment.CACHE_VERSION }}-code-tree-shallow
   - restore_cache:
       key: {{ .Environment.CACHE_VERSION }}-bake-tree-cache
   - run:
