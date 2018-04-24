@@ -32,8 +32,8 @@ do_steps: &do_steps
       name: enable python3
       command: |
         sudo apt-get install -y python3.4-venv
-        python3 -m venv venv
-        . venv/bin/activate
+        python3 -m venv $HOME/venv
+        . $HOME/venv/bin/activate
         # mercurial exists only for python2
         # pip install mercurial
         # PYTHON3=`which python3`
@@ -43,14 +43,14 @@ do_steps: &do_steps
       name: download bake and codes
       environment:
       command: |
-        . venv/bin/activate
+        . $HOME/venv/bin/activate
         if [ -z "${BAKE_BRANCH}" ] ; then export BAKE_BRANCH="master" ; fi
         if [ -z "${BAKE_MOD_VERSION}" ] ; then export BAKE_MOD_VERSION="dev" ; fi
 
         # we clone a fork of bake
         cd "$HOME" && git clone -b ${BAKE_BRANCH} git://github.com/direct-code-execution/bake ./bake
-        cd "$HOME" && python2 ./bake/bake.py configure -e dce-umip-${BAKE_MOD_VERSION} -e dce-linux-${BAKE_MOD_VERSION}
-        cd "$HOME" && python2 ./bake/bake.py download -vvv && python2 ./bake/bake.py update -vvv
+        cd "$HOME" && ./bake/bake.py configure -e dce-umip-${BAKE_MOD_VERSION} -e dce-linux-${BAKE_MOD_VERSION}
+        cd "$HOME" && ./bake/bake.py download -vvv && ./bake/bake.py update -vvv
 
   - save_cache:
       key: code-tree-shallow-{{ epoch }}
@@ -69,12 +69,12 @@ do_steps: &do_steps
   - run:
       name: build dce
       command: |
-        . venv/bin/activate
+        . $HOME/venv/bin/activate
 
         # bake installs the master branch hence DCE will be install $CIRCLE_BRANCH
         cd ${HOME}/source/ns-3-dce && git remote add local "$HOME/project" && \
             git fetch local -a && git reset --hard $CIRCLE_SHA1
-        cd "$HOME" && python2 ./bake/bake.py build -j1 -vvv
+        cd "$HOME" && ./bake/bake.py build -j1 -vvv
 
   - save_cache:
      paths:
