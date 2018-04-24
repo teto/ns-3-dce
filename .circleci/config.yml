@@ -4,7 +4,8 @@ general:
 
 machine:
   post:
-  - pyenv global 3.6.0
+  - sudo apt-get install python3-venv
+  # - pyenv global 3.6.0
 
 
 do_steps: &do_steps
