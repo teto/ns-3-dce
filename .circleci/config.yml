@@ -1,6 +1,5 @@
+# DONT FORGET to add CACHE_VERSION as an envrionment variable in circleci UI
 version: 2
-general:
-  artifacts:
 
 # machine:
 #   post:
@@ -10,9 +9,9 @@ general:
 do_steps: &do_steps
  steps:
   - restore_cache:
-      key: code-tree-shallow
+      key: {{ .Environment.CACHE_VERSION }}-code-tree-shallow
   - restore_cache:
-      key: bake-tree-cache
+      key: {{ .Environment.CACHE_VERSION }}-bake-tree-cache
   - run:
       name: checkout build tree
       command: |
@@ -53,18 +52,18 @@ do_steps: &do_steps
         cd "$HOME" && ./bake/bake.py download -vvv && ./bake/bake.py update -vvv
 
   - save_cache:
-      key: code-tree-shallow-{{ epoch }}
+      key: {{ .Environment.CACHE_VERSION }}-code-tree-shallow-{{ epoch }}
       paths:
         - /home/ns3dce/project/.git
 
   - save_cache:
-      key: bake-tree-cache-{{ epoch }}
+      key: {{ .Environment.CACHE_VERSION }}-bake-tree-cache-{{ epoch }}
       paths:
         - /home/ns3dce/source
 
   - run: mkdir -p /home/ns3dce/.ccache
   - restore_cache:
-      key: compiler-cache-{{ .Environment.CIRCLE_JOB }}
+      key: {{ .Environment.CACHE_VERSION }}-compiler-cache-{{ .Environment.CIRCLE_JOB }}
   - run: ccache -M 5.0G
   - run:
       name: build dce
@@ -79,7 +78,7 @@ do_steps: &do_steps
   - save_cache:
      paths:
        - /home/ns3dce/.ccache
-     key: compiler-cache-{{ .Environment.CIRCLE_JOB }}-{{ epoch }}
+     key: {{ .Environment.CACHE_VERSION }}-compiler-cache-{{ .Environment.CIRCLE_JOB }}-{{ epoch }}
   - run: cd ${HOME}/source/ns-3-dce && ./test.py -r
   - run:
       name: save test results
