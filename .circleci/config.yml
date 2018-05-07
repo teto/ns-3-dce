@@ -15,7 +15,7 @@ do_steps: &do_steps
   - restore_cache:
       keys: 
         # have to be careful here the cache restores the files with the patch on
-        - v1-bake-tree-cache-{{ .Branch }}
+        - v2-bake-tree-cache-{{ .Branch }}
   - run:
       name: checkout build tree
       command: |
@@ -59,13 +59,13 @@ do_steps: &do_steps
         - /home/ns3dce/project/.git
 
   - save_cache:
-      key: v1-bake-tree-cache-{{ .Branch }}-{{ epoch }}
+      key: v2-bake-tree-cache-{{ .Branch }}-{{ epoch }}
       paths:
-        - /home/ns3dce/source/pybindgen
-        - /home/ns3dce/source/quagga
-        - /home/ns3dce/source/net-next-nuse
-        - /home/ns3dce/source/libaspect
-        - /home/ns3dce/source/netanim
+        - /home/ns3dce/source
+        # - /home/ns3dce/source/quagga
+        # - /home/ns3dce/source/net-next-nuse
+        # - /home/ns3dce/source/libaspect
+        # - /home/ns3dce/source/netanim
 
   - run: mkdir -p /home/ns3dce/.ccache
   - restore_cache:
