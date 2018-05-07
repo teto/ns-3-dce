@@ -10,9 +10,13 @@ general:
 do_steps: &do_steps
  steps:
   - restore_cache:
-      key: code-tree-shallow
+      keys: 
+        - code-tree-shallow-{{ .Branch }}
+        - code-tree-shallow
   - restore_cache:
-      key: bake-tree-cache
+      keys: 
+        - bake-tree-cache-{{ .Branch }}
+        - bake-tree-cache
   - run:
       name: checkout build tree
       command: |
@@ -34,10 +38,6 @@ do_steps: &do_steps
         sudo apt-get install -y python3.4-venv
         python3 -m venv $HOME/venv
         . ${HOME}/venv/bin/activate
-        # mercurial exists only for python2
-        # pip install mercurial
-        # PYTHON3=`which python3`
-        # sudo mv $PYTHON3 /usr/bin/python
 
   - run:
       name: download bake and codes
@@ -53,12 +53,12 @@ do_steps: &do_steps
         cd "$HOME" && ./bake/bake.py download -vvv && ./bake/bake.py update -vvv
 
   - save_cache:
-      key: code-tree-shallow-{{ epoch }}
+      key: code-tree-shallow-{{ .Branch }}-{{ epoch }}
       paths:
         - /home/ns3dce/project/.git
 
   - save_cache:
-      key: bake-tree-cache-{{ epoch }}
+      key: bake-tree-cache-{{ .Branch }}-{{ epoch }}
       paths:
         - /home/ns3dce/source
 
