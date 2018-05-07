@@ -11,12 +11,11 @@ do_steps: &do_steps
  steps:
   - restore_cache:
       keys: 
-        - code-tree-shallow-{{ .Branch }}
-        - code-tree-shallow
+        - v1-code-tree-shallow-{{ .Branch }}
   - restore_cache:
       keys: 
-        - bake-tree-cache-{{ .Branch }}
-        - bake-tree-cache
+        # have to be careful here the cache restores the files with the patch on
+        - v1-bake-tree-cache-{{ .Branch }}
   - run:
       name: checkout build tree
       command: |
@@ -47,18 +46,20 @@ do_steps: &do_steps
         if [ -z "${BAKE_BRANCH}" ] ; then export BAKE_BRANCH="master" ; fi
         if [ -z "${BAKE_MOD_VERSION}" ] ; then export BAKE_MOD_VERSION="dev" ; fi
 
-        # we clone a fork of bake
+        # The cache saves the patched files making the application of the same patch
+        # a failure. We remove patched programs so that they get reinstalled
+        rm -f ${HOME}/source/iputils  ${HOME}/source/iperf
         cd "$HOME" && git clone -b ${BAKE_BRANCH} git://github.com/direct-code-execution/bake ./bake
         cd "$HOME" && ./bake/bake.py configure -e dce-umip-${BAKE_MOD_VERSION} -e dce-linux-${BAKE_MOD_VERSION}
         cd "$HOME" && ./bake/bake.py download -vvv && ./bake/bake.py update -vvv
 
   - save_cache:
-      key: code-tree-shallow-{{ .Branch }}-{{ epoch }}
+      key: v1-code-tree-shallow-{{ .Branch }}-{{ epoch }}
       paths:
         - /home/ns3dce/project/.git
 
   - save_cache:
-      key: bake-tree-cache-{{ .Branch }}-{{ epoch }}
+      key: v1-bake-tree-cache-{{ .Branch }}-{{ epoch }}
       paths:
         - /home/ns3dce/source
 
