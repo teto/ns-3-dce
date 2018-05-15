@@ -51,7 +51,8 @@ do_steps: &do_steps
         rm -rf ${HOME}/source/iputils  ${HOME}/source/iperf
         cd "$HOME" && git clone -b ${BAKE_BRANCH} git://github.com/direct-code-execution/bake ./bake
         cd "$HOME" && ./bake/bake.py configure -e dce-umip-${BAKE_MOD_VERSION} -e dce-linux-${BAKE_MOD_VERSION}
-        cd "$HOME" && strace -olog_download -f ./bake/bake.py download -vvv && strace -log_update -f ./bake/bake.py update -vvv
+        cd "$HOME" && ./bake/bake.py download -vvv 
+        cd "$HOME" && ./bake/bake.py update -vvv
 
   - save_cache:
       key: v1-code-tree-shallow-{{ .Branch }}-{{ epoch }}
