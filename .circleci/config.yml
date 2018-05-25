@@ -55,6 +55,7 @@ do_steps: &do_steps
         # bake installs the master branch hence DCE will be install $CIRCLE_BRANCH
         cd ${HOME}/source/ns-3-dce && git remote add local "$HOME/project" && \
             git fetch local -a && git reset --hard $CIRCLE_SHA1
+        echo "hello world"
         cd "$HOME" && ./bake/bake.py build -j1 -vvv
 
   - save_cache:
