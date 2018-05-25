@@ -27,11 +27,11 @@ do_steps: &do_steps
       name: download bake and codes
       environment:
       command: |
-        if [ -z "${BAKE_BRANCH}" ] ; then export BAKE_BRANCH="master" ; fi
+        if [ -z "${BAKE_BRANCH}" ] ; then export BAKE_BRANCH="test" ; fi
         if [ -z "${BAKE_MOD_VERSION}" ] ; then export BAKE_MOD_VERSION="dev" ; fi
 
         # we clone a fork of bake
-        cd "$HOME" && git clone -b ${BAKE_BRANCH} git://github.com/direct-code-execution/bake ./bake
+        cd "$HOME" && git clone -b ${BAKE_BRANCH} git://github.com/teto/bake ./bake
         cd "$HOME" && ./bake/bake.py configure -e dce-umip-${BAKE_MOD_VERSION} -e dce-linux-${BAKE_MOD_VERSION}
         cd "$HOME" && ./bake/bake.py download -vvv && ./bake/bake.py update -vvv
 
@@ -124,10 +124,10 @@ workflows:
   build:
     jobs:
      - ubuntu14.04
-     - ubuntu16.04
-     - ubuntu17.04
-     - fedora26
-     - fedora27
+     # - ubuntu16.04
+     # - ubuntu17.04
+     # - fedora26
+     # - fedora27
   nightly_workflow:
     triggers:
       - schedule:
