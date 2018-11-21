@@ -204,7 +204,7 @@ public:
             kwargs = {}
         try:
             return_type = ReturnValue.new(str(return_ctype), **kwargs)
-        except (typehandlers.TypeLookupError, typehandlers.TypeConfigurationError), ex:
+        except (typehandlers.TypeLookupError, typehandlers.TypeConfigurationError) as ex:
             warnings.warn("***** Unable to register callback; Return value '%s' error (used in %s): %r"
                           % (callback_return, cls_name, ex),
                           Warning)
@@ -223,7 +223,7 @@ public:
                 kwargs = {}
             try:
                 arguments.append(Parameter.new(str(param_ctype), arg_name, **kwargs))
-            except (typehandlers.TypeLookupError, typehandlers.TypeConfigurationError), ex:
+            except (typehandlers.TypeLookupError, typehandlers.TypeConfigurationError) as ex:
                 warnings.warn("***** Unable to register callback; parameter '%s %s' error (used in %s): %r"
                               % (arg_type, arg_name, cls_name, ex),
                               Warning)
@@ -241,7 +241,7 @@ public:
         class PythonCallbackParameter(Parameter):
             "Class handlers"
             CTYPES = [cls_name]
-            print >> sys.stderr, "***** registering callback handler: %r" % ctypeparser.normalize_type_string(cls_name)
+            print("***** registering callback handler: %r" % ctypeparser.normalize_type_string(cls_name), outfile=sys.stderr,)
             DIRECTIONS = [Parameter.DIRECTION_IN]
             PYTHON_CALLBACK_IMPL_NAME = class_name
             TEMPLATE_ARGS = template_parameters

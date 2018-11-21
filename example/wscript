@@ -1,0 +1,27 @@
+import os
+import ns3waf
+from collections import namedtuple
+from waflib import Logs, Errors, Utils
+
+def options(opt):
+    opt.add_option('--disable-examples', help='Disable compilation of examples',
+                   dest='enable_examples', action='store_false',
+                   default=True)
+
+def configure(conf):
+
+    conf.env['OPENSSL_FOUND'] = False
+    try:
+        conf.find_program('openssl', var='OPENSSL')
+        conf.env['OPENSSL_FOUND'] = True
+    except WafError:
+        pass
+
+    conf.env['OPENSSL_FOUND'] = False
+    try:
+        conf.find_program('openssl', var='OPENSSL')
+        conf.env['OPENSSL_FOUND'] = True
+    except WafError:
+        pass
+
+

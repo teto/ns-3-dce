@@ -24,9 +24,17 @@ do_steps: &do_steps
         git reset --hard $CIRCLE_SHA1
 
   - run:
+      name: enable python3
+      command: |
+        sudo apt-get install -y python3.4-venv
+        python3 -m venv $HOME/venv
+        . ${HOME}/venv/bin/activate
+
+  - run:
       name: download bake and codes
       environment:
       command: |
+        . ${HOME}/venv/bin/activate
         if [ -z "${BAKE_BRANCH}" ] ; then export BAKE_BRANCH="master" ; fi
         if [ -z "${BAKE_MOD_VERSION}" ] ; then export BAKE_MOD_VERSION="dev" ; fi
 
@@ -52,9 +60,13 @@ do_steps: &do_steps
   - run:
       name: build dce
       command: |
+        . ${HOME}/venv/bin/activate
+
         # bake installs the master branch hence DCE will be install $CIRCLE_BRANCH
         cd ${HOME}/source/ns-3-dce && git remote add local "$HOME/project" && \
             git fetch local -a && git reset --hard $CIRCLE_SHA1
+        rm -rf ${HOME}/source/iputils
+        cd "$HOME" && ./bake/bake.py download -vvv
         cd "$HOME" && ./bake/bake.py build -j1 -vvv
 
   - save_cache:
@@ -124,10 +136,10 @@ workflows:
   build:
     jobs:
      - ubuntu14.04
-     - ubuntu16.04
-     - ubuntu17.04
-     - fedora26
-     - fedora27
+     # - ubuntu16.04
+     # - ubuntu17.04
+     # - fedora26
+     # - fedora27
   nightly_workflow:
     triggers:
       - schedule:
