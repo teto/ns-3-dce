@@ -74,7 +74,9 @@ do_steps: &do_steps
      paths:
        - /home/ns3dce/.ccache
      key: compiler-cache-{{ .Environment.CIRCLE_JOB }}-{{ epoch }}
-  - run: cd ${HOME}/source/ns-3-dce && ./test.py -r
+  - run: 
+        . ${HOME}/venv/bin/activate
+        cd ${HOME}/source/ns-3-dce && ./test.py -r
   - run:
       name: save test results
       environment:
