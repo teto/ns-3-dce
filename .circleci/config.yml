@@ -29,13 +29,13 @@ do_steps: &do_steps
         sudo apt-get update
         sudo apt-get install -y python3.4-venv
         python3 -m venv $HOME/venv
-        . ${HOME}/venv/bin/activate
+        # . ${HOME}/venv/bin/activate
+        echo "source $HOME/venv/bin/activate" >> $BASH_ENV
 
   - run:
       name: download bake and codes
       environment:
       command: |
-        . ${HOME}/venv/bin/activate
         if [ -z "${BAKE_BRANCH}" ] ; then export BAKE_BRANCH="master" ; fi
         if [ -z "${BAKE_MOD_VERSION}" ] ; then export BAKE_MOD_VERSION="dev" ; fi
 
@@ -61,7 +61,6 @@ do_steps: &do_steps
   - run:
       name: build dce
       command: |
-        . ${HOME}/venv/bin/activate
 
         # bake installs the master branch hence DCE will be install $CIRCLE_BRANCH
         cd ${HOME}/source/ns-3-dce && git remote add local "$HOME/project" && \
