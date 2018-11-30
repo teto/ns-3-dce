@@ -24,15 +24,6 @@ do_steps: &do_steps
         git reset --hard $CIRCLE_SHA1
 
   - run:
-      name: enable python3
-      command: |
-        sudo apt-get update
-        sudo apt-get install -y python3.4-venv
-        python3 -m venv $HOME/venv
-        # . ${HOME}/venv/bin/activate
-        echo "source $HOME/venv/bin/activate" >> $BASH_ENV
-
-  - run:
       name: download bake and codes
       environment:
       command: |
@@ -74,7 +65,6 @@ do_steps: &do_steps
        - /home/ns3dce/.ccache
      key: compiler-cache-{{ .Environment.CIRCLE_JOB }}-{{ epoch }}
   - run: 
-        . ${HOME}/venv/bin/activate
         cd ${HOME}/source/ns-3-dce && ./test.py -r
   - run:
       name: save test results
@@ -97,7 +87,7 @@ do_steps: &do_steps
 jobs:
   ubuntu14.04:
    docker:
-     - image: ns3dce/ubuntu14.04:0.1
+     - image: mattator/dce-dockerfiles:latest
    environment:
    <<: *do_steps
 
