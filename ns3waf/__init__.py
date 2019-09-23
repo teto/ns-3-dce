@@ -138,12 +138,11 @@ def _check_win32(conf):
         if libstdcxx_location:
             conf.env.append_value('NS3_MODULE_PATH', libstdcxx_location)
 
-        if Options.platform in ['linux']:
-            if _check_compilation_flag(conf, '-Wl,--soname=foo'):
-                env['WL_SONAME_SUPPORTED'] = True
+        if _check_compilation_flag(conf, '-Wl,--soname=foo'):
+            env['WL_SONAME_SUPPORTED'] = True
 
 
-ns3_versions = ['3-dev', '3.29', '3.28', '3.27', '3.26', '3.25', '3.24', '3.23', '3.22', '3.21', '3.20', '3.19', '3.18', '3.17']
+ns3_versions = ['3-dev', '3.30', '3.29', '3.28', '3.27', '3.26', '3.25', '3.24', '3.23', '3.22', '3.21', '3.20', '3.19', '3.18', '3.17']
 def _check_dependencies(conf, required, mandatory):
     found = []
     # match_pkg = None
