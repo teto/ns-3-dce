@@ -325,7 +325,7 @@ def _build_library(bld, name, *k, **kw):
         lib_type = 'stlib'
     else:
         lib_type = 'shlib'
-    features = waflib.Tools.c_aliases.sniff_features(source=source, _type=lib_type)
+    features = waflib.Tools.c_aliases.sniff_features(source=source, typ=lib_type)
     kw['features'] = features
     kw['target'] = target
     kw['cxxflags'] = kw.get('cxxflags', []) + cxxflags
